@@ -1,0 +1,37 @@
+TITLE:: OSSIA_vec4f
+summary:: (put short description here)
+categories:: Undocumented classes
+related:: Classes/SomeRelatedClass, Reference/SomeRelatedStuff, etc.
+
+DESCRIPTION::
+(put long description here)
+
+
+CLASSMETHODS::
+
+METHOD:: new
+(describe method here)
+
+ARGUMENT:: v1
+(describe argument here)
+
+ARGUMENT:: v2
+(describe argument here)
+
+ARGUMENT:: v3
+(describe argument here)
+
+ARGUMENT:: v4
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+INSTANCEMETHODS::
+
+
+EXAMPLES::
+
+code::
+(some example code)
+::

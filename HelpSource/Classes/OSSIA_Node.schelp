@@ -1,0 +1,83 @@
+TITLE:: OSSIA_Node
+summary:: Ossia applications' main components
+categories:: Undocumented classes
+related:: Classes/OSSIA_Device, Classes/OSSIA_Parameter, Guides/OssiaReference
+
+DESCRIPTION::
+The nodes in the device are simply called emphasis::code:: in the API. Nodes are identified with the strong::OSC parameter syntax::: code::'/foo/bar'::.
+
+Nodes per se strong::don't carry any value::; they have to be emphasis::extended with parameters:: to be able to send and receive messages.
+
+CLASSMETHODS::
+
+METHOD:: new
+Instantiates a new node in the Ossia application.
+
+ARGUMENT:: parent
+strong::required:: - an code::OSSIA_Device::, code::OSSIA_Node:: or code::OSSIA_Parameter::
+
+ARGUMENT:: name
+strong::required:: - the node's identifier on the network
+
+returns:: an code::OSSIA_Node::
+
+INSTANCEMETHODS::
+
+METHOD:: name
+gets the node's identifier on the network.
+
+METHOD:: snapshot
+returns:: an array with children parameters' name as symbols and their values, convenient for code::Synth:: creation.
+
+METHOD:: description
+An optional textual description.
+
+METHOD:: tags
+An optional array of tags for nodes.
+
+ARGUMENT:: aSymbolList
+strong::e.g.:: : code::n.tags = ['physical_model', "awesome"];::
+
+METHOD:: disable
+This attribute will disable a node: it will stop sending messages to the network.
+
+METHOD:: enable
+This attribute will re-enable a disabled node
+
+METHOD:: is_disabled
+returns:: code::true:: if node is disabled, code::false:: otherwise.
+
+METHOD:: muted
+This attribute will disable a node: it will stop sending messages to the network. Unlike the "enabled/disabled" attribute, strong::it won't propagate to other computers::.
+
+METHOD:: hidden
+This attribute is to use for nodes that are not to be exposed to the network.
+
+METHOD:: load_preset
+applies a saved node preset to the receiver. If path is empty, a dialog will open.
+
+ARGUMENT:: path
+the path to the .json preset file.
+
+METHOD:: save_preset
+saves the state of the receiver as a .json file. If path is empty, a dialog will open.
+
+ARGUMENT:: path
+the path to the .json preset file.
+
+METHOD:: fullpath
+gets the node full path on the network.
+returns:: strong::aString:: containing the node's osc path.
+
+METHOD::children
+returns:: a stringlist of the node's direct children nodes.
+
+METHOD::zombie
+This is a read-only attribute: it informs of whether a node is in a zombie state. A zombie node is an node in a remote device, whose source has been removed. It is kept in the mirrors but marked as such.
+returns:: code::true:: if node is in a zombie state, code::false:: otherwise.
+
+EXAMPLES::
+
+code::
+(some example code)
+::

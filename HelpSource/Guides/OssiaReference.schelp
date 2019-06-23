@@ -1,0 +1,442 @@
+title::Ossia library reference for SuperCollider
+summary::getting started with the Ossia library
+categories:: Libraries>Ossia>Guides
+related::Classes/OSSIA_Device
+
+strong::libossia:: is a modern C++, cross-environment distributed object model for strong::creative coding:: and strong::interaction scoring::. It allows to strong::expose :: the parameters of your creative coding application over the network, and strong::score :: them in time.
+
+It handles various strong::protocols:: such as code::OSC::, code::MIDI::, code::Minuit:: and code::OSCQuery::. It offers bindings for many environments (PureData, Max/MSP, Python, Unity3D, QML, Faust, SuperCollider).
+
+section::Basic Networking
+subsection::Local OSCQuery device
+
+A strong::device:: represents emphasis::a tree of parameters::.
+
+emphasis::Local:: devices map to real parameters on the executable emphasis::libossia:: is used with. For instance the frequency of a filter, etc.
+
+emphasis::Remote:: devices are mirror images of local devices strong::on other applications:: : remote controls, mobile apps, etc. Every parameter in a local device will be emphasis::synchronized:: with the remote devices connected to it.
+
+Devices can be strong::mapped:: to different strong::protocols:: : code::Minuit::, code::OSCQuery::, etc. For the sake of simplicity, some bindings tie together device and protocol implementation.
+
+We use strong::OSCQuery:: as an example of protocol here. Once a device has been created, it is possible to check what's in it by going to http://localhost:5678.
+
+For more information on the OSCQuery protocol, please refer to the proposal.
+
+code::
+~some_device = OSSIA_Device('supersoftware');
+~some_device.exposeOSCQueryServer(1234, 5678);
+
+// equivalent to
+
+~some_device = OSSIA_Device.newOSCQueryServer('supersoftware', 1234, 5678);
+::
+
+subsection::Creating nodes
+
+The nodes in the device are simply called strong::"nodes":: in the API. Nodes are identified with the OSC parameter syntax: emphasis::/foo/bar::.
+
+Nodes per se don't carry any value; they have to be extended with strong::parameters:: to be able to send and receive messages.
+
+code::
+~some_device = OSSIA_Device('supersoftware');
+~some_device.exposeOSCQueryServer(1234, 5678);
+
+~node = OSSIA_Node(parent: ~some_device, name: "/foo/bar")
+::
+
+subsection::Creating parameters
+
+Each node can only have strong::a single parameter::. Parameters can have the following types:
+
+list::
+
+## code::Integer:: - 32-bit int.
+## code::Float:: - 32-bit float.
+## code::Boolean:: - code::true/false::.
+## code::Impulse:: or code::Signal:: - no value; just a message.
+## code::Char:: - code::'a'::, code::'0'::, code::'!':: or code::$s::, code::$_::...
+## code::String:: or code::Symbol:: - code::"a string":: or code::'symbol'::
+## code::Array:: or code::List::- a generic list of values: code::[3, 'a', 2.68, ["foo", "bar"]]::
+
+::
+
+As an optimisation, strong::specific types:: for 2, 3, and 4 floats are provided; they are referred to as code::OSSIA_vec2f::, code::OSSIA_vec3f::, code::OSSIA_vec4f:: through the code.
+
+Values can be written to a parameter, and fetched from it.
+
+This example shows how to create a node, a parameter, and send a value to the parameter:
+
+NOTE:: First we strong::create:: a parameter ::
+code::
+~param = OSSIA_Parameter(~some_device, 'int_test', Integer);
+~sigparam = OSSIA_Parameter(~some_device, 'signal_test', Signal);
+::
+
+NOTE:: Then we can strong::send values:: to this parameter::
+code::
+~param.value = 347;
+~param.v = 347; // 1st shortcut
+~param.sv(347); // 2nd shortcut
+::
+
+NOTE:: And strong::read:: them::
+code::
+~param.value.postln;
+~param.v.postln;
+::
+
+subsection:: Parameter callbacks
+Parameter callbacks will inform you strong::every time a parameter receives a message::. On environments that support this, this will enable listening on the remote end. That is, if a remote device has no callbacks, network messages won't be sent upon modification.
+
+code::
+~param.callback = { |value|
+    format("value received: %", value).postln;
+}
+::
+
+subsection::Property binding
+
+This show how, for environments that support it, ossia objects can integrate with existing property environments. In SuperCollider, parameters can easily be integrated with a code::SynthDef:: using the code::.snapshot::, code::.ar:: and code::.kr:: methods.
+
+code::
+~freq = OSSIA_Parameter(~some_device, 'freq', Float, [440, 880], 440);
+
+// bind the frequency parameter to the synthdef, becoming an argument
+
+d = SynthDef('sinosc', {
+	Out.ar(0, SinOsc.ar(~freq.kr, 0, 0.25));
+}).add;
+
+// the snapshot convenience method returns an array with children parameter's name and current values
+x = Synth('sinosc', ~some_device.snapshot);
+
+// changing the value of the parameter will automatically update the synth argument's value
+~freq.value = 660;
+::
+
+subsection::Device callbacks
+The example below shows how to automatically strong::wait for the device to be instantiated and exposed:: before creating your own tree of nodes & parameters, necessary if you want to build all in a single code region, because the protocols' instantiation is asynchronous :
+
+code::
+(
+~some_device = OSSIA_Device.newOSCQueryServer('supersoftware', 1234, 5678, {
+    ~foo = OSSIA_Node(~some_device, 'foo');
+    ~bar = OSSIA_Parameter(~foo, 'bar', Float);
+}
+)
+::
+
+subsection::Remote OSCQuery Device
+This shows how to connect to an existing strong::OSCQuery:: device, and refresh the image that we have of it.
+
+code::
+
+// create a local device in any application, for this example, we'll do this directly in SuperCollider
+
+(
+d = OSSIA_Device('my_device').exposeOSCQueryServer(1234, 5678, {
+	p = OSSIA_Parameter(d, 'my_parameter', Float).value_(22.5);
+});
+)
+
+// create a remote mirror image of the device
+m = OSSIA_Device('my_remote');
+m.exposeOSCQueryMirror("ws://localhost:5678");
+
+// get the root node's direct children
+m.children; // posts [ my_parameter ]
+
+// create a mirror image of a parameter and query its value
+q = OSSIA_MirrorParameter(m, '/my_parameter');
+q.value; // posts 22.5
+
+// remotely modify the value of the original parameter
+q.value = 25.0;
+p.value; // posts 25
+
+::
+
+section::Node attributes
+
+This part presents the attributes that can be set on nodes and parameters.
+
+When using strong::OSCQuery::, all attribute changes will strong::propagate across the network::, except mute which is local. The strong::"disabled":: attribute has the same effect but does propagate.
+
+subsection::Access mode
+
+Access mode is a metadata that categorizes parameters between:
+list::
+##strong::GET::: read-only
+##strong::SET::: write-only
+##strong::BI::: read-write
+::
+For instance:
+list::
+##The value of a vu-meter should be strong::GET::
+##A "play" button should be strong::SET::.
+##The cutoff of a filter or a controllable color should be strong::BI::.
+::
+
+code::
+~some_parameter.access_mode = OSSIA_access_mode.bi;
+~some_parameter.access_mode = 'bi'; // equivalent #1
+~some_parameter.access_mode = 'rw'; // equivalent #2
+::
+
+subsection::Domain (min/max)
+
+Domains allow to set strong::a range of accepted values:: for a given parameter. Only meaningful for nodes with parameters.
+
+NOTE::This sets a node's range between -5 and 5.::
+code::
+// Set domain either at parameter creation, or later on...
+~param_1 = OSSIA_Parameter(~some_device, 'floatparam', Float, [-5.0, 5.0]);
+~param_2 = OSSIA_Parameter(~some_device, 'intparam', Integer, nil);
+~param_2.domain = [-5, 5];
+::
+
+NOTE::If the domain is an array, it is possible to filter per value, or with a single, shared, min / max.::
+
+code::
+~param = OSSIA_Parameter(~some_device, 'vector', OSSIA_Vec3f);
+~param.domain = [[0.0, 1.0, 2.0], [1.0, 5.0, 10.0]]; // unique min/max ranges for each value, first array represents the min values, second array the max values
+::
+
+NOTE::Instead of a min / max, it is also possible to give a set of accepted values. Values that don't fit will be rounded to the closest accepted value.::
+code::
+~param = OSSIA_Parameter(~some_device, 'my_param', Integer,
+	OSSIA.domain(values: [1, 3, 5]), 3);
+::
+
+subsection::Bounding mode
+The bounding mode tells what happens when a value is outside of the min / max:
+list::
+##strong::FREE:: : no clipping; domain is only indicative.
+##strong::CLIP:: : clipped to the closest value in the range.
+##strong::LOW:: : only clips values lower than the min.
+##strong::HIGH:: : only clips values higher than the max.
+##strong::WRAP:: : wraps values around the range
+##strong::FOLD:: : folds back values into the range
+::
+
+The default is strong::FREE::.
+
+code::
+// same as domain:
+~param = OSSIA_Parameter(~some_device, 'param', Float, [0, 2017], bounding_mode: 'clip');
+~param.bounding_mode = OSSIA_bounding_mode.high;
+~param.bounding_mode = 'high'; // equivalent;
+::
+
+subsection::Repetition filter
+When the repetition filter is enabled, if the same value is sent twice, the second time will be filtered.
+code::
+p = OSSIA_Parameter(~some_device, 'p', Float, [0, 1], repetition_filter: true);
+p.repetition_filter = false;
+::
+
+subsection::Units
+Units give a semantic meaning to the value of a parameter.
+
+strong::Position::
+
+list::
+##cart2D
+##cart3D
+##spherical
+##polar
+##opengl
+##cylindrical
+::
+
+strong::Orientation::
+
+list::
+##quaternion:
+##euler:
+##axis:
+::
+
+strong::Color::
+
+list::
+##argb: all between 0 - 1
+##rgba:
+##rgb:
+##bgr:
+##argb8: all between 0 - 255
+##hsv:
+##cmy8:
+##todo: css? (rgb in 0, 1 and alpha in 0, 255)
+::
+
+strong::Angle::
+
+list::
+##degree
+##radian
+::
+
+strong::Distance::
+
+list::
+##meter
+##kilometer
+##decimeter
+##centimeter
+##millimeter
+##micrometer
+##nanometer
+##picometer
+##inch
+##foot
+##mile
+::
+
+strong::Time::
+
+list::
+##second
+##bark
+##bpm
+##cent
+##frequency
+##mel
+##midi_pitch
+##millisecond
+##playback_speed
+::
+
+strong::Gain::
+list::
+##linear
+##midigain
+##decibel
+##decibel_raw
+::
+
+strong::Speed::
+list::
+##meter_per_second
+##miles_per_hour
+##kilometer_per_hour
+##knot
+##foot_per_second
+##foot_per_hour
+::
+
+subsection::Extended type
+
+WARNING::NotYetImplemented::
+
+Extended types, just like units, are here to give an indicative meaning to a parameter. They can also be used to enable some optimizations.
+
+libossia proposes the following types:
+
+list::
+##strong::File path:: : used for when a string is a filesystem path, like /home/self/sound.wav or c:\document.txt
+##strong::Generic buffer:: : when a string should be interpreted as a a raw binary blob.
+##strong::Float array:: : when a parameter has a fixed number of floating point values, like vec2f.
+##strong::Float list:: : when a tuple consists exclusively of values of type float.
+##Same for int list and string list.
+##strong::Dynamic array:: : when a tuple's size may change during execution.
+::
+
+subsection::Description
+An optional textual description.
+code::
+n = OSSIA_Node(~some_device, 'pretty_node');
+n.description = "a pretty node";
+::
+
+subsection::Tags
+An optional array of tags for nodes.
+code::
+n = OSSIA_Node(~some_device, 'synth_1');
+n.tags = ['physical_model', "awesome"];
+::
+
+subsection::Priority
+Nodes with the highest priority should execute first.
+
+code::
+n = OSSIA_Node(~some_device, 'super_important_node');
+n.priority = 10;
+::
+
+subsection::Refresh rate
+An optional value that says how often a value should be updated. Currently does nothing.
+code::
+n = OSSIA_Node(~some_device, 'laggy_node');
+n.refresh_rate = 500;
+::
+
+subsection::Step size
+An optional value that says by which increment a value should change, for instance in a value editor.
+
+subsection::Default value
+A default value for a given node. Useful for resetting to a default state.
+
+code::
+p = OSSIA_Parameter(~some_device, 'foo', Float, [0, 1], default_value: 0.5);
+::
+
+
+subsection::Zombie
+This is a read-only attribute: it informs of whether a node is in a zombie state. A zombie node is an node in a remote device, whose source has been removed. It is kept in the mirrors but marked as such.
+
+subsection::Critical
+This attribute informs the network protocol that the value has a particular importance and should if possible use a protocol not subject to message loss, eg TCP instead of UDP. This is useful for instance for "play" messages.
+
+code::
+p = OSSIA_Parameter(~some_device, 'foo', Signal, critical: true);
+p.critical = false;
+::
+
+subsection::Enabled/Disabled
+This attribute will disable a node: it will stop sending messages to the network.
+code::
+n = OSSIA_Node(~some_device, 'some_node');
+n.disabled = true;
+::
+
+subsection::Hidden
+This attribute is to use for nodes that are not to be exposed to the network.
+code::
+n = OSSIA_Node(~some_device, 'hidden_node').hidden_(true);
+::
+
+subsection::Muted
+This attribute will disable a node: it will stop sending messages to the network. Unlike the "enabled/disabled" attribute, it won't propagate to other computers.
+code::
+n = OSSIA_Node(~some_device, 'muted_node').muted_(true);
+n.muted = false;
+::
+
+section::Preset support
+
+subsection::Loading and saving presets
+
+Ossia provides preset handling. Files can be loaded and save to the disk to set the state of the device tree.
+
+NOTE::Create a preset from a device and save it to a file::
+code::
+d = OSSIA_Device('my_device');
+d.exposeOSCQueryServer(1234, 5678, {
+	p = OSSIA_Parameter(d, 'param_1', Float, [0.0, 1.0], 0.5);
+	q = OSSIA_Parameter(d, 'param_2', Integer);
+	g = OSSIA_Parameter(d, 'param_3', String, nil, "hello");
+});
+
+d.save_preset(); // if no path is explicitly specified, this will open a dialog
+::
+
+NOTE::Load and apply the preset::
+code::
+p.value = 0.75;
+q.value = 127;
+g.value = "something else";
+
+// reload the original state preset
+d.load_preset();
+::

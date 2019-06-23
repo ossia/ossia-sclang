@@ -1,0 +1,174 @@
+TITLE:: OSSIA_Device
+summary:: the rootnode of ossia-based applications
+categories:: Ossia
+related:: Classes/OSSIA_Parameter, Classes/OSSIA_Node, Guides/OssiaReference
+
+DESCRIPTION::
+an code::OSSIA_Device:: is to be considered as the strong::rootnode:: of all ossia-based applications. It may be exposed to the network using different protocols, such as code::OSC::, code::OSCQuery::, code::Minuit:: etc.
+
+CLASSMETHODS::
+
+METHOD:: newOSCQueryServer
+shortcut class method to instantiate device and directly expose it to the network with the strong::OSCQuery protocol::.
+
+ARGUMENT:: name
+a code::String:: or code::Symbol:: to identify the device on the network
+
+ARGUMENT:: osc_port
+device will receive strong::osc:: (emphasis::udp, non-critical::) messages on this port, defaults to code::1234::
+
+ARGUMENT:: ws_port
+device will receive strong::websocket:: (emphasis::tcp, critical::) messages on this port, defaults to code::5678::
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is instantiated strong::and exposed:: on the network. Typically, this is used to build the different nodes and parameters composing the application node-tree.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: new
+instantiates a device strong::without:: exposing it to the network, which can be later achieved by calling the code::.exposeProtocol:: methods, such as code::.exposeOSCQueryServer::, code::.exposeMinuit::, code::.exposeOSC::, etc.
+
+ARGUMENT:: name
+a code::String:: or code::Symbol:: to later identify the device on the network
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: newOSCQueryMirror
+shortcut class method to instantiate a strong::mirror image:: of a device already exposed on the network.
+
+ARGUMENT:: name
+a code::String:: or code::Symbol:: indicating the device's identifier on the network
+
+ARGUMENT:: host_addr
+a code::String:: or code::Symbol:: indicating the host address on the network, e.g. code::"ws://localhost:5678"::
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is instantiated.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: newMinuit
+shortcut class method to instantiate device and directly expose it to the network with the strong::Minuit protocol::.
+
+ARGUMENT:: name
+a code::String:: or code::Symbol:: to identify the device on the network
+
+ARGUMENT:: remote_ip
+a code::String:: or code::Symbol:: indicating the receiver's ip address
+
+ARGUMENT:: remote_port
+an code::Integer:: indicating the receiver's port
+
+ARGUMENT:: local_port
+an code::Integer:: indicating the device's osc receive port
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is instantiated strong::and exposed:: on the network. Typically, this is used to build the different nodes and parameters composing the application node-tree.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: newOSC
+shortcut class method to instantiate device and directly expose it to the network with the strong::OSC protocol::.
+
+ARGUMENT:: name
+a code::String:: or code::Symbol:: indicating the device's identifier on the network
+
+ARGUMENT:: remote_ip
+a code::String:: or code::Symbol:: indicating the receiver's ip address
+
+ARGUMENT:: remote_port
+an code::Integer:: indicating the receiver's port
+
+ARGUMENT:: local_port
+an code::Integer:: indicating the device's osc receive port
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is instantiated strong::and exposed:: on the network. Typically, this is used to build the different nodes and parameters composing the application node-tree.
+
+returns:: an code::OSSIA_Device::
+
+INSTANCEMETHODS::
+
+METHOD:: exposeOSCQueryServer
+exposes a device to the network with the strong::OSCQuery protocol::.
+
+ARGUMENT:: osc_port
+device will receive strong::osc:: (emphasis::udp, non-critical::) messages on this port, defaults to code::1234::
+
+ARGUMENT:: ws_port
+device will receive strong::websocket:: (emphasis::tcp, critical::) messages on this port, defaults to code::5678::
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is strong::exposed:: on the network. Typically, this is used to build the different nodes and parameters composing the application node-tree.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: exposeOSCQueryMirror
+catches a network-exposed device, mirrors it in SuperCollider
+
+ARGUMENT:: host_addr
+a code::String:: or code::Symbol:: indicating the host address on the network, e.g. code::"ws://localhost:5678"::
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is instantiated
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: exposeMinuit
+exposes a device to the network with the strong::Minuit protocol::.
+
+ARGUMENT:: remote_ip
+a code::String:: or code::Symbol:: indicating the receiver's ip address
+
+ARGUMENT:: remote_port
+an code::Integer:: indicating the receiver's port
+
+ARGUMENT:: local_port
+an code::Integer:: indicating the device's osc receive port
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is strong::exposed:: on the network.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: exposeOSC
+exposes a device to the network with the strong::OSC protocol::.
+
+ARGUMENT:: remote_ip
+a code::String:: or code::Symbol:: indicating the receiver's ip address
+
+ARGUMENT:: remote_port
+an code::Integer:: indicating the receiver's port
+
+ARGUMENT:: local_port
+an code::Integer:: indicating the device's osc receive port
+
+ARGUMENT:: callback
+a code::Function:: to evaluate when device is strong::exposed:: on the network.
+
+returns:: an code::OSSIA_Device::
+
+METHOD:: free
+free a device and all of its contents (its node-tree)
+
+returns:: code::nil::
+
+EXAMPLES::
+
+code::
+
+// This shows how to automatically wait for the device to be instantiated
+// before creating your own tree of nodes & parameters
+// necessary if you want to build all in a single code region:
+
+(
+~some_device = OSSIA_Device.newOSCQueryServer('supersoftware', 1234, 5678, {
+    ~foo = OSSIA_Node(~some_device, 'foo');
+    ~bar = OSSIA_Parameter(~foo, 'bar', Float);
+});
+)
+
+// check device's node-tree in the navigator
+"http://localhost:5678".openOS();
+
+::
