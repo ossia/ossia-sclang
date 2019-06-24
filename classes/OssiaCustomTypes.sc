@@ -51,8 +51,8 @@ OSSIA_domain[slot]
 		^super.new.domainCtor(min, max, values);
 	}
 
-	domainCtor { |min, max, values|
-		m_domain = [min, max, values];
+	domainCtor { |min, max, values, bounds|
+		m_domain = [min, max, values, bounds];
 	}
 
 	at {|i| ^m_domain[i] }
@@ -100,7 +100,7 @@ OSSIA_FVector {
 		^super.new.init(sz, values);
 	}
 
-	init { |sz,v|
+	init { |sz, v|
 
 		v.do({|item|
 			if((item.isFloat.not) && (item.isInteger.not)) {
@@ -113,7 +113,8 @@ OSSIA_FVector {
 	}
 
 	at {|i| ^am_val[i] }
-	put { |index, item| am_val[index] = item }
+	put { |index, item| am_val[index] = item.asFloat }
+
 }
 
 OSSIA_access_mode {
@@ -123,10 +124,43 @@ OSSIA_access_mode {
 }
 
 OSSIA_bounding_mode {
+
+	var handle_bounds;
+
+	*new { |mode, anOssiaDomain|
+		^super.new.boundCtor(mode, anOssiaDomain);
+	}
+
+	boundCtor { |mode, domain|
+
+		if (domain[2].size == 0) {
+			switch(mode,
+				'free', { handle_bounds = { |value| value } },
+				'clip', { handle_bounds = { |value| value.clip(domain.min, domain.max) } },
+				'low', { handle_bounds = { |value| value.max(domain.min) } },
+				'high', { handle_bounds = { |value| value.min(domain.max) } },
+				'wrap', { handle_bounds = { |value| value.wrap(domain.min, domain.max) } },
+				'fold', { handle_bounds = { |value| value.fold(domain.min, domain.max) } }
+			);
+		} {
+			handle_bounds = { |value|
+				^domain[2].do({ |item|
+					if (item == value) { ^value };
+				});
+			};
+		};
+
+	}
+
+	bound { |value|
+		^handle_bounds.value(value);
+	}
+
 	*free { ^'free' }
 	*clip { ^'clip' }
 	*low { ^'low' }
 	*high { ^'high' }
 	*wrap { ^'wrap' }
 	*fold { ^'fold' }
+
 }

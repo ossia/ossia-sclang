@@ -19,7 +19,10 @@ OSSIA_OSCProtocol
 
 	oscProtocolCtor {
 		netAddr = NetAddr(remoteAddr, remotePort);
-		recivrers = [];
+		recivrers = Array.with(
+			device.tree(
+				parameters_only: true).do(this.instantiateParameter(_))
+		);
 	}
 
 	push { |anOssiaParameter|
@@ -31,19 +34,23 @@ OSSIA_OSCProtocol
 
 		recivrers.add(OSCdef(path.asSymbol,
 			{ |msg|
+				("received" + msg).postln;
 				if (msg.size == 2) {
-					anOssiaParameter.valueQiet(msg[1]);
-				} { anOssiaParameter.valueQiet(msg.removeAt(0));
+					anOssiaParameter.valueQuiet(msg[1]);
+				} { anOssiaParameter.valueQuiet(msg.removeAt(0));
 				};
 			},
 			path, recvPort: localPort));
+
+		this.push(anOssiaParameter);
 	}
 
-	freeParameter { |path|
-		OSCdef(path.asSymbol).free;
+	freeParameter { |anOssiaParameter|
+		OSCdef(anOssiaParameter.path.asSymbol).free;
 	}
 
 	free {
-		device.tree(parameters_only: true).do(this.freeParameter(_.path));
+		device.tree(parameters_only: true).do(this.freeParameter(_));
+		^super.free;
 	}
 }

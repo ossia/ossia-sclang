@@ -173,15 +173,23 @@ OSSIA_Node {
 
 OSSIA_Parameter : OSSIA_Node {
 
-	var <value, <type, domain, default_value, bounding_mode,
-	critical, repetition_filter, m_callback, m_has_callback;
+	var <value;
+	var <type;
+	var <domain;
+	var <bounding_mode;
+	var <critical;
+	var <>repetition_filter;
+	var <>access_mode;
+	var <m_callback;
+	var m_has_callback;
+	var handle_types;
 
-	*new {|parent_node, name, type, domain, default_value,
+	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
 		repetition_filter = false|
 
 		^super.new(parent_node, name).parameterCtor(type, domain, default_value,
-			                bounding_mode, critical, repetition_filter);
+			bounding_mode, critical, repetition_filter);
 	}
 
 	*array { |size, parent_node, name, type, domain, default_value,
@@ -192,16 +200,42 @@ OSSIA_Parameter : OSSIA_Node {
 		});
 	}
 
-	parameterCtor { |type, domain, default_value,
-		bounding_mode, critical, repetition_filter|
+	parameterCtor { |tp, dm, dv, bm, cl, rf|
 
+		type = tp;
+
+		this.typesafe;
+
+		domain = OSSIA_domain(dm[0], dm[1]);
+		bounding_mode = OSSIA_bounding_mode(bm, domain);
+
+		value = bounding_mode.bound( handle_types.value(dv) );
+
+		critical = cl;
+		repetition_filter = rf;
+		access_mode = 'bi';
 		m_has_callback = false;
 
 		device.instantiateParameter(this);
 	}
 
+	typesafe {
+
+		switch(type.class,
+			Meta_Integer, { handle_types = { |value| value.asInteger } },
+			Meta_Float, { handle_types = { |value| value.asFloat } },
+			Meta_Boolean, { handle_types = { |value| value.asBoolean } },
+			Meta_Char, { handle_types = { |value| value.asAscii } },
+			Meta_String, { handle_types = { |value| value.asString } },
+			Meta_Symbol, { handle_types = { |value| value.asString } },
+			Meta_Array, { handle_types = { |value| value.asArray } },
+			Meta_List, { handle_types = { |value| value.asArray } }
+		);
+	}
+
 	free {
 		device.freeParameter(path);
+		^super.free;
 	}
 
 	//-------------------------------------------//
@@ -210,31 +244,41 @@ OSSIA_Parameter : OSSIA_Node {
 
 	value_ { |v|
 
-		if(m_has_callback)
-		{
-			m_callback.value(v);
-		};
+		var handle_value = bounding_mode.bound( handle_types.value(v) );
 
-		value = v;
-		device.updateParameter(this);
+		if (access_mode != 'get') {
+
+			if (repetition_filter && (handle_value != value)) {
+
+				if (m_has_callback)
+				{
+					m_callback.value(handle_value);
+				};
+
+				value = bounding_mode.bound( handle_types.value(handle_value) );
+				device.updateParameter(this);
+			}
+		}
 	}
 
-	valueQiet { |v|
+	valueQuiet { |v| // same as value_ without sending the updated value
 
-		if(m_has_callback)
-		{
-			m_callback.value(v);
-		};
+		var handle_value = bounding_mode.bound( handle_types.value(v) );
 
-		value = v;
+		if (access_mode != 'get') {
+
+			if (repetition_filter && (handle_value != value)) {
+
+				if (m_has_callback)
+				{
+					m_callback.value(handle_value);
+				};
+
+				value = bounding_mode.bound( handle_types.value(handle_value) );
+			}
+		}
 	}
 
-	//
-	// pyrSetValue { |v|
-	// 	_OSSIA_ParameterSetValue
-	// 	^this.primitiveFailed
-	// }
-	//
 	// access_mode {
 	// 	_OSSIA_ParameterGetAccessMode
 	// 	^this.primitiveFailed

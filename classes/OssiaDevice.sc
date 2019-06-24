@@ -108,7 +108,8 @@ OSSIA_Device {
 			// 'oscqs', { this.pyrOSCQS(vargs[0], vargs[1])},
 			// 'oscqm', { this.pyrOSCQM(vargs[0])},
 			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
-			'osc', { protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)}
+			'osc', { if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)}
 		);
 	}
 
