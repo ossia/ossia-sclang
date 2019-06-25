@@ -195,8 +195,8 @@ OSSIA_Parameter : OSSIA_Node {
 	*array { |size, parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false , repetition_filter = false|
 		^Array.fill(size, {|i|
-			OSSIA_Parameter(parent_node, format(name,i), type, domain, default_value, bounding_mode,
-				critical, repetition_filter);
+			OSSIA_Parameter(parent_node, format(name,i), type, domain,
+				default_value, bounding_mode, critical, repetition_filter);
 		});
 	}
 
@@ -240,7 +240,7 @@ OSSIA_Parameter : OSSIA_Node {
 		access_mode = 'bi';
 		m_has_callback = false;
 
-		//device.instantiateParameter(this);
+		device.instantiateParameter(this);
 	}
 
 	free {

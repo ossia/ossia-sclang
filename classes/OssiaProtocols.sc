@@ -37,7 +37,8 @@ OSSIA_OSCProtocol
 			{ |msg|
 				if (msg.size == 2) {
 					anOssiaParameter.valueQuiet(msg[1]);
-				} { anOssiaParameter.valueQuiet(msg.removeAt(0));
+				} { msg.removeAt(0);
+					anOssiaParameter.valueQuiet(msg);
 				};
 			},
 			path, recvPort: localPort));
