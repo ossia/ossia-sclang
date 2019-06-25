@@ -9,7 +9,7 @@ OSSIA_Node {
 	var <name;
 	var <path;
 	var <device;
-	var <description;
+	var <>description;
 	var <children;
 	var m_ptr_data;
 
@@ -202,19 +202,45 @@ OSSIA_Parameter : OSSIA_Node {
 
 	parameterCtor { |tp, dm, dv, bm, cl, rf|
 
+		var dom_slot, df_val­­­­­­;
+
 		type = tp;
 
-		domain = OSSIA_domain(dm[0], dm[1]);
+		if (dm.isNil) {
+			dom_slot = [nil, nil];
+		} {
+			dom_slot = dm;
+		};
+
+		domain = OSSIA_domain(dom_slot[0], dom_slot[1]);
 		bounding_mode = OSSIA_bounding_mode(bm, type, domain);
 
-		value = bounding_mode.bound(dv);
+		if (dv.isNil) {
+			switch(type.class,
+				Meta_Integer, { df_val = 0 },
+				Meta_Float, { df_val = 0.0 },
+				Meta_Boolean, { df_val = false },
+				Meta_Char, { df_val = $ },
+				Meta_String, { df_val = "" },
+				Meta_Symbol, { df_val = \ },
+				Meta_Array, { df_val = [] },
+				Meta_List, { df_val = List[] },
+				Meta_OSSIA_vec2f, { df_val = [0.0, 0.0] },
+				Meta_OSSIA_vec3f, { df_val = [0.0, 0.0, 0.0] },
+				Meta_OSSIA_vec4f, { df_val = [0.0, 0.0, 0.0, 0.0] };
+			);
+		} {
+			df_val = dv;
+		};
+
+		value = bounding_mode.bound(df_val);
 
 		critical = cl;
 		repetition_filter = rf;
 		access_mode = 'bi';
 		m_has_callback = false;
 
-		device.instantiateParameter(this);
+		//device.instantiateParameter(this);
 	}
 
 	free {
@@ -263,22 +289,41 @@ OSSIA_Parameter : OSSIA_Node {
 		};
 	}
 
-/*	domain_ { |min, max|
-		var
-		domain = OSSIA_domain(max, max);
-		bounding_mode = OSSIA_bounding_mode(bm, domain);
-	}*/
+	domain_ { |min, max, values|
 
-	// unit {
-	// 	_OSSIA_ParameterGetUnit
-	// 	^this.primitiveFailed
-	// }
-	//
-	// unit_ { |aSymbol|
-	// 	_OSSIA_ParameterSetUnit
-	// 	^this.primitiveFailed
-	// }
-	//
+		var recall_mode = bounding_mode.md;
+
+		bounding_mode.free;
+		domain.free;
+
+		domain = OSSIA_domain(max, max, values);
+		bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
+	}
+
+	bounding_mode_ { |mode|
+
+		bounding_mode.free;
+
+		bounding_mode = OSSIA_bounding_mode(mode, type, domain);
+	}
+
+	unit_ { |anOssiaUnit|
+
+		if (unit.notNil) { unit.free };
+
+		unit = anOssiaUnit;
+	}
+
+	access_mode_ { |aSymbol|
+
+		access_mode = aSymbol;
+	}
+
+	critical_ { |aBool|
+
+		critical = aBool;
+	}
+
 	// priority {
 	// 	_OSSIA_ParameterGetPriority
 	// 	^this.primitiveFailed
@@ -289,16 +334,6 @@ OSSIA_Parameter : OSSIA_Node {
 	// 	^this.primitiveFailed
 	// }
 	//
-	// critical {
-	// 	_OSSIA_ParameterGetCritical
-	// 	^this.primitiveFailed
-	// }
-	//
-	// critical_ { |aBool|
-	// 	_OSSIA_ParameterSetCritical
-	// 	^this.primitiveFailed
-	// }
-
 	//-------------------------------------------//
 	//                 CALLBACKS                 //
 	//-------------------------------------------//

@@ -51,8 +51,8 @@ OSSIA_domain[slot]
 		^super.new.domainCtor(min, max, values);
 	}
 
-	domainCtor { |min, max, values, bounds|
-		m_domain = [min, max, values, bounds];
+	domainCtor { |min, max, values|
+		m_domain = [min, max, values];
 	}
 
 	at {|i| ^m_domain[i] }
@@ -137,7 +137,7 @@ OSSIA_access_mode {
 
 OSSIA_bounding_mode {
 
-	var handle_bounds;
+	var <md, handle_bounds;
 
 	*new { |mode, anOssiaType, anOssiaDomain|
 		^super.new.boundCtor(mode, anOssiaType, anOssiaDomain);
@@ -145,13 +145,15 @@ OSSIA_bounding_mode {
 
 	boundCtor { |mode, type, domain|
 
+		md = mode;
+
 		switch(type.class,
 			Meta_Integer, {
 				if (domain[2].size == 0) {
 					switch(mode,
 						'free', {
 							handle_bounds = { |value|
-								value.asInteger };
+								value };
 						},
 						'clip', {
 							handle_bounds = { |value|
