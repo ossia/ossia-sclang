@@ -178,11 +178,11 @@ OSSIA_Parameter : OSSIA_Node {
 	var <domain;
 	var <bounding_mode;
 	var <critical;
-	var <>repetition_filter;
-	var <>access_mode;
+	var <repetition_filter;
+	var <access_mode;
+	var <unit;
 	var <m_callback;
 	var m_has_callback;
-	var handle_types;
 
 	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
@@ -204,12 +204,10 @@ OSSIA_Parameter : OSSIA_Node {
 
 		type = tp;
 
-		this.typesafe;
-
 		domain = OSSIA_domain(dm[0], dm[1]);
-		bounding_mode = OSSIA_bounding_mode(bm, domain);
+		bounding_mode = OSSIA_bounding_mode(bm, type, domain);
 
-		value = bounding_mode.bound( handle_types.value(dv) );
+		value = bounding_mode.bound(dv);
 
 		critical = cl;
 		repetition_filter = rf;
@@ -217,20 +215,6 @@ OSSIA_Parameter : OSSIA_Node {
 		m_has_callback = false;
 
 		device.instantiateParameter(this);
-	}
-
-	typesafe {
-
-		switch(type.class,
-			Meta_Integer, { handle_types = { |value| value.asInteger } },
-			Meta_Float, { handle_types = { |value| value.asFloat } },
-			Meta_Boolean, { handle_types = { |value| value.asBoolean } },
-			Meta_Char, { handle_types = { |value| value.asAscii } },
-			Meta_String, { handle_types = { |value| value.asString } },
-			Meta_Symbol, { handle_types = { |value| value.asString } },
-			Meta_Array, { handle_types = { |value| value.asArray } },
-			Meta_List, { handle_types = { |value| value.asArray } }
-		);
 	}
 
 	free {
@@ -244,81 +228,47 @@ OSSIA_Parameter : OSSIA_Node {
 
 	value_ { |v|
 
-		var handle_value = bounding_mode.bound( handle_types.value(v) );
+		var handle_value = bounding_mode.bound(v);
 
 		if (access_mode != 'get') {
 
-			if (repetition_filter && (handle_value != value)) {
+			if (repetition_filter.nand( (handle_value == value) )) {
 
 				if (m_has_callback)
 				{
 					m_callback.value(handle_value);
 				};
 
-				value = bounding_mode.bound( handle_types.value(handle_value) );
+				value = handle_value;
 				device.updateParameter(this);
-			}
-		}
+			};
+		};
 	}
 
-	valueQuiet { |v| // same as value_ without sending the updated value
+	valueQuiet { |v| // same as value_ without sending the updated value back to the device
 
-		var handle_value = bounding_mode.bound( handle_types.value(v) );
+		var handle_value = bounding_mode.bound(v);
 
-		if (access_mode != 'get') {
+		if (access_mode != 'set') {
 
-			if (repetition_filter && (handle_value != value)) {
+			if (repetition_filter.nand( (handle_value == value) )) {
 
 				if (m_has_callback)
 				{
 					m_callback.value(handle_value);
 				};
 
-				value = bounding_mode.bound( handle_types.value(handle_value) );
-			}
-		}
+				value = handle_value;
+			};
+		};
 	}
 
-	// access_mode {
-	// 	_OSSIA_ParameterGetAccessMode
-	// 	^this.primitiveFailed
-	// }
-	//
-	// access_mode_ { |aSymbol|
-	// 	_OSSIA_ParameterSetAccessMode
-	// 	^this.primitiveFailed
-	// }
-	//
-	// domain {
-	// 	_OSSIA_ParameterGetDomain
-	// 	^this.primitiveFailed
-	// }
-	//
-	// domain_ { |aList|
-	// 	_OSSIA_ParameterSetDomain
-	// 	^this.primitiveFailed
-	// }
-	//
-	// bounding_mode {
-	// 	_OSSIA_ParameterGetBoundingMode
-	// 	^this.primitiveFailed
-	// }
-	//
-	// bounding_mode_ { |aSymbol|
-	// 	_OSSIA_ParameterSetBoundingMode
-	// 	^this.primitiveFailed
-	// }
-	//
-	// repetition_filter {
-	// 	_OSSIA_ParameterGetRepetitionFilter
-	// 	^this.primitiveFailed
-	// }
-	//
-	// repetition_filter_ { |aBool|
-	// 	_OSSIA_ParameterSetRepetitionFilter
-	// 	^this.primitiveFailed
-	// }
-	//
+/*	domain_ { |min, max|
+		var
+		domain = OSSIA_domain(max, max);
+		bounding_mode = OSSIA_bounding_mode(bm, domain);
+	}*/
+
 	// unit {
 	// 	_OSSIA_ParameterGetUnit
 	// 	^this.primitiveFailed
@@ -368,19 +318,15 @@ OSSIA_Parameter : OSSIA_Node {
 	callback { ^m_callback }
 	callback_ { |callback_function|
 		if(not(m_has_callback)) {
-			this.prEnableCallback();
 			m_has_callback = true;
 		} {
 			if(callback_function.isNil()) {
-				this.prDisableCallback;
 				m_has_callback = false;
 			}
 		};
 
 		m_callback = callback_function;
 	}
-
-
 
 	// interpreter callback from attached ossia lambda
 	pvOnCallback { |v|

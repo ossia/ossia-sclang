@@ -34,7 +34,6 @@ OSSIA_OSCProtocol
 
 		recivrers.add(OSCdef(path.asSymbol,
 			{ |msg|
-				("received" + msg).postln;
 				if (msg.size == 2) {
 					anOssiaParameter.valueQuiet(msg[1]);
 				} { anOssiaParameter.valueQuiet(msg.removeAt(0));
