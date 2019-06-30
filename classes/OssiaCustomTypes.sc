@@ -40,7 +40,7 @@ OSSIA {
 	}
 }
 
-OSSIA_domain[slot]
+OSSIA_domain
 {
 	var m_domain;
 
@@ -53,23 +53,23 @@ OSSIA_domain[slot]
 		^super.new.domainCtor(min, max, values);
 	}
 
-	domainCtor { |min, max, values|
-		m_domain = [min, max, values];
+	domainCtor { |min, max|
+		m_domain = [min, max];
 	}
 
 	at {|i| ^m_domain[i] }
 	put { |index, item| m_domain[index] = item }
 
-	min      { ^this[0] }
-	min_     { |v| this[0] = v }
-	max      { ^this[1] }
-	max_     { |v| this[1] = v }
-	values   { ^this[2] }
+	min      { ^m_domain[0] }
+	min_     { |v| m_domain[0] = v }
+	max      { ^m_domain[1] }
+	max_     { |v| m_domain[1] = v }
+	values   { ^m_domain[2] }
 	values_  { |anArray|
 		if((not(anArray.class == Array)) && (anArray.notNil)) {
 			Error("values argument should be an array").throw;
 		};
-		this[2] = anArray;
+		m_domain[2] = anArray;
 	}
 }
 
@@ -139,303 +139,263 @@ OSSIA_access_mode {
 
 OSSIA_bounding_mode {
 
-	var <md, handle_bounds;
+	classvar switch_tree, func_array;
+	var <mode, domain, type, handle_bounds;
 
-	*new { |mode, anOssiaType, anOssiaDomain|
-		^super.new.boundCtor(mode, anOssiaType, anOssiaDomain);
+	*initClass {
+
+		func_array = [
+			// Integer (from index 0)
+			{ |value, domain, type| value.asInteger },
+			{ |value, domain, type| value.clip(domain.min, domain.max).asInteger },
+			{ |value, domain, type| value.max(domain.min).asInteger },
+			{ |value, domain, type| value.min(domain.max).asInteger },
+			{ |value, domain, type| value.wrap(domain.min, domain.max).asInteger },
+			{ |value, domain, type| value.fold(domain.min, domain.max).asInteger },
+			{ |value, domain, type| domain[2].do({ |item| if (item == value)
+				{ ^value.asInteger };
+			});
+			// Float (from index 7)
+			}, { |value, domain, type| value.asFloat },
+			{ |value, domain, type| value.clip(domain.min, domain.max).asFloat },
+			{ |value, domain, type| value.max(domain.min).asFloat },
+			{ |value, domain, type| value.min(domain.max).asFloat },
+			{ |value, domain, type| value.wrap(domain.min, domain.max).asFloat },
+			{ |value, domain, type| value.fold(domain.min, domain.max).asFloat },
+			{ |value, domain, type| domain[2].do({ |item| if (item == value)
+				{ ^value.asFloat };
+			});
+			// Boolean (index 14)
+			}, { |value, domain, type| value.asBoolean },
+			// Char (from index 15)
+			{ |value, domain, type| value.asAscii },
+			{ |value, domain, type| value.clip(domain.min, domain.max).asAscii },
+			{ |value, domain, type| value.max(domain.min).asAscii },
+			{ |value, domain, type| value.min(domain.max).asAscii },
+			{ |value, domain, type| domain[2].do({ |item| if (item == value)
+				{ ^value.asAscii };
+			});
+			// String (from index 20)
+			}, { |value, domain, type| domain[2].do({ |item|
+				if (item == value) { ^value.asString };
+			});
+			}, { |value, domain, type| value.asString },
+			// Array (from index 22)
+			{ |value, domain, type| value.asArray },
+			{ |value, domain, type| value.clip(domain.min, domain.max).asArray },
+			{ |value, domain, type| value.max(domain.min).asArray },
+			{ |value, domain, type| value.min(domain.max).asArray },
+			{ |value, domain, type| value.wrap(domain.min, domain.max).asArray },
+			{ |value, domain, type| value.fold(domain.min, domain.max).asArray },
+			{ |value, domain, type| domain[2].do({ |item| if (item == value)
+				{ ^value.asArray };
+			});
+			// VecNf (from index 29)
+			}, { |value, domain, type| type.asOssiaVec(value.clip(domain.min, domain.max)) },
+			{ |value, domain, type| type.asOssiaVec(value.max(domain.min)) },
+			{ |value, domain, type| type.asOssiaVec(value.min(domain.max)) },
+			{ |value, domain, type| type.asOssiaVec(value.wrap(domain.min, domain.max)) },
+			{ |value, domain, type| type.asOssiaVec(value.wrap(domain.min, domain.max)) },
+			{ |value, domain, type| domain[2].do({ |item| if (item == value)
+				{ ^type.asOssiaVec(value) };
+			});
+			}
+		];
+
+		switch_tree = { |mode, type, domain|
+			switch(type.class,
+				Meta_Integer, {
+					switch(mode,
+						'free', {
+							func_array[0];
+						},
+						'clip', {
+							func_array[1];
+						},
+						'low', {
+							func_array[2];
+						},
+						'high', {
+							func_array[3];
+						},
+						'wrap', {
+							func_array[4];
+						},
+						'fold', {
+							func_array[5];
+						}, {
+							func_array[6];
+					});
+				},
+				Meta_Float, {
+					switch(mode,
+						'free', {
+							func_array[7];
+						},
+						'clip', {
+							func_array[8];
+						},
+						'low', {
+							func_array[9];
+						},
+						'high', {
+							func_array[10];
+						},
+						'wrap', {
+							func_array[11];
+						},
+						'fold', {
+							func_array[12];
+						}, {
+							func_array[13];
+					});
+				},
+				Meta_Boolean, {
+					func_array[14];
+				},
+				Meta_Char, {
+					switch(mode,
+						'free', {
+							func_array[15];
+						},
+						'clip', {
+							func_array[16];
+						},
+						'low', {
+							func_array[17];
+						},
+						'high', {
+							func_array[18];
+						}, {
+							func_array[19];
+					});
+				},
+				Meta_String, {
+					if (mode == 'values') {
+						func_array[20];
+					} {
+						func_array[21];
+					};
+				},
+				Meta_Array, {
+					switch(mode,
+						'free', {
+							func_array[22];
+						},
+						'clip', {
+							func_array[23];
+						},
+						'low', {
+							func_array[24];
+						},
+						'high', {
+							func_array[25];
+						},
+						'wrap', {
+							func_array[26];
+						},
+						'fold', {
+							func_array[27];
+						}, {
+							func_array[28];
+					});
+				},
+				Meta_OSSIA_vec2f, {
+					switch(mode,
+						'free', {
+							func_array[29];
+						},
+						'clip', {
+							func_array[30];
+						},
+						'low', {
+							func_array[31];
+						},
+						'high', {
+							func_array[32];
+						},
+						'wrap', {
+							func_array[33];
+						},
+						'fold', {
+							func_array[34];
+						}, {
+							func_array[35];
+					});
+				},
+				Meta_OSSIA_vec3f, {
+					switch(mode,
+						'free', {
+							func_array[29];
+						},
+						'clip', {
+							func_array[30];
+						},
+						'low', {
+							func_array[31];
+						},
+						'high', {
+							func_array[32];
+						},
+						'wrap', {
+							func_array[33];
+						},
+						'fold', {
+							func_array[34];
+						}, {
+							func_array[35];
+					});
+				},
+				Meta_OSSIA_vec4f, {
+					switch(mode,
+						'free', {
+							func_array[29];
+						},
+						'clip', {
+							func_array[30];
+						},
+						'low', {
+							func_array[31];
+						},
+						'high', {
+							func_array[32];
+						},
+						'wrap', {
+							func_array[33];
+						},
+						'fold', {
+							func_array[34];
+						}, {
+							func_array[35];
+					});
+				};
+			);
+		};
 	}
 
-	boundCtor { |mode, type, domain|
+	*new { |mode, anOssiaType, anOssiaDomain|
 
-		md = mode;
+		^super.new.ctor(mode, anOssiaType, anOssiaDomain);
+	}
 
-		switch(type.class,
-			Meta_Integer, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								value.clip(domain.min, domain.max).asInteger };
-						},
-						'low', {
-							handle_bounds = { |value|
-								value.max(domain.min).asInteger };
-						},
-						'high', { handle_bounds = { |value|
-							value.min(domain.max).asInteger };
-						},
-						'wrap', { handle_bounds = { |value|
-							value.wrap(domain.min, domain.max).asInteger };
-						},
-						'fold', { handle_bounds = { |value|
-							value.fold(domain.min, domain.max).asInteger };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asInteger };
-						});
-					};
-				};
-			},
-			Meta_Float, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asFloat };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								value.clip(domain.min, domain.max).asFloat };
-						},
-						'low', {
-							handle_bounds = { |value|
-								value.max(domain.min).asFloat };
-						},
-						'high', { handle_bounds = { |value|
-							value.min(domain.max).asFloat };
-						},
-						'wrap', { handle_bounds = { |value|
-							value.wrap(domain.min, domain.max).asFloat };
-						},
-						'fold', { handle_bounds = { |value|
-							value.fold(domain.min, domain.max).asFloat };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asFloat };
-						});
-					};
-				};
-			},
-			Meta_Boolean, { handle_bounds = { |value|
-				value.asBoolean } },
-			Meta_Char, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'clip', {
-							handle_bounds = { |value|
-								value.clip(domain.min, domain.max).asAscii };
-						},
-						'low', {
-							handle_bounds = { |value|
-								value.max(domain.min).asAscii };
-						},
-						'high', { handle_bounds = { |value|
-							value.min(domain.max).asAscii };
-						},
-						{ handle_bounds = { |value|
-							value.asAscii } };
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asAscii };
-						});
-					};
-				};
-			},
-			Meta_String, {
-				if (domain[2].size == 0) {
-					handle_bounds = { |value| value.asString }
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asString };
-						});
-					};
-				};
-			},
-			Meta_Symbol, {
-				if (domain[2].size == 0) {
-					handle_bounds = { |value| value.asSymbol }
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asSymbol };
-						});
-					};
-				};
-			},
-			Meta_Array, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asArray };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								value.clip(domain.min, domain.max).asArray };
-						},
-						'low', {
-							handle_bounds = { |value|
-								value.max(domain.min).asArray };
-						},
-						'high', { handle_bounds = { |value|
-							value.min(domain.max).asArray };
-						},
-						'wrap', { handle_bounds = { |value|
-							value.wrap(domain.min, domain.max).asArray };
-						},
-						'fold', { handle_bounds = { |value|
-							value.fold(domain.min, domain.max).asArray };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asArray };
-						});
-					};
-				};
-			},
-			Meta_List, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asArray };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								value.clip(domain.min, domain.max).asList };
-						},
-						'low', {
-							handle_bounds = { |value|
-								value.max(domain.min).asList };
-						},
-						'high', { handle_bounds = { |value|
-							value.min(domain.max).asList };
-						},
-						'wrap', { handle_bounds = { |value|
-							value.wrap(domain.min, domain.max).asList };
-						},
-						'fold', { handle_bounds = { |value|
-							value.fold(domain.min, domain.max).asList };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^value.asList };
-						});
-					};
-				};
-			},
-			Meta_OSSIA_vec2f, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asArray };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.clip(domain.min, domain.max)) };
-						},
-						'low', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.max(domain.min)) };
-						},
-						'high', { handle_bounds = { |value|
-							type.asOssiaVec(value.min(domain.max)) };
-						},
-						'wrap', { handle_bounds = { |value|
-							type.asOssiaVec(value.wrap(domain.min, domain.max)) };
-						},
-						'fold', { handle_bounds = { |value|
-							type.asOssiaVec(value.fold(domain.min, domain.max)) };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^type.asOssiaVec(value) };
-						});
-					};
-				};
-			},
-			Meta_OSSIA_vec3f, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asArray };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.clip(domain.min, domain.max)) };
-						},
-						'low', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.max(domain.min)) };
-						},
-						'high', { handle_bounds = { |value|
-							type.asOssiaVec(value.min(domain.max)) };
-						},
-						'wrap', { handle_bounds = { |value|
-							type.asOssiaVec(value.wrap(domain.min, domain.max)) };
-						},
-						'fold', { handle_bounds = { |value|
-							type.asOssiaVec(value.fold(domain.min, domain.max)) };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^type.asOssiaVec(value) };
-						});
-					};
-				};
-			},
-			Meta_OSSIA_vec4f, {
-				if (domain[2].size == 0) {
-					switch(mode,
-						'free', {
-							handle_bounds = { |value|
-								value.asArray };
-						},
-						'clip', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.clip(domain.min, domain.max)) };
-						},
-						'low', {
-							handle_bounds = { |value|
-								type.asOssiaVec(value.max(domain.min)) };
-						},
-						'high', { handle_bounds = { |value|
-							type.asOssiaVec(value.min(domain.max)) };
-						},
-						'wrap', { handle_bounds = { |value|
-							type.asOssiaVec(value.wrap(domain.min, domain.max)) };
-						},
-						'fold', { handle_bounds = { |value|
-							type.asOssiaVec(value.fold(domain.min, domain.max)) };
-						};
-					);
-				} {
-					handle_bounds = { |value|
-						domain[2].do({ |item|
-							if (item == value) { ^type.asOssiaVec(value) };
-						});
-					};
-				};
-			};
-		);
+	ctor { |bm, tp, dn|
+
+		domain = dn;
+
+		if (domain.values.notNil) {
+			mode = 'values';
+		} {
+			mode = bm;
+		};
+
+		type = tp;
+
+		handle_bounds = switch_tree.value(mode, type, domain);
 
 	}
 
 	bound { |value|
-		^handle_bounds.value(value);
+		^handle_bounds.value(value, domain, type);
 	}
 
 	*free { ^'free' }

@@ -200,8 +200,9 @@ OSSIA_Parameter : OSSIA_Node {
 
 	*array { |size, parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false , repetition_filter = false|
+
 		^Array.fill(size, {|i|
-			OSSIA_Parameter(parent_node, format(name,i), type, domain,
+			OSSIA_Parameter(parent_node, name++'_'++i, type, domain,
 				default_value, bounding_mode, critical, repetition_filter);
 		});
 	}
@@ -209,6 +210,12 @@ OSSIA_Parameter : OSSIA_Node {
 	parameterCtor { |tp, dm, dv, bm, cl, rf|
 
 		var dom_slot, df_val­­­­­­;
+
+		switch(tp.class,
+			Meta_Symbol, { type = String },
+			Meta_List, { type = Array },
+			{ type = tp };
+		);
 
 		type = tp;
 
@@ -219,7 +226,6 @@ OSSIA_Parameter : OSSIA_Node {
 		};
 
 		domain = OSSIA_domain(dom_slot[0], dom_slot[1]);
-		bounding_mode = OSSIA_bounding_mode(bm, type, domain);
 
 		if (dv.isNil) {
 			switch(type.class,
@@ -228,9 +234,7 @@ OSSIA_Parameter : OSSIA_Node {
 				Meta_Boolean, { df_val = false },
 				Meta_Char, { df_val = $ },
 				Meta_String, { df_val = "" },
-				Meta_Symbol, { df_val = \ },
 				Meta_Array, { df_val = [] },
-				Meta_List, { df_val = List[] },
 				Meta_OSSIA_vec2f, { df_val = [0.0, 0.0] },
 				Meta_OSSIA_vec3f, { df_val = [0.0, 0.0, 0.0] },
 				Meta_OSSIA_vec4f, { df_val = [0.0, 0.0, 0.0, 0.0] };
@@ -239,13 +243,14 @@ OSSIA_Parameter : OSSIA_Node {
 			df_val = dv;
 		};
 
-		value = bounding_mode.bound(df_val);
+		bounding_mode = OSSIA_bounding_mode(bm, type, domain);
 
 		critical = cl;
 		repetition_filter = rf;
 		access_mode = 'bi';
 		m_has_callback = false;
 
+		value = bounding_mode.bound(df_val);
 		device.instantiateParameter(this);
 	}
 
