@@ -182,36 +182,36 @@ OSSIA_bounding_mode {
 			}, { |value, domain, type| value.asString },
 			// Array (from index 22)
 			{ |value, domain, type| value.asArray },
-			{ |value, domain, type| value.collect({ |i|
-				_.clip(domain.min[i], domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |i|
-				_.max(domain.min[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |i|
-				_.min(domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |i|
-				_.wrap(domain.min[i], domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |i|
-				_.fold(domain.min[i], domain.max[i]) }).asArray },
+			{ |value, domain, type| value.collect({ |item, i|
+				item.clip(domain.min[i], domain.max[i]) }).asArray },
+			{ |value, domain, type| value.collect({ |item, i|
+				item.max(domain.min[i]) }).asArray },
+			{ |value, domain, type| value.collect({ |item, i|
+				item.min(domain.max[i]) }).asArray },
+			{ |value, domain, type| value.collect({ |item, i|
+				item.wrap(domain.min[i], domain.max[i]) }).asArray },
+			{ |value, domain, type| value.collect({ |item, i|
+				item.fold(domain.min[i], domain.max[i]) }).asArray },
 			{ |value, domain, type| domain[2].do({ |item| if (item == value)
 				{ ^value.asArray };
 			});
 			// VecNf (from index 29)
 			}, { |value, domain, type| type.asOssiaVec(value) },
 			{ |value, domain, type| type.asOssiaVec(
-				value.collect({ |i|
-					_.clip(domain.min[i], domain.max[i]) }) ) },
+				value.collect({ |item, i|
+					item.clip(domain.min[i], domain.max[i]) }) ) },
 			{ |value, domain, type| type.asOssiaVec(value.max(
-				value.collect({ |i|
-					_.max(domain.min[i]) }) ))
+				value.collect({ |item, i|
+					item.max(domain.min[i]) }) ))
 			}, { |value, domain, type| type.asOssiaVec(value.max(
-				value.collect({ |i|
-					_.min(domain.max[i]) }) ))
+				value.collect({ |item, i|
+					item.min(domain.max[i]) }) ))
 			}, { |value, domain, type| type.asOssiaVec(
-				value.collect({ |i|
-					_.wrap(domain.min[i], domain.max[i]) }) )
+				value.collect({ |item, i|
+					item.wrap(domain.min[i], domain.max[i]) }) )
 			}, { |value, domain, type| type.asOssiaVec(
-				value.collect({ |i|
-					_.fold(domain.min[i], domain.max[i]) }) )
+				value.collect({ |item, i|
+					item.fold(domain.min[i], domain.max[i]) }) )
 			}, { |value, domain, type| domain[2].do({ |item| if (item == value)
 				{ ^type.asOssiaVec(value) };
 			});
