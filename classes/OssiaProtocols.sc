@@ -17,7 +17,6 @@ OSSIA_OSCProtocol
 	var localPort;
 	var device;
 	var netAddr;
-	var recivrers;
 
 	*new { |remoteAddr, remotePort, localPort, device|
 		^this.newCopyArgs(remoteAddr, remotePort, localPort, device).oscProtocolCtor;
@@ -25,10 +24,7 @@ OSSIA_OSCProtocol
 
 	oscProtocolCtor {
 		netAddr = NetAddr(remoteAddr, remotePort);
-		recivrers = Array.with(
-			device.tree(
-				parameters_only: true).do(this.instantiateParameter(_))
-		);
+		device.tree(parameters_only: true).do(this.instantiateParameter(_));
 	}
 
 	push { |anOssiaParameter|
@@ -39,7 +35,7 @@ OSSIA_OSCProtocol
 	instantiateParameter { |anOssiaParameter|
 		var path = anOssiaParameter.path;
 
-		recivrers.add(OSCdef(path.asSymbol,
+		OSCdef(path.asSymbol,
 			{ |msg|
 				if (msg.size == 2) {
 					anOssiaParameter.valueQuiet(msg[1]);
@@ -47,7 +43,7 @@ OSSIA_OSCProtocol
 					anOssiaParameter.valueQuiet(msg);
 				};
 			},
-			path, recvPort: localPort));
+			path, recvPort: localPort);
 
 		this.push(anOssiaParameter);
 	}

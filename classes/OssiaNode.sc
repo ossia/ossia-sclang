@@ -18,6 +18,7 @@ OSSIA_Node {
 	var <>description;
 	var <children;
 	var m_ptr_data;
+	var parent;
 
 	addChild { |anOssiaNode|
 		children = children.add(anOssiaNode);
@@ -28,13 +29,14 @@ OSSIA_Node {
 	}
 
 	nodeCtor { |p, n|
-		var parent = p.path;
+		var parent_path = p.path;
+		parent = p;
 
 		name =  n;
 
-		if (parent != $/) {
+		if (parent_path != $/) {
 			device = p.device;
-			path = parent++$/++name;
+			path = parent_path++$/++name;
 		} {
 			device = p;
 			path = $/++name;
@@ -62,6 +64,12 @@ OSSIA_Node {
 		} {
 		^[children.collect(_.paramExplore)];
 		}
+	}
+
+	free {
+		children.collect(_.free);
+		parent.children.remove(this);
+		^super.free;
 	}
 
 	//-------------------------------------------//
@@ -255,7 +263,9 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	free {
-		device.freeParameter(path);
+		children.collect(_.free);
+		device.freeParameter(this);
+		parent.children.remove(this);
 		^super.free;
 	}
 

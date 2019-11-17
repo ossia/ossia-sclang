@@ -59,8 +59,8 @@ OSSIA_Device {
 		if (protocol.notNil) { protocol.instantiateParameter(anOssiaParameter); };
 	}
 
-	freeParameter { |path|
-		if (protocol.notNil) { protocol.freeParameter(path); };
+	freeParameter { |anOssiaParameter|
+		if (protocol.notNil) { protocol.freeParameter(anOssiaParameter); };
 	}
 
 	updateParameter { |anOssiaParameter|
