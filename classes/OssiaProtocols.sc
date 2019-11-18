@@ -57,3 +57,60 @@ OSSIA_OSCProtocol
 		^super.free;
 	}
 }
+
+OSSIA_OSCQSProtocol
+{
+	var name;
+	var osc_port;
+	var ws_port;
+	var device;
+	var netAddr;
+	var remoteAddr;
+	var ws_server;
+
+	*new { |name, osc_port, ws_port, device|
+		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
+	}
+
+	oscQuerryProtocolCtor {
+		ws_server = WebSocketServer(6789, name, "_oscjson._tcp");
+		netAddr = NetAddr(remoteAddr, 9999);
+		device.tree(parameters_only: true).do(this.instantiateParameter(_));
+	}
+
+	push { |anOssiaParameter|
+		netAddr.sendRaw(
+			([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+	}
+
+	instantiateParameter { |anOssiaParameter|
+		this.instantiateOSC(anOssiaParameter);
+	}
+
+	instantiateOSC { |anOssiaParameter|
+		var path = anOssiaParameter.path;
+
+		OSCdef(path.asSymbol,
+			{ |msg|
+				if (msg.size == 2) {
+					anOssiaParameter.valueQuiet(msg[1]);
+				} { msg.removeAt(0);
+					anOssiaParameter.valueQuiet(msg);
+				};
+			},
+			path, recvPort: osc_port);
+	}
+
+	freeParameter { |anOssiaParameter|
+		this.freeOSC(anOssiaParameter);
+	}
+
+	freeOSC { |anOssiaParameter|
+		OSCdef(anOssiaParameter.path.asSymbol).free;
+	}
+
+	free {
+		device.tree(parameters_only: true).do(this.freeParameter(_));
+		^super.free;
+	}
+}

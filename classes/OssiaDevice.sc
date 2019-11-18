@@ -110,8 +110,8 @@ OSSIA_Device {
 
 	exposeRedirect { |method, vargs|
 		switch(method,
-			// only OSC is suported for now
-			// 'oscqs', { this.pyrOSCQS(vargs[0], vargs[1])},
+			'oscqs', { if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)},
 			// 'oscqm', { this.pyrOSCQM(vargs[0])},
 			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
 			'osc', { if (protocol.notNil) { protocol.free; };
