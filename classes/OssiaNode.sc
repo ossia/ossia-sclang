@@ -241,7 +241,7 @@ OSSIA_Parameter : OSSIA_Node {
 				Meta_Integer, { df_val = 0 },
 				Meta_OSSIA_vec2f, { df_val = [0.0, 0.0] },
 				Meta_OSSIA_vec3f, { df_val = [0.0, 0.0, 0.0] },
-				Meta_OSSIA_vec4f, { df_val = [0.0, 0.0, 0.0, 0.0] };
+				Meta_OSSIA_vec4f, { df_val = [0.0, 0.0, 0.0, 0.0] },
 				Meta_Boolean, { df_val = false },
 				Meta_String, { df_val = "" },
 				Meta_Array, { df_val = [] },

@@ -227,7 +227,7 @@ OSSIA_Tree
 				Meta_Char, "\"c\""
 			)
 			++",\"VALUE\":"++ anOssiaNode.value
-			//++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+			++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
 			++",\"CLIPMODE\":\""++ anOssiaNode.bounding_mode.mode ++"\""
 			++ if (anOssiaNode.domain.values.notNil) {
 				",\"VALUES\":[\""++ anOssiaNode.domain.values ++"\"]"
