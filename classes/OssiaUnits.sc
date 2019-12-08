@@ -79,9 +79,9 @@ OSSIA_time : OSSIA_Unit {
 	*cent{^this.fmt(thisMethod) }
 	*frequency{^this.fmt(thisMethod) }
 	*mel{^this.fmt(thisMethod) }
-	*midi_pitch{^this.fmt(thisMethod) }
-	*millisecond{^this.fmt(thisMethod) }
-	*playback_speed{^this.fmt(thisMethod) }
+	*midinote{^this.fmt(thisMethod) }
+	*ms{^this.fmt(thisMethod) }
+	*speed{^this.fmt(thisMethod) }
 }
 
 OSSIA_gain : OSSIA_Unit {

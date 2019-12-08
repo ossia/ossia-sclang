@@ -76,7 +76,7 @@ OSSIA_Device {
 	}
 
 	nodeExplore {
-		^[this, children.collect(_.nodeExplore)];
+		^[children.collect(_.nodeExplore)];
 	}
 
 	paramExplore {
@@ -123,10 +123,9 @@ OSSIA_Device {
 	//                NEW SHORTCUTS              //
 	//-------------------------------------------//
 
-	// only OSC is suported for now
-	// *newOSCQueryServer { |name, osc_port = 1234, ws_port = 5678, callback|
-	// 	^this.new(name).exposeOSCQueryServer(osc_port, ws_port, callback);
-	// }
+	*newOSCQueryServer { |name, osc_port = 1234, ws_port = 5678, callback|
+		^this.new(name).exposeOSCQueryServer(osc_port, ws_port, callback);
+	}
 	//
 	// *newOSCQueryMirror { |name, host_addr, callback|
 	// 	^this.new(name).exposeOSCQueryMirror(host_addr, callback);
@@ -136,7 +135,7 @@ OSSIA_Device {
 	// 	^this.new(name).exposeMinuit(remote_ip, remote_port, local_port, callback);
 	// }
 
-	newOSC { |name, remote_ip = "127.0.0.1",
+	*newOSC { |name, remote_ip = "127.0.0.1",
 		remote_port = 9997, local_port = 9996, callback|
 		^this.exposeOSC(remote_ip, remote_port, local_port, callback);
 	}

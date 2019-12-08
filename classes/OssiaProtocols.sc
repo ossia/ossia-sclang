@@ -65,17 +65,83 @@ OSSIA_OSCQSProtocol
 	var ws_port;
 	var device;
 	var netAddr;
-	var remoteAddr;
 	var ws_server;
+	var jsonTree;
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
 	}
 
 	oscQuerryProtocolCtor {
-		ws_server = WebSocketServer(6789, name, "_oscjson._tcp");
-		netAddr = NetAddr(remoteAddr, 9999);
-		device.tree(parameters_only: true).do(this.instantiateParameter(_));
+
+		netAddr = NetAddr();
+		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
+
+		ws_server.onNewConnection = { |con|
+			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
+			netAddr.hostname_(con.address);
+			netAddr.port_(con.port);
+
+			con.onTextMessageReceived = { |msg|
+				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
+				postln(msg);
+				con.writeText(msg);
+			};
+
+			con.onOscMessageReceived = { |array|
+				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
+				postln(array);
+			};
+		};
+
+		ws_server.onHttpRequestReceived = { |req|
+
+			postln("[http-server] request received");
+			postln(format("[http-server] uri: %", req.uri));
+			postln(req.query);
+
+			if (req.query.isEmpty().not()) {
+				postln(format("[http-server] query: %", req.query));
+			};
+
+			if (req.uri == "/") {
+				if (req.query == "HOST_INFO") {
+					req.replyJson(
+						"{"
+						++"\"NAME\":\""++ name ++"\""
+						++",\"OSC_PORT\":"++ osc_port ++""
+						++",\"OSC_TRANSPORT\":\"UDP\""
+						++",\"EXTENSIONS\":"
+						++"{"
+						++"\"TYPE\":true"
+						++",\"ACCESS\":true"
+						++",\"VALUE\":true"
+						++",\"RANGE\":true"
+						++",\"TAGS\":true"
+						++",\"CLIPMODE\":true"
+						++",\"UNIT\":true"
+						++",\"CRITICAL\":true"
+						++",\"DESCRIPTION\":true"
+						++",\"HTML\":true"
+						++",\"OSC_STREAMING\":true"
+						++",\"LISTEN\":true"
+						++",\"ECHO\":true"
+						++",\"PATH_CHANGED\":false"
+						++",\"PATH_RENAMED\":true"
+						++",\"PATH_ADDED\":true"
+						++",\"PATH_REMOVED\":true"
+						++"}"
+						++"}"
+					);
+				} {
+					ws_server[0].writeText(jsonTree);
+				}
+			}
+		};
+
+		device.tree().do(
+			this.instantiateOSC(_)
+		);
 	}
 
 	push { |anOssiaParameter|
@@ -110,7 +176,67 @@ OSSIA_OSCQSProtocol
 	}
 
 	free {
-		device.tree(parameters_only: true).do(this.freeParameter(_));
+		device.tree().do(this.freeParameter(_));
 		^super.free;
+	}
+}
+
+OSSIA_Tree
+{
+
+	*stringify { |ossiaNodes|
+
+		var json = "";
+
+		if (ossiaNodes.isArray) {
+			ossiaNodes.do({ |item|
+				json = json ++ this.fmt(item);
+			});
+		} {
+			json = json ++ this.fmt(ossiaNodes);
+		};
+
+		^json;
+	}
+
+	*fmt { |anOssiaNode|
+
+		^"{"
+		++"\""++ anOssiaNode.name ++"\":"
+		++"{\"FULL_PATH\":\""++ anOssiaNode.path ++"\""
+		++ if (anOssiaNode.class == OSSIA_Parameter) {
+			",\"TYPE\":"
+			++ switch (anOssiaNode.type.class,
+				Meta_Float, "\"f\"",
+				Meta_Integer, "\"i\"",
+				Meta_OSSIA_vec2f, "\"ff\"",
+				Meta_OSSIA_vec3f, "\"fff\"",
+				Meta_OSSIA_vec4f, "\"ffff\"",
+				Meta_Boolean, "\"F\"",
+				Meta_Impulse, "\"I\"",
+				Meta_Signal, "\"I\"",
+				Meta_String, "\"s\"",
+				Meta_Array, "\"l\"",
+				Meta_Char, "\"c\""
+			)
+			++",\"VALUE\":"++ anOssiaNode.value
+			++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+			++",\"CLIPMODE\":\""++ anOssiaNode.bounding_mode.mode ++"\""
+			++ if (anOssiaNode.domain.values.notNil) {
+				",\"VALUES\":[\""++ anOssiaNode.domain.values ++"\"]"
+			} { "" }
+			++ if (anOssiaNode.unit.notNil) {
+				",\"UNIT\":[\""++ anOssiaNode.unit ++"\"]"
+			} { "" }
+			++",\"ACCESS\":\""++ anOssiaNode.access_mode ++"\""
+		} { "" }
+		++ if (anOssiaNode.description.notNil) {
+			",\"DESCRIPTION\":\""++ anOssiaNode.description ++"\""
+		} { "" }
+		++ if (anOssiaNode.children.isEmpty.not) {
+			",\"CONTENTS\":"++ this.stringify(anOssiaNode.children)
+		} { "" }
+		++"}"
+		++"}"
 	}
 }

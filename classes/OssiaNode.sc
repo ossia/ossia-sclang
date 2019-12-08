@@ -237,15 +237,15 @@ OSSIA_Parameter : OSSIA_Node {
 
 		if (dv.isNil) {
 			switch(type.class,
-				Meta_Integer, { df_val = 0 },
 				Meta_Float, { df_val = 0.0 },
-				Meta_Boolean, { df_val = false },
-				Meta_Char, { df_val = $ },
-				Meta_String, { df_val = "" },
-				Meta_Array, { df_val = [] },
+				Meta_Integer, { df_val = 0 },
 				Meta_OSSIA_vec2f, { df_val = [0.0, 0.0] },
 				Meta_OSSIA_vec3f, { df_val = [0.0, 0.0, 0.0] },
 				Meta_OSSIA_vec4f, { df_val = [0.0, 0.0, 0.0, 0.0] };
+				Meta_Boolean, { df_val = false },
+				Meta_String, { df_val = "" },
+				Meta_Array, { df_val = [] },
+				Meta_Char, { df_val = $ }
 			);
 		} {
 			df_val = dv;
