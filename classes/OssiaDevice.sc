@@ -148,11 +148,11 @@ OSSIA_Device {
 	// get { |addr|
 	// 	^OSSIA_MirrorParameter(this, addr)
 	// }
-	//
-	// exposeOSCQueryServer { |osc_port = 1234, ws_port = 5678, callback|
-	// 	this.forkExpose('oscqs', [osc_port, ws_port], callback);
-	// }
-	//
+
+	exposeOSCQueryServer { |osc_port = 1234, ws_port = 5678, callback|
+		this.forkExpose('oscqs', [name, osc_port, ws_port], callback);
+	}
+
 	// exposeOSCQueryMirror { |host_addr, callback|
 	// 	this.forkExpose('oscqm', [host_addr], callback);
 	// }

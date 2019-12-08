@@ -66,7 +66,7 @@ OSSIA_OSCQSProtocol
 	var device;
 	var netAddr;
 	var ws_server;
-	var jsonTree;
+	var jsonTree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":";
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
@@ -74,6 +74,7 @@ OSSIA_OSCQSProtocol
 
 	oscQuerryProtocolCtor {
 
+		jsonTree = jsonTree ++ OSSIA_Tree.stringify(device.children) ++"}";
 		netAddr = NetAddr();
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
 
@@ -134,12 +135,13 @@ OSSIA_OSCQSProtocol
 						++"}"
 					);
 				} {
+					//jsonTree = jsonTree ++ OSSIA_Tree.stringify(device.children);
 					ws_server[0].writeText(jsonTree);
 				}
 			}
 		};
 
-		device.tree().do(
+		device.tree(parameters_only: true).do(
 			this.instantiateOSC(_)
 		);
 	}
@@ -183,15 +185,21 @@ OSSIA_OSCQSProtocol
 
 OSSIA_Tree
 {
-
 	*stringify { |ossiaNodes|
 
 		var json = "";
 
 		if (ossiaNodes.isArray) {
-			ossiaNodes.do({ |item|
-				json = json ++ this.fmt(item);
+
+			var last = ossiaNodes.size - 1;
+
+			ossiaNodes.do({ |item, count|
+				json = json
+				++ if (count == 0) {"{"} {","}
+				++ this.fmt(item)
+				++ if (count == last) {"}"} {""}
 			});
+
 		} {
 			json = json ++ this.fmt(ossiaNodes);
 		};
@@ -201,8 +209,7 @@ OSSIA_Tree
 
 	*fmt { |anOssiaNode|
 
-		^"{"
-		++"\""++ anOssiaNode.name ++"\":"
+		^"\""++ anOssiaNode.name ++"\":"
 		++"{\"FULL_PATH\":\""++ anOssiaNode.path ++"\""
 		++ if (anOssiaNode.class == OSSIA_Parameter) {
 			",\"TYPE\":"
@@ -220,7 +227,7 @@ OSSIA_Tree
 				Meta_Char, "\"c\""
 			)
 			++",\"VALUE\":"++ anOssiaNode.value
-			++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+			//++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
 			++",\"CLIPMODE\":\""++ anOssiaNode.bounding_mode.mode ++"\""
 			++ if (anOssiaNode.domain.values.notNil) {
 				",\"VALUES\":[\""++ anOssiaNode.domain.values ++"\"]"
@@ -236,7 +243,6 @@ OSSIA_Tree
 		++ if (anOssiaNode.children.isEmpty.not) {
 			",\"CONTENTS\":"++ this.stringify(anOssiaNode.children)
 		} { "" }
-		++"}"
 		++"}"
 	}
 }
