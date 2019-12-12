@@ -135,7 +135,7 @@ OSSIA_OSCQSProtocol
 			if (req.uri == "/") {
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
-					if (ws_server[0].notNil) { ws_server[0].writeText(host_info) };
+					//if (ws_server[0].size == 1) { ws_server[0].writeText(host_info) };
 				} {
 					json_tree = json_tree ++ OSSIA_Tree.stringify(device.children) ++"}";
 					ws_server[0].writeText(json_tree);
