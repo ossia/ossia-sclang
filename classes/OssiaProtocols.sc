@@ -67,6 +67,7 @@ OSSIA_OSCQSProtocol
 	var netAddr;
 	var ws_server;
 	var zeroconf_service;
+	var host_info;
 	var json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":";
 
 	*new { |name, osc_port, ws_port, device|
@@ -78,6 +79,31 @@ OSSIA_OSCQSProtocol
 		netAddr = NetAddr();
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
+		host_info = "{"
+		++"\"NAME\":\""++ name ++"\""
+		++",\"OSC_PORT\":"++ osc_port ++""
+		++",\"OSC_TRANSPORT\":\"UDP\""
+		++",\"EXTENSIONS\":"
+		++"{"
+		++"\"TYPE\":true"
+		++",\"ACCESS\":true"
+		++",\"VALUE\":true"
+		++",\"RANGE\":true"
+		++",\"TAGS\":true"
+		++",\"CLIPMODE\":true"
+		++",\"UNIT\":true"
+		++",\"CRITICAL\":true"
+		++",\"DESCRIPTION\":true"
+		++",\"HTML\":true"
+		++",\"OSC_STREAMING\":true"
+		++",\"LISTEN\":true"
+		++",\"ECHO\":true"
+		++",\"PATH_CHANGED\":false"
+		++",\"PATH_RENAMED\":true"
+		++",\"PATH_ADDED\":true"
+		++",\"PATH_REMOVED\":true"
+		++"}"
+		++"}";
 
 		ws_server.onNewConnection = { |con|
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
@@ -108,33 +134,8 @@ OSSIA_OSCQSProtocol
 
 			if (req.uri == "/") {
 				if (req.query == "HOST_INFO") {
-					req.replyJson(
-						"{"
-						++"\"NAME\":\""++ name ++"\""
-						++",\"OSC_PORT\":"++ osc_port ++""
-						++",\"OSC_TRANSPORT\":\"UDP\""
-						++",\"EXTENSIONS\":"
-						++"{"
-						++"\"TYPE\":true"
-						++",\"ACCESS\":true"
-						++",\"VALUE\":true"
-						++",\"RANGE\":true"
-						++",\"TAGS\":true"
-						++",\"CLIPMODE\":true"
-						++",\"UNIT\":true"
-						++",\"CRITICAL\":true"
-						++",\"DESCRIPTION\":true"
-						++",\"HTML\":true"
-						++",\"OSC_STREAMING\":true"
-						++",\"LISTEN\":true"
-						++",\"ECHO\":true"
-						++",\"PATH_CHANGED\":false"
-						++",\"PATH_RENAMED\":true"
-						++",\"PATH_ADDED\":true"
-						++",\"PATH_REMOVED\":true"
-						++"}"
-						++"}"
-					);
+					req.replyJson(host_info);
+					if (ws_server[0].notNil) { ws_server[0].writeText(host_info) };
 				} {
 					json_tree = json_tree ++ OSSIA_Tree.stringify(device.children) ++"}";
 					ws_server[0].writeText(json_tree);
