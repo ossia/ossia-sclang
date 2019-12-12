@@ -28,12 +28,12 @@ OSSIA_Unit {
 }
 
 OSSIA_position : OSSIA_Unit {
-	*cart2D{ ^this.fmt(thisMethod) }
-	*cart3D{ ^this.fmt(thisMethod)}
-	*spherical{ ^this.fmt(thisMethod) }
-	*polar{ ^this.fmt(thisMethod) }
-	*opengl{^this.fmt(thisMethod) }
-	*cylindrical{^this.fmt(thisMethod) }
+	*cart2D{^this.fmt(thisMethod)}
+	*cart3D{^this.fmt(thisMethod)}
+	*spherical{^this.fmt(thisMethod)}
+	*polar{ ^this.fmt(thisMethod)}
+	*opengl{^this.fmt(thisMethod)}
+	*cylindrical{^this.fmt(thisMethod)}
 }
 
 OSSIA_orientation : OSSIA_Unit {

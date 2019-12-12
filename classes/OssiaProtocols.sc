@@ -66,7 +66,8 @@ OSSIA_OSCQSProtocol
 	var device;
 	var netAddr;
 	var ws_server;
-	var jsonTree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":";
+	var zeroconf_service;
+	var json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":";
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
@@ -74,9 +75,9 @@ OSSIA_OSCQSProtocol
 
 	oscQuerryProtocolCtor {
 
-		jsonTree = jsonTree ++ OSSIA_Tree.stringify(device.children) ++"}";
 		netAddr = NetAddr();
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
+		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 
 		ws_server.onNewConnection = { |con|
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
@@ -135,15 +136,13 @@ OSSIA_OSCQSProtocol
 						++"}"
 					);
 				} {
-					//jsonTree = jsonTree ++ OSSIA_Tree.stringify(device.children);
-					ws_server[0].writeText(jsonTree);
+					json_tree = json_tree ++ OSSIA_Tree.stringify(device.children) ++"}";
+					ws_server[0].writeText(json_tree);
 				}
 			}
 		};
 
-		device.tree(parameters_only: true).do(
-			this.instantiateOSC(_)
-		);
+		device.tree(parameters_only: true).do(this.instantiateOSC(_));
 	}
 
 	push { |anOssiaParameter|
@@ -169,16 +168,12 @@ OSSIA_OSCQSProtocol
 			path, recvPort: osc_port);
 	}
 
-	freeParameter { |anOssiaParameter|
-		this.freeOSC(anOssiaParameter);
-	}
-
-	freeOSC { |anOssiaParameter|
-		OSCdef(anOssiaParameter.path.asSymbol).free;
+	freeParameter { |anOssiaNode|
+		if (anOssiaNode.class == OSSIA_Parameter) { OSCdef(anOssiaNode.path.asSymbol).free };
 	}
 
 	free {
-		device.tree().do(this.freeParameter(_));
+		device.tree(parameters_only: true).do(this.freeParameter(_));
 		^super.free;
 	}
 }
@@ -191,14 +186,13 @@ OSSIA_Tree
 
 		if (ossiaNodes.isArray) {
 
-			var last = ossiaNodes.size - 1;
-
 			ossiaNodes.do({ |item, count|
 				json = json
 				++ if (count == 0) {"{"} {","}
 				++ this.fmt(item)
-				++ if (count == last) {"}"} {""}
 			});
+
+			json = json ++ "}";
 
 		} {
 			json = json ++ this.fmt(ossiaNodes);
@@ -226,8 +220,12 @@ OSSIA_Tree
 				Meta_Array, "\"l\"",
 				Meta_Char, "\"c\""
 			)
-			++",\"VALUE\":"++ anOssiaNode.value
-			++",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+			++ if (anOssiaNode.domain.min.notNil && anOssiaNode.domain.max.notNil) {
+				",\"VALUE\":"++ anOssiaNode.value
+			} { "" }
+			++ if (anOssiaNode.domain.min.notNil && anOssiaNode.domain.max.notNil) {
+				",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+			} { "" }
 			++",\"CLIPMODE\":\""++ anOssiaNode.bounding_mode.mode ++"\""
 			++ if (anOssiaNode.domain.values.notNil) {
 				",\"VALUES\":[\""++ anOssiaNode.domain.values ++"\"]"

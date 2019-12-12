@@ -19,6 +19,7 @@ OSSIA_Node {
 	var <children;
 	var m_ptr_data;
 	var parent;
+	var <>window;
 
 	addChild { |anOssiaNode|
 		children = children.add(anOssiaNode);
@@ -405,7 +406,7 @@ OSSIA_Parameter : OSSIA_Node {
 	kr { | bind = true |
 
 		if(bind) {
-			if(not(m_has_callback)) { this.prEnableCallback; m_has_callback = true };
+			if(not(m_has_callback)) { m_has_callback = true };
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
@@ -415,7 +416,7 @@ OSSIA_Parameter : OSSIA_Node {
 	ar { | bind = true |
 
 		if(bind) {
-			if(not(m_has_callback)) { this.prEnableCallback; m_has_callback = true };
+			if(not(m_has_callback)) { m_has_callback = true };
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
@@ -423,6 +424,13 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	tr { ^this.sym.tr}
+
+	gui { |wondow, bounds, children_depth = 0|
+
+		if (wondow.isNil) {
+
+		};
+	}
 
 }
 
