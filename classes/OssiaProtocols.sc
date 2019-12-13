@@ -66,9 +66,10 @@ OSSIA_OSCQSProtocol
 	var device;
 	var netAddr;
 	var ws_server;
+	var ws_connect_count = 0;
 	var zeroconf_service;
 	var host_info;
-	var json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":";
+	var json_tree;
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
@@ -76,7 +77,6 @@ OSSIA_OSCQSProtocol
 
 	oscQuerryProtocolCtor {
 
-		netAddr = NetAddr();
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 		host_info = "{"
@@ -107,13 +107,18 @@ OSSIA_OSCQSProtocol
 
 		ws_server.onNewConnection = { |con|
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
-			netAddr.hostname_(con.address);
-			netAddr.port_(con.port);
+			ws_connect_count = ws_connect_count + 1;
 
 			con.onTextMessageReceived = { |msg|
+				var command = msg.parseYAML;
 				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
 				postln(msg);
 				con.writeText(msg);
+				if (command["COMMAND"] == "START_OSC_STREAMING") {
+					netAddr = NetAddr(con.address,
+						command["DATA"]["LOCAL_SERVER_PORT"].asInt;
+					);
+				};
 			};
 
 			con.onOscMessageReceived = { |array|
@@ -135,10 +140,10 @@ OSSIA_OSCQSProtocol
 			if (req.uri == "/") {
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
-					//if (ws_server[0].size == 1) { ws_server[0].writeText(host_info) };
+					if (ws_server[ws_connect_count - 1].notNil) { ws_server[ws_connect_count - 1].writeText(host_info) };
 				} {
-					json_tree = json_tree ++ OSSIA_Tree.stringify(device.children) ++"}";
-					ws_server[0].writeText(json_tree);
+					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
+					ws_server[ws_connect_count - 1].writeText(json_tree);
 				}
 			}
 		};
