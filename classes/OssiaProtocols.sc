@@ -35,7 +35,7 @@ OSSIA_OSCProtocol
 	instantiateParameter { |anOssiaParameter|
 		var path = anOssiaParameter.path;
 
-		OSCdef(path.asSymbol,
+		OSCFunc(
 			{ |msg|
 				if (msg.size == 2) {
 					anOssiaParameter.valueQuiet(msg[1]);
@@ -70,6 +70,7 @@ OSSIA_OSCQSProtocol
 	var zeroconf_service;
 	var host_info;
 	var json_tree;
+	var dictionary;
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
@@ -79,6 +80,7 @@ OSSIA_OSCQSProtocol
 
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
+		dictionary = IdentityDictionary.new;
 		host_info = "{"
 		++"\"NAME\":\""++ name ++"\""
 		++",\"OSC_PORT\":"++ osc_port ++""
@@ -124,6 +126,7 @@ OSSIA_OSCQSProtocol
 			con.onOscMessageReceived = { |array|
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
+				dictionary.at(array[0]).valueQuiet(array[1]);
 			};
 		};
 
@@ -148,38 +151,54 @@ OSSIA_OSCQSProtocol
 			}
 		};
 
-		device.tree(parameters_only: true).do(this.instantiateOSC(_));
+		device.tree().flat.do(this.instantiateNode(_));
 	}
 
 	push { |anOssiaParameter|
-		netAddr.sendRaw(
-			([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+
+		if (anOssiaParameter.critical) {
+
+		} {
+			netAddr.sendRaw(
+				([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+		};
+	}
+
+	instantiateNode { |anOssiaNode|
+
+		dictionary.put(anOssiaNode.path, anOssiaNode);
+
+		if(anOssiaNode.class == OSSIA_Parameter) {
+			this.instantiateParameter(anOssiaNode);
+		};
 	}
 
 	instantiateParameter { |anOssiaParameter|
-		this.instantiateOSC(anOssiaParameter);
-	}
 
-	instantiateOSC { |anOssiaParameter|
-		var path = anOssiaParameter.path;
+		if (anOssiaParameter.critical.not) {
+			var path = anOssiaParameter.path;
 
-		OSCdef(path.asSymbol,
-			{ |msg|
-				if (msg.size == 2) {
-					anOssiaParameter.valueQuiet(msg[1]);
-				} { msg.removeAt(0);
-					anOssiaParameter.valueQuiet(msg);
-				};
-			},
-			path, recvPort: osc_port);
+			OSCFunc(
+				{ |msg|
+					if (msg.size == 2) {
+						anOssiaParameter.valueQuiet(msg[1]);
+					} { msg.removeAt(0);
+						anOssiaParameter.valueQuiet(msg);
+					};
+				},
+				path, recvPort: osc_port);
+		};
 	}
 
 	freeParameter { |anOssiaNode|
-		if (anOssiaNode.class == OSSIA_Parameter) { OSCdef(anOssiaNode.path.asSymbol).free };
+
+		if ((anOssiaNode.class == OSSIA_Parameter) && anOssiaNode.critical.not) {
+			OSCdef(anOssiaNode.path.asSymbol).free;
+		};
 	}
 
 	free {
-		device.tree(parameters_only: true).do(this.freeParameter(_));
+		device.tree().flat.do(this.freeParameter(_));
 		^super.free;
 	}
 }
@@ -240,6 +259,7 @@ OSSIA_Tree
 				",\"UNIT\":[\""++ anOssiaNode.unit ++"\"]"
 			} { "" }
 			++",\"ACCESS\":\""++ anOssiaNode.access_mode ++"\""
+			++",\"CRITICAL\":\""++ anOssiaNode.critical ++"\""
 		} { "" }
 		++ if (anOssiaNode.description.notNil) {
 			",\"DESCRIPTION\":\""++ anOssiaNode.description ++"\""
