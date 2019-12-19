@@ -1,5 +1,5 @@
 # ossia-sclang
-minimal OSSIA parameter tree for osc messages
+minimal OSSIA API for supercollider
 
 This project is a fork of [Pierre Cohard's](https://github.com/pchdev) [ossia-supercollider](https://github.com/OSSIA/ossia-supercollider.git)
 Form his sclang files, the aim is to provide the same message structure
