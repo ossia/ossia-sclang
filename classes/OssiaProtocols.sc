@@ -115,7 +115,6 @@ OSSIA_OSCQSProtocol
 				var command = msg.parseYAML;
 				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
 				postln(msg);
-				con.writeText(msg);
 				if (command["COMMAND"] == "START_OSC_STREAMING") {
 					netAddr = NetAddr(con.address,
 						command["DATA"]["LOCAL_SERVER_PORT"].asInt;
