@@ -234,7 +234,7 @@ OSSIA_Parameter : OSSIA_Node {
 			dom_slot = dm;
 		};
 
-		domain = OSSIA_domain(dom_slot[0], dom_slot[1]);
+		domain = OSSIA_domain(dom_slot[0], dom_slot[1], type:type);
 
 		if (dv.isNil) {
 			switch(type.class,

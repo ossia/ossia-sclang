@@ -192,8 +192,10 @@ OSSIA_OSCQSProtocol
 
 	freeParameter { |anOssiaNode|
 
-		if ((anOssiaNode.class == OSSIA_Parameter) && anOssiaNode.critical.not) {
-			OSCdef(anOssiaNode.path.asSymbol).free;
+		if (anOssiaNode.class == OSSIA_Parameter) {
+			if (anOssiaNode.critical.not) {
+				OSCdef(anOssiaNode.path.asSymbol).free;
+			};
 		};
 	}
 
@@ -245,11 +247,17 @@ OSSIA_Tree
 				Meta_Array, "\"l\"",
 				Meta_Char, "\"c\""
 			)
-			++ if (anOssiaNode.domain.min.notNil && anOssiaNode.domain.max.notNil) {
+			++ if (anOssiaNode.value.notNil) {
 				",\"VALUE\":"++ anOssiaNode.value
 			} { "" }
 			++ if (anOssiaNode.domain.min.notNil && anOssiaNode.domain.max.notNil) {
-				",\"RANGE\":[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+				",\"RANGE\":"++
+				if (anOssiaNode.domain.min.isArray) {
+					anOssiaNode.domain.min.collect({ |item, index|
+						"{\"MIN\":"++ anOssiaNode.domain.min[index] ++",\"MAX\":"++ anOssiaNode.domain.max[index] ++"}"});
+				} {
+					"[{\"MIN\":"++ anOssiaNode.domain.min ++",\"MAX\":"++ anOssiaNode.domain.max ++"}]"
+				}
 			} { "" }
 			++",\"CLIPMODE\":\""++ anOssiaNode.bounding_mode.mode ++"\""
 			++ if (anOssiaNode.domain.values.notNil) {
@@ -259,7 +267,7 @@ OSSIA_Tree
 				",\"UNIT\":[\""++ anOssiaNode.unit ++"\"]"
 			} { "" }
 			++",\"ACCESS\":\""++ anOssiaNode.access_mode ++"\""
-			++",\"CRITICAL\":\""++ anOssiaNode.critical ++"\""
+			++",\"CRITICAL\":"++ anOssiaNode.critical
 		} { "" }
 		++ if (anOssiaNode.description.notNil) {
 			",\"DESCRIPTION\":\""++ anOssiaNode.description ++"\""

@@ -44,17 +44,22 @@ OSSIA_domain
 {
 	var m_domain;
 
-	*new { |min, max, values|
+	*new { |min, max, values, type|
 
 		if((not(values.class == Array)) && (values.notNil)) {
 			Error("values argument should be an array").throw;
 		};
 
-		^super.new.domainCtor(min, max, values);
+		^super.new.domainCtor(min, max, values, type);
 	}
 
-	domainCtor { |min, max|
-		m_domain = [min, max];
+	domainCtor { |min, max, values, type|
+
+		if (type.superclass == OSSIA_FVector) {
+			m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), values];
+		} {
+			m_domain = [min, max, values];
+		};
 	}
 
 	at {|i| ^m_domain[i] }
