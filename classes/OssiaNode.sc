@@ -12,38 +12,37 @@
 
 OSSIA_Node {
 
+	var parent;
 	var <name;
 	var <path;
 	var <device;
 	var <>description;
 	var <children;
 	var m_ptr_data;
-	var parent;
-	var <>window;
+	var <window;
+
+	classvar skipJack, evGui;
 
 	addChild { |anOssiaNode|
 		children = children.add(anOssiaNode);
 	}
 
 	*new { |parent, name|
-		^super.new.nodeCtor(parent, name);
+		^super.newCopyArgs(parent, name).nodeCtor();
 	}
 
-	nodeCtor { |p, n|
-		var parent_path = p.path;
-		parent = p;
-
-		name =  n;
+	nodeCtor {
+		var parent_path = parent.path;
 
 		if (parent_path != $/) {
-			device = p.device;
+			device = parent.device;
 			path = parent_path++$/++name;
 		} {
-			device = p;
+			device = parent;
 			path = $/++name;
 		};
 
-		p.addChild(this);
+		parent.addChild(this);
 		children = [];
 	}
 
@@ -65,6 +64,201 @@ OSSIA_Node {
 		} {
 		^[children.collect(_.paramExplore)];
 		}
+	}
+
+	gui { |parent|
+		var params = [], widgets = [];
+
+		children.add(this).do({ |item|
+			if(item.class == OSSIA_Parameter) {
+				params = params.add(item);
+			};
+		});
+
+		if (parent.isNil) {
+			window = Window(name).front; // resize later to the flow layout size
+			window.addFlowLayout;
+		} {
+			window = parent;
+		};
+
+		if (evGui.isNil) {
+			evGui = ();
+		};
+
+		params.do({ |item, count|
+
+			switch(item.type.class,
+				Meta_Float, {
+					widgets = widgets.add(EZSlider(window, 392@20, item.name,
+						action:{ | val | item.value_(val.value); },
+						initVal: item.value, labelWidth:100, gap:0@0));
+
+					if(item.domain.min.notNil) {
+						widgets[count].controlSpec.minval_(item.domain.min);
+						widgets[count].controlSpec.maxval_(item.domain.max);
+					};
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != widgets[count].value) {
+							widgets[count].value_(item.value);
+						};
+					};
+				},
+				Meta_Integer, {
+					widgets = widgets.add(EZSlider(window, 392@20, item.name,
+						action:{ | val | item.value_(val.value); },
+						initVal: item.value, labelWidth:100, gap:0@0));
+
+					widgets[count].controlSpec.step_(1);
+
+					if(item.domain.min.notNil) {
+						widgets[count].controlSpec.minval_(item.domain.min);
+						widgets[count].controlSpec.maxval_(item.domain.max);
+					};
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != widgets[count].value) {
+							widgets[count].value_(item.value);
+						};
+					};
+				},
+				Meta_OSSIA_vec2f, {
+					widgets = widgets.add(EZRanger(window, 392@20, item.name,
+						action:{ | val | item.value_(val.value); },
+						initVal: item.value, labelWidth:100, gap:0@0));
+
+					if(item.domain.min.notNil) {
+						widgets[count].controlSpec.minval_(item.domain.min[0]);
+						widgets[count].controlSpec.maxval_(item.domain.max[1]);
+					};
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != widgets[count].value) {
+							widgets[count].value_(item.value);
+						};
+					};
+				},
+				Meta_OSSIA_vec3f, {
+					widgets = widgets.add([
+						EZNumber(window, 194@20, item.name,
+							action:{ | val | item.value_([val.value, item.value[1], item.value[2]]); },
+							initVal: item.value[0], labelWidth:100, gap:0@0),
+						EZNumber(window, 95@20,
+							action:{ | val | item.value_([item.value[0], val.value, item.value[2]]); },
+							initVal: item.value[1], gap:0@0),
+						EZNumber(window, 95@20,
+							action:{ | val | item.value_([item.value[0], item.value[1], val.value]); },
+							initVal: item.value[2], gap:0@0)
+					]);
+
+					if(item.domain.min.notNil) {
+						widgets[count][0].controlSpec.minval_(item.domain.min[0]);
+						widgets[count][0].controlSpec.maxval_(item.domain.max[0]);
+						widgets[count][1].controlSpec.minval_(item.domain.min[1]);
+						widgets[count][1].controlSpec.maxval_(item.domain.max[1]);
+						widgets[count][2].controlSpec.minval_(item.domain.min[2]);
+						widgets[count][2].controlSpec.maxval_(item.domain.max[2]);
+					};
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != [widgets[count][0].value, widgets[count][1].value, widgets[count][2].value]) {
+							widgets[count][0].value_(item.value[0]);
+							widgets[count][1].value_(item.value[1]);
+							widgets[count][2].value_(item.value[2]);
+						};
+					};
+				},
+				Meta_OSSIA_vec4f, {
+					widgets = widgets.add([
+						EZNumber(window, 170@20, item.name,
+							action:{ | val | item.value_([val.value, item.value[1], item.value[2], item.value[3]]); },
+							initVal: item.value[0], labelWidth:100, gap:0@0),
+						EZNumber(window, 70@20,
+							action:{ | val | item.value_([item.value[0], val.value, item.value[2], item.value[3]]); },
+							initVal: item.value[1], gap:0@0),
+						EZNumber(window, 70@20,
+							action:{ | val | item.value_([item.value[0], item.value[1], val.value, item.value[3]]); },
+							initVal: item.value[2], gap:0@0),
+						EZNumber(window, 70@20,
+							action:{ | val | item.value_([item.value[0], item.value[1], item.value[2], val.value]); },
+							initVal: item.value[3], gap:0@0)
+					]);
+
+					if(item.domain.min.notNil) {
+						widgets[count][0].controlSpec.minval_(item.domain.min[0]);
+						widgets[count][0].controlSpec.maxval_(item.domain.max[0]);
+						widgets[count][1].controlSpec.minval_(item.domain.min[1]);
+						widgets[count][1].controlSpec.maxval_(item.domain.max[1]);
+						widgets[count][2].controlSpec.minval_(item.domain.min[2]);
+						widgets[count][2].controlSpec.maxval_(item.domain.max[2]);
+						widgets[count][2].controlSpec.minval_(item.domain.min[3]);
+						widgets[count][2].controlSpec.maxval_(item.domain.max[3]);
+					};
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != [widgets[count][0].value, widgets[count][1].value, widgets[count][2].value,
+							widgets[count][3].value]) {
+							widgets[count][0].value_(item.value[0]);
+							widgets[count][1].value_(item.value[1]);
+							widgets[count][2].value_(item.value[2]);
+							widgets[count][3].value_(item.value[3]);
+						};
+					};
+				},
+				Meta_Boolean, {
+					StaticText(window, 100@20).string_(item.name).align_(\right);
+
+					widgets = widgets.add(Button(window, 288@20).states_([
+						["true", Color.black, Color.green()],
+						["false", Color.white, Color.red()]
+				]).action_({ | val | item.value_(val.value); }));
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != widgets[count].value) {
+							widgets[count].value_(item.value);
+						};
+					};
+				},
+				Meta_Impulse, {
+					StaticText(window, 100@20).string_(item.name).align_(\right);
+
+					widgets = widgets.add(Button(window, 288@20).states_([
+						["Pulse"]]).action_({ | val | item.value_(); }));
+				},
+				{
+					widgets = widgets.add(EZText(window, 392@20, item.name,
+						action:{ | val | item.value_(val.value); },
+						initVal: item.value, labelWidth:100, gap:0@0));
+
+					evGui[item.name.asSymbol] = {
+						if (item.value != widgets[count].value) {
+							widgets[count].value_(item.value);
+						};
+					};
+				};
+			);
+		});
+
+		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
+			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
+		};
+
+		if (skipJack.isNil) {
+			skipJack = SkipJack({
+				evGui.do(_.defer);
+			},
+			0.1,
+			evGui.size == 0,
+			name: this.name
+			);
+		};
+
+		window.onClose_({
+			params.do({ | item |
+				evGui.removeAt(item.name.asSymbol);
+			});
+		});
 	}
 
 	free {
@@ -98,23 +292,7 @@ OSSIA_Node {
 	// 	^res
 	// }
 	//
-	// tree { |with_attributes = false, parameters_only = false|
-	// 	var exp = this.explore(with_attributes, parameters_only);
 	//
-	// 	exp.do({|item|
-	// 		var str = "";
-	// 		item.do({|subitem|
-	// 			str = str + subitem;
-	// 		});
-	// 		str.postln;
-	// 	});
-	//
-	// }
-	//
-	// explore { |with_attributes = true, parameters_only = false|
-	// 	_OSSIA_NodeExplore
-	// 	^this.primitiveFailed
-	// }
 	//
 	// is_disabled {
 	// 	_OSSIA_NodeGetDisabled
@@ -217,7 +395,6 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	parameterCtor { |tp, dm, dv, bm, cl, rf|
-
 		var dom_slot, df_val­­­­­­;
 
 		switch(tp.class,
@@ -275,7 +452,6 @@ OSSIA_Parameter : OSSIA_Node {
 	//-------------------------------------------//
 
 	value_ { |v|
-
 		var handle_value = bounding_mode.bound(v);
 
 		if (access_mode != 'get') {
@@ -294,7 +470,6 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	valueQuiet { |v| // same as value_ without sending the updated value back to the device
-
 		var handle_value = bounding_mode.bound(v);
 
 		if (access_mode != 'set') {
@@ -312,7 +487,6 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	domain_ { |min, max, values|
-
 		var recall_mode = bounding_mode.md;
 
 		bounding_mode.free;
@@ -323,26 +497,20 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	bounding_mode_ { |mode|
-
 		bounding_mode.free;
-
 		bounding_mode = OSSIA_bounding_mode(mode, type, domain);
 	}
 
 	unit_ { |anOssiaUnit|
-
 		if (unit.notNil) { unit.free };
-
 		unit = anOssiaUnit;
 	}
 
 	access_mode_ { |aSymbol|
-
 		access_mode = aSymbol;
 	}
 
 	critical_ { |aBool|
-
 		critical = aBool;
 	}
 
@@ -404,7 +572,6 @@ OSSIA_Parameter : OSSIA_Node {
 	aar { ^[this.sym, this.value()] }
 
 	kr { | bind = true |
-
 		if(bind) {
 			if(not(m_has_callback)) { m_has_callback = true };
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
@@ -414,7 +581,6 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	ar { | bind = true |
-
 		if(bind) {
 			if(not(m_has_callback)) { m_has_callback = true };
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
@@ -424,13 +590,6 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	tr { ^this.sym.tr}
-
-	gui { |wondow, bounds, children_depth = 0|
-
-		if (wondow.isNil) {
-
-		};
-	}
 
 }
 

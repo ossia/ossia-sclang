@@ -55,9 +55,9 @@ OSSIA_domain
 
 	domainCtor { |min, max, values, type|
 
-		if (type.superclass == OSSIA_FVector) {
-			m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), values];
-		} {
+			if(type.superclass == OSSIA_FVector && (min.notNil && max.notNil)) {
+				m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), values];
+			} {
 			m_domain = [min, max, values];
 		};
 	}

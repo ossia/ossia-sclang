@@ -78,6 +78,7 @@ OSSIA_OSCQSProtocol
 
 	oscQuerryProtocolCtor {
 
+		netAddr = NetAddr();
 		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 		dictionary = IdentityDictionary.new;
@@ -116,9 +117,8 @@ OSSIA_OSCQSProtocol
 				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
 				postln(msg);
 				if (command["COMMAND"] == "START_OSC_STREAMING") {
-					netAddr = NetAddr(con.address,
-						command["DATA"]["LOCAL_SERVER_PORT"].asInt;
-					);
+					netAddr.hostname_(con.address);
+					netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInt);
 				};
 			};
 
