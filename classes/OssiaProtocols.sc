@@ -125,7 +125,7 @@ OSSIA_OSCQSProtocol
 			con.onOscMessageReceived = { |array|
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
-				dictionary.at(array[0]).valueQuiet(array[1]);
+				//dictionary.at(array[0]).valueQuiet(array[1]);
 			};
 		};
 
@@ -142,10 +142,10 @@ OSSIA_OSCQSProtocol
 			if (req.uri == "/") {
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
-					if (ws_server[ws_connect_count - 1].notNil) { ws_server[ws_connect_count - 1].writeText(host_info) };
+					if (ws_server[ws_connect_count - 1].notNil) { ws_server[0].writeText(host_info) };
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
-					ws_server[ws_connect_count - 1].writeText(json_tree);
+					ws_server[0].writeText(json_tree);
 				}
 			}
 		};
