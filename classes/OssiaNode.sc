@@ -70,6 +70,7 @@ OSSIA_Node {
 		var params = [], widgets = [];
 
 		children.add(this).do({ |item|
+			params.postln;
 			if(item.class == OSSIA_Parameter) {
 				params = params.add(item);
 			};
@@ -258,6 +259,8 @@ OSSIA_Node {
 			params.do({ | item |
 				evGui.removeAt(item.name.asSymbol);
 			});
+			params.free;
+			params.postln;
 		});
 	}
 
