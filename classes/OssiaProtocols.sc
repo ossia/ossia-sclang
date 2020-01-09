@@ -78,7 +78,7 @@ OSSIA_OSCQSProtocol
 	oscQuerryProtocolCtor {
 
 		netAddr = NetAddr();
-		ws_server = WebSocketServer(ws_port, name, "_oscjson._tcp");
+		ws_server = WebSocketServer(ws_port);
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 		dictionary = IdentityDictionary.new;
 		host_info = "{"
