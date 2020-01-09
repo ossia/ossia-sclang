@@ -66,7 +66,6 @@ OSSIA_OSCQSProtocol
 	var device;
 	var netAddr;
 	var ws_server;
-	var ws_connect_count = 0;
 	var zeroconf_service;
 	var host_info;
 	var json_tree;
@@ -110,7 +109,6 @@ OSSIA_OSCQSProtocol
 
 		ws_server.onNewConnection = { |con|
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
-			ws_connect_count = ws_connect_count + 1;
 
 			con.onTextMessageReceived = { |msg|
 				var command = msg.parseYAML;
@@ -140,14 +138,24 @@ OSSIA_OSCQSProtocol
 			};
 
 			if (req.uri == "/") {
+				var connection = ws_server[ws_server.numConnections()-1];
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
-					if (ws_server[ws_connect_count - 1].notNil) { ws_server[0].writeText(host_info) };
+					// note: this below is only temporary,
+					// until the score asio bug is resolved:
+					// obviously, we shouldn't reply to http requests via ws
+					if (connection.notNil) { connection.writeText(host_info);};
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
-					ws_server[0].writeText(json_tree);
+					// note: same for this
+					// req.replyJson(json_tree);
+					if (connection.notNil) { connection.writeText(json_tree) };
 				}
 			}
+		};
+
+		ws_server.onDisconnection = { |con|
+			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 
 		device.tree().flat.do(this.instantiateNode(_));
