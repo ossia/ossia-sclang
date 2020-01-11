@@ -21,8 +21,6 @@ OSSIA_Node {
 	var m_ptr_data;
 	var <window;
 
-	classvar skipJack, evGui;
-
 	addChild { |anOssiaNode|
 		children = children.add(anOssiaNode);
 	}
@@ -54,214 +52,34 @@ OSSIA_Node {
 		}
 	}
 
-	nodeExplore {
-		^[this, children.collect(_.nodeExplore)];
+	nodeExplore { ^[this, children.collect(_.nodeExplore)]; }
+
+	paramExplore { ^[children.collect(_.paramExplore)]; }
+
+	//-------------------------------------------//
+	//                    GUI                    //
+	//-------------------------------------------//
+
+	gui { |parent, childrenDepth = 1|
+		this.windowIfNeeded(parent);
+		this.childGui(childrenDepth);
 	}
 
-	paramExplore {
-		if (this.class == OSSIA_Parameter) {
-			^[this, children.collect(_.paramExplore)];
-		} {
-		^[children.collect(_.paramExplore)];
-		}
-	}
-
-	gui { |parent|
-		var params = [], widgets = [];
-
-		children.add(this).do({ |item|
-			params.postln;
-			if(item.class == OSSIA_Parameter) {
-				params = params.add(item);
-			};
-		});
-
-		if (parent.isNil) {
+	windowIfNeeded { |win|
+		if (win.isNil) {
 			window = Window(name).front; // resize later to the flow layout size
 			window.addFlowLayout;
 		} {
-			window = parent;
+			window = win;
 		};
+	}
 
-		if (evGui.isNil) {
-			evGui = ();
-		};
-
-		params.do({ |item, count|
-
-			switch(item.type.class,
-				Meta_Float, {
-					widgets = widgets.add(EZSlider(window, 392@20, item.name,
-						action:{ | val | item.value_(val.value); },
-						initVal: item.value, labelWidth:100, gap:0@0));
-
-					if(item.domain.min.notNil) {
-						widgets[count].controlSpec.minval_(item.domain.min);
-						widgets[count].controlSpec.maxval_(item.domain.max);
-					};
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != widgets[count].value) {
-							widgets[count].value_(item.value);
-						};
-					};
-				},
-				Meta_Integer, {
-					widgets = widgets.add(EZSlider(window, 392@20, item.name,
-						action:{ | val | item.value_(val.value); },
-						initVal: item.value, labelWidth:100, gap:0@0));
-
-					widgets[count].controlSpec.step_(1);
-
-					if(item.domain.min.notNil) {
-						widgets[count].controlSpec.minval_(item.domain.min);
-						widgets[count].controlSpec.maxval_(item.domain.max);
-					};
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != widgets[count].value) {
-							widgets[count].value_(item.value);
-						};
-					};
-				},
-				Meta_OSSIA_vec2f, {
-					widgets = widgets.add(EZRanger(window, 392@20, item.name,
-						action:{ | val | item.value_(val.value); },
-						initVal: item.value, labelWidth:100, gap:0@0));
-
-					if(item.domain.min.notNil) {
-						widgets[count].controlSpec.minval_(item.domain.min[0]);
-						widgets[count].controlSpec.maxval_(item.domain.max[1]);
-					};
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != widgets[count].value) {
-							widgets[count].value_(item.value);
-						};
-					};
-				},
-				Meta_OSSIA_vec3f, {
-					widgets = widgets.add([
-						EZNumber(window, 194@20, item.name,
-							action:{ | val | item.value_([val.value, item.value[1], item.value[2]]); },
-							initVal: item.value[0], labelWidth:100, gap:0@0),
-						EZNumber(window, 95@20,
-							action:{ | val | item.value_([item.value[0], val.value, item.value[2]]); },
-							initVal: item.value[1], gap:0@0),
-						EZNumber(window, 95@20,
-							action:{ | val | item.value_([item.value[0], item.value[1], val.value]); },
-							initVal: item.value[2], gap:0@0)
-					]);
-
-					if(item.domain.min.notNil) {
-						widgets[count][0].controlSpec.minval_(item.domain.min[0]);
-						widgets[count][0].controlSpec.maxval_(item.domain.max[0]);
-						widgets[count][1].controlSpec.minval_(item.domain.min[1]);
-						widgets[count][1].controlSpec.maxval_(item.domain.max[1]);
-						widgets[count][2].controlSpec.minval_(item.domain.min[2]);
-						widgets[count][2].controlSpec.maxval_(item.domain.max[2]);
-					};
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != [widgets[count][0].value, widgets[count][1].value, widgets[count][2].value]) {
-							widgets[count][0].value_(item.value[0]);
-							widgets[count][1].value_(item.value[1]);
-							widgets[count][2].value_(item.value[2]);
-						};
-					};
-				},
-				Meta_OSSIA_vec4f, {
-					widgets = widgets.add([
-						EZNumber(window, 170@20, item.name,
-							action:{ | val | item.value_([val.value, item.value[1], item.value[2], item.value[3]]); },
-							initVal: item.value[0], labelWidth:100, gap:0@0),
-						EZNumber(window, 70@20,
-							action:{ | val | item.value_([item.value[0], val.value, item.value[2], item.value[3]]); },
-							initVal: item.value[1], gap:0@0),
-						EZNumber(window, 70@20,
-							action:{ | val | item.value_([item.value[0], item.value[1], val.value, item.value[3]]); },
-							initVal: item.value[2], gap:0@0),
-						EZNumber(window, 70@20,
-							action:{ | val | item.value_([item.value[0], item.value[1], item.value[2], val.value]); },
-							initVal: item.value[3], gap:0@0)
-					]);
-
-					if(item.domain.min.notNil) {
-						widgets[count][0].controlSpec.minval_(item.domain.min[0]);
-						widgets[count][0].controlSpec.maxval_(item.domain.max[0]);
-						widgets[count][1].controlSpec.minval_(item.domain.min[1]);
-						widgets[count][1].controlSpec.maxval_(item.domain.max[1]);
-						widgets[count][2].controlSpec.minval_(item.domain.min[2]);
-						widgets[count][2].controlSpec.maxval_(item.domain.max[2]);
-						widgets[count][2].controlSpec.minval_(item.domain.min[3]);
-						widgets[count][2].controlSpec.maxval_(item.domain.max[3]);
-					};
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != [widgets[count][0].value, widgets[count][1].value, widgets[count][2].value,
-							widgets[count][3].value]) {
-							widgets[count][0].value_(item.value[0]);
-							widgets[count][1].value_(item.value[1]);
-							widgets[count][2].value_(item.value[2]);
-							widgets[count][3].value_(item.value[3]);
-						};
-					};
-				},
-				Meta_Boolean, {
-					StaticText(window, 100@20).string_(item.name).align_(\right);
-
-					widgets = widgets.add(Button(window, 288@20).states_([
-						["true", Color.black, Color.green()],
-						["false", Color.white, Color.red()]
-				]).action_({ | val | item.value_(val.value); }));
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != widgets[count].value) {
-							widgets[count].value_(item.value);
-						};
-					};
-				},
-				Meta_Impulse, {
-					StaticText(window, 100@20).string_(item.name).align_(\right);
-
-					widgets = widgets.add(Button(window, 288@20).states_([
-						["Pulse"]]).action_({ | val | item.value_(); }));
-				},
-				{
-					widgets = widgets.add(EZText(window, 392@20, item.name,
-						action:{ | val | item.value_(val.value); },
-						initVal: item.value, labelWidth:100, gap:0@0));
-
-					evGui[item.name.asSymbol] = {
-						if (item.value != widgets[count].value) {
-							widgets[count].value_(item.value);
-						};
-					};
-				};
-			);
-		});
-
-		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
-			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
-		};
-
-		if (skipJack.isNil) {
-			skipJack = SkipJack({
-				evGui.do(_.defer);
-			},
-			0.1,
-			evGui.size == 0,
-			name: this.name
-			);
-		};
-
-		window.onClose_({
-			params.do({ | item |
-				evGui.removeAt(item.name.asSymbol);
+	childGui { |childrenDepth|
+		if (childrenDepth > 0) {
+			children.do({ |item|
+				item.gui(window, childrenDepth - 1);
 			});
-			params.free;
-			params.postln;
-		});
+		};
 	}
 
 	free {
@@ -294,8 +112,6 @@ OSSIA_Node {
 	//
 	// 	^res
 	// }
-	//
-	//
 	//
 	// is_disabled {
 	// 	_OSSIA_NodeGetDisabled
@@ -379,6 +195,9 @@ OSSIA_Parameter : OSSIA_Node {
 	var <unit;
 	var <m_callback;
 	var m_has_callback;
+	var widgets;
+
+	classvar skipJack, evenGui;
 
 	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
@@ -442,6 +261,8 @@ OSSIA_Parameter : OSSIA_Node {
 		value = bounding_mode.bound(df_val);
 		device.instantiateParameter(this);
 	}
+
+	paramExplore { ^[this, children.collect(_.paramExplore)]; }
 
 	free {
 		children.collect(_.free);
@@ -592,7 +413,200 @@ OSSIA_Parameter : OSSIA_Node {
 		^this.sym.ar
 	}
 
-	tr { ^this.sym.tr}
+	tr { ^this.sym.tr }
+
+	//-------------------------------------------//
+	//                    GUI                    //
+	//-------------------------------------------//
+
+	gui { |parent, childrenDepth = 0|
+
+		this.windowIfNeeded(parent);
+
+		if (evenGui.isNil) {
+			evenGui = ();
+		};
+
+		if (skipJack.isNil) {
+			skipJack = SkipJack({
+				evenGui.do(_.defer);
+			},
+			0.1,
+			evenGui.size == 0,
+			name: this.name
+			);
+		};
+
+		this.addWidget();
+		this.childGui(childrenDepth);
+
+		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
+			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
+		};
+	}
+
+	addWidget { |childDepth|
+		var widgets;
+
+		switch(type.class,
+			Meta_Float, {
+				widgets = EZSlider(window, 392@20, name,
+					action:{ | val | this.value_(val.value); },
+					initVal: value, labelWidth:100, gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); });
+
+				if(domain.min.notNil) {
+					widgets.controlSpec.minval_(domain.min);
+					widgets.controlSpec.maxval_(domain.max);
+				};
+
+				evenGui[name.asSymbol] = {
+					if (value != widgets.value) {
+						widgets.value_(value);
+					};
+				};
+			},
+			Meta_Integer, {
+				widgets = EZSlider(window, 392@20, name,
+					action:{ | val | this.value_(val.value); },
+					initVal: value, labelWidth:100, gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); });
+
+				widgets.controlSpec.step_(1);
+
+				if(domain.min.notNil) {
+					widgets.controlSpec.minval_(domain.min);
+					widgets.controlSpec.maxval_(domain.max);
+				};
+
+				evenGui[name.asSymbol] = {
+					if (value != widgets.value) {
+						widgets.value_(value);
+					};
+				};
+			},
+			Meta_OSSIA_vec2f, {
+				widgets = EZRanger(window, 392@20, name,
+					action:{ | val | this.value_(val.value); },
+					initVal: value, labelWidth:100, gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); });
+
+				if(domain.min.notNil) {
+					widgets.controlSpec.minval_(domain.min[0]);
+					widgets.controlSpec.maxval_(domain.max[1]);
+				};
+
+				evenGui[name.asSymbol] = {
+					if (value != widgets.value) {
+						widgets.value_(value);
+					};
+				};
+			},
+			Meta_OSSIA_vec3f, {
+				widgets = [
+					EZNumber(window, 194@20, name,
+						action:{ | val | this.value_([val.value, value[1], value[2]]); },
+						initVal: value[0], labelWidth:100, gap:0@0),
+					EZNumber(window, 95@20,
+						action:{ | val | this.value_([value[0], val.value, value[2]]); },
+						initVal: value[1], gap:0@0),
+					EZNumber(window, 95@20,
+						action:{ | val | this.value_([value[0], value[1], val.value]); },
+						initVal: value[2], gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); })
+				];
+
+				if(domain.min.notNil) {
+					widgets[0].controlSpec.minval_(domain.min[0]);
+					widgets[0].controlSpec.maxval_(domain.max[0]);
+					widgets[1].controlSpec.minval_(domain.min[1]);
+					widgets[1].controlSpec.maxval_(domain.max[1]);
+					widgets[2].controlSpec.minval_(domain.min[2]);
+					widgets[2].controlSpec.maxval_(domain.max[2]);
+				};
+
+				evenGui[name.asSymbol] = {
+					if (value != [widgets[0].value, widgets[1].value, widgets[2].value]) {
+						widgets[0].value_(value[0]);
+						widgets[1].value_(value[1]);
+						widgets[2].value_(value[2]);
+					};
+				};
+			},
+			Meta_OSSIA_vec4f, {
+				widgets = [
+					EZNumber(window, 170@20, name,
+						action:{ | val | this.value_([val.value, value[1], value[2], value[3]]); },
+						initVal: value[0], labelWidth:100, gap:0@0),
+					EZNumber(window, 70@20,
+						action:{ | val | this.value_([value[0], val.value, value[2], value[3]]); },
+						initVal: value[1], gap:0@0),
+					EZNumber(window, 70@20,
+						action:{ | val | this.value_([value[0], value[1], val.value, value[3]]); },
+						initVal: value[2], gap:0@0),
+					EZNumber(window, 70@20,
+						action:{ | val | this.value_([value[0], value[1], value[2], val.value]); },
+						initVal: value[3], gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); })
+				];
+
+				if(domain.min.notNil) {
+					widgets[0].controlSpec.minval_(domain.min[0]);
+					widgets[0].controlSpec.maxval_(domain.max[0]);
+					widgets[1].controlSpec.minval_(domain.min[1]);
+					widgets[1].controlSpec.maxval_(domain.max[1]);
+					widgets[2].controlSpec.minval_(domain.min[2]);
+					widgets[2].controlSpec.maxval_(domain.max[2]);
+					widgets[2].controlSpec.minval_(domain.min[3]);
+					widgets[2].controlSpec.maxval_(domain.max[3]);
+				};
+
+				evenGui[name.asSymbol] = {
+					if (value != [widgets[0].value, widgets[1].value, widgets[2].value,
+						widgets[3].value]) {
+						widgets[0].value_(value[0]);
+						widgets[1].value_(value[1]);
+						widgets[2].value_(value[2]);
+						widgets[3].value_(value[3]);
+					};
+				};
+			},
+			Meta_Boolean, {
+				StaticText(window, 100@20).string_(this.name).align_(\right);
+
+				widgets = widgets.add(Button(window, 288@20).states_([
+					["true", Color.black, Color.green()],
+					["false", Color.white, Color.red()]
+				]).action_({ | val | this.value_(val.value); }).onClose_({
+					evenGui.removeAt(this.name.asSymbol); }));
+
+				evenGui[this.name.asSymbol] = {
+					if (this.value != widgets.value) {
+						widgets.value_(this.value);
+					};
+				};
+			},
+			Meta_Impulse, {
+				StaticText(window, 100@20).string_(name).align_(\right);
+
+				widgets = Button(window, 288@20).states_([
+					["Pulse"]]).action_({ | val | this.value_(); }).onClose_({
+					evenGui.removeAt(this.name.asSymbol); });
+			},
+			{
+				widgets = EZText(window, 392@20, this.name,
+					action:{ | val | this.value_(val.value); },
+					initVal: value, labelWidth:100, gap:0@0).onClose_({
+					evenGui.removeAt(this.name.asSymbol); });
+
+				evenGui[this.name.asSymbol] = {
+					if (value != widgets.value) {
+						widgets.value_(value);
+					};
+				};
+			};
+		);
+	}
 
 }
 
