@@ -87,6 +87,31 @@ OSSIA_vec2f : OSSIA_FVector
 	*asOssiaVec { |anArray|
 		^[anArray[0].asFloat, anArray[1].asFloat];
 	}
+
+	*ossiaDefaultValue { ^[0.0, 0.0]; }
+
+	*ossiaWidget { |anOssiaParameter|
+		var widgets;
+
+		widgets = EZRanger(anOssiaParameter.window, 392@20, anOssiaParameter.name,
+			action:{ | val | anOssiaParameter.value_(val.value); },
+			initVal: anOssiaParameter.value, labelWidth:100, gap:0@0).onClose_({
+			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+
+		if(anOssiaParameter.domain.min.notNil) {
+			widgets.controlSpec.minval_(anOssiaParameter.domain.min[0]);
+			widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+		};
+
+		anOssiaParameter.addToEvenGui_(
+			name.asSymbol,
+			{
+				if (anOssiaParameter.value != widgets.value) {
+					widgets.value_(anOssiaParameter.value);
+				};
+			};
+		);
+	}
 }
 
 OSSIA_vec3f : OSSIA_FVector
@@ -97,6 +122,59 @@ OSSIA_vec3f : OSSIA_FVector
 
 	*asOssiaVec { |anArray|
 		^[anArray[0].asFloat, anArray[1].asFloat,  anArray[2].asFloat];
+	}
+
+	*ossiaDefaultValue { ^[0.0, 0.0, 0.0]; }
+
+	*ossiaWidget { |anOssiaParameter|
+		var widgets;
+
+		widgets = [
+			EZNumber(anOssiaParameter.window, 170@20, anOssiaParameter.name,
+				action:{ | val | anOssiaParameter.value_([
+					val.value,
+					anOssiaParameter.value[1],
+					anOssiaParameter.value[2]
+				])},
+				initVal: anOssiaParameter.value[0], labelWidth:100, gap:0@0),
+			EZNumber(anOssiaParameter.window, 70@20,
+				action:{ | val | anOssiaParameter.value_([
+					anOssiaParameter.value[0],
+					val.value,
+					anOssiaParameter.value[2],
+					anOssiaParameter.value[3]
+				])},
+				initVal: anOssiaParameter.value[1], gap:0@0),
+			EZNumber(anOssiaParameter.window, 70@20,
+				action:{ | val | anOssiaParameter.value_([
+					anOssiaParameter.value[0],
+					anOssiaParameter.value[1],
+					anOssiaParameter.value[2],
+					val.value
+				])},
+				initVal: anOssiaParameter.value[2], gap:0@0).onClose_({
+				anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); })
+		];
+
+		if(anOssiaParameter.domain.min.notNil) {
+			widgets[0].controlSpec.minval_(anOssiaParameter.domain.min[0]);
+			widgets[0].controlSpec.maxval_(anOssiaParameter.domain.max[0]);
+			widgets[1].controlSpec.minval_(anOssiaParameter.domain.min[1]);
+			widgets[1].controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+			widgets[2].controlSpec.minval_(anOssiaParameter.domain.min[2]);
+			widgets[2].controlSpec.maxval_(anOssiaParameter.domain.max[2]);
+		};
+
+		anOssiaParameter.addToEvenGui_(
+			anOssiaParameter.name.asSymbol,
+			{
+				if (anOssiaParameter.value != [widgets[0].value, widgets[1].value, widgets[2].value]) {
+					widgets[0].value_(anOssiaParameter.value[0]);
+					widgets[1].value_(anOssiaParameter.value[1]);
+					widgets[2].value_(anOssiaParameter.value[2]);
+				};
+			};
+		);
 	}
 }
 
@@ -109,6 +187,73 @@ OSSIA_vec4f : OSSIA_FVector
 	*asOssiaVec { |anArray|
 		^[anArray[0].asFloat, anArray[1].asFloat,  anArray[2].asFloat,  anArray[3].asFloat];
 	}
+
+	*ossiaDefaultValue { ^[0.0, 0.0, 0.0, 0.0]; }
+
+	*ossiaWidget { |anOssiaParameter|
+		var widgets;
+
+		widgets = [
+			EZNumber(anOssiaParameter.window, 170@20, anOssiaParameter.name,
+				action:{ | val | anOssiaParameter.value_([
+					val.value,
+					anOssiaParameter.value[1],
+					anOssiaParameter.value[2],
+					anOssiaParameter.value[3]
+				])},
+				initVal: anOssiaParameter.value[0], labelWidth:100, gap:0@0),
+			EZNumber(anOssiaParameter.window, 70@20,
+				action:{ | val | anOssiaParameter.value_([
+					anOssiaParameter.value[0],
+					val.value,
+					anOssiaParameter.value[2],
+					anOssiaParameter.value[3]
+				])},
+				initVal: anOssiaParameter.value[1], gap:0@0),
+			EZNumber(anOssiaParameter.window, 70@20,
+				action:{ | val | anOssiaParameter.value_([
+					anOssiaParameter.value[0],
+					anOssiaParameter.value[1],
+					val.value,
+					anOssiaParameter.value[3]
+				])},
+				initVal: anOssiaParameter.value[2], gap:0@0),
+			EZNumber(anOssiaParameter.window, 70@20,
+				action:{ | val | anOssiaParameter.value_([
+					anOssiaParameter.value[0],
+					anOssiaParameter.value[1],
+					anOssiaParameter.value[2],
+					val.value
+				])},
+				initVal: anOssiaParameter.value[3], gap:0@0).onClose_({
+				anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); })
+		];
+
+		if(anOssiaParameter.domain.min.notNil) {
+			widgets[0].controlSpec.minval_(anOssiaParameter.domain.min[0]);
+			widgets[0].controlSpec.maxval_(anOssiaParameter.domain.max[0]);
+			widgets[1].controlSpec.minval_(anOssiaParameter.domain.min[1]);
+			widgets[1].controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+			widgets[2].controlSpec.minval_(anOssiaParameter.domain.min[2]);
+			widgets[2].controlSpec.maxval_(anOssiaParameter.domain.max[2]);
+			widgets[2].controlSpec.minval_(anOssiaParameter.domain.min[3]);
+			widgets[2].controlSpec.maxval_(anOssiaParameter.domain.max[3]);
+		};
+
+		anOssiaParameter.addToEvenGui_(
+			anOssiaParameter.name.asSymbol,
+			{
+				if (anOssiaParameter.value != [widgets[0].value, widgets[1].value, widgets[2].value,
+					widgets[3].value]) {
+					widgets[0].value_(anOssiaParameter.value[0]);
+					widgets[1].value_(anOssiaParameter.value[1]);
+					widgets[2].value_(anOssiaParameter.value[2]);
+					widgets[3].value_(anOssiaParameter.value[3]);
+				};
+			};
+		);
+	}
+
 }
 
 OSSIA_FVector {
@@ -134,6 +279,55 @@ OSSIA_FVector {
 	at {|i| ^am_val[i] }
 	put { |index, item| am_val[index] = item.asFloat }
 
+	*ossiaSendMsg {	|anOssiaParameter, addr|
+		addr.sendRaw(([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+	}
+
+	*ossiaBounds { |mode|
+		switch(mode,
+			'free', {
+				^{ |value, domain| this.asOssiaVec(value) };
+			},
+			'clip', {
+				^{ |value, domain| this.asOssiaVec(
+				value.collect({ |item, i|
+					item.clip(domain.min[i], domain.max[i]);
+					});
+				)};
+			},
+			'low', {
+				^{ |value, domain| this.asOssiaVec(
+					value.collect({ |item, i|
+						item.max(domain.min[i])};
+					);
+				)};
+			},
+			'high', {
+				^{ |value, domain| this.asOssiaVec(
+					value.collect({ |item, i|
+						item.min(domain.max[i]);
+					});
+				)};
+			},
+			'wrap', {
+				^{ |value, domain| this.asOssiaVec(
+					value.collect({ |item, i|
+						item.wrap(domain.min[i], domain.max[i]);
+					});
+				)};
+			},
+			'fold', {
+				^{ |value, domain| this.asOssiaVec(
+					value.collect({ |item, i|
+						item.fold(domain.min[i], domain.max[i]);
+					});
+				)};
+			}, {
+				^{ |value, domain| domain[2].do({ |item|
+					if (item == value) { this.asOssiaVec(value); }; });
+				};
+		});
+	}
 }
 
 OSSIA_access_mode {
@@ -146,253 +340,6 @@ OSSIA_bounding_mode {
 
 	classvar switch_tree, func_array;
 	var <mode, domain, type, handle_bounds;
-
-	*initClass {
-
-		func_array = [
-			// Integer (from index 0)
-			{ |value, domain, type| value.asInteger },
-			{ |value, domain, type| value.clip(domain.min, domain.max).asInteger },
-			{ |value, domain, type| value.max(domain.min).asInteger },
-			{ |value, domain, type| value.min(domain.max).asInteger },
-			{ |value, domain, type| value.wrap(domain.min, domain.max).asInteger },
-			{ |value, domain, type| value.fold(domain.min, domain.max).asInteger },
-			{ |value, domain, type| domain[2].do({ |item| if (item == value)
-				{ ^value.asInteger };
-			});
-			// Float (from index 7)
-			}, { |value, domain, type| value.asFloat },
-			{ |value, domain, type| value.clip(domain.min, domain.max).asFloat },
-			{ |value, domain, type| value.max(domain.min).asFloat },
-			{ |value, domain, type| value.min(domain.max).asFloat },
-			{ |value, domain, type| value.wrap(domain.min, domain.max).asFloat },
-			{ |value, domain, type| value.fold(domain.min, domain.max).asFloat },
-			{ |value, domain, type| domain[2].do({ |item| if (item == value)
-				{ ^value.asFloat };
-			});
-			// Boolean (index 14)
-			}, { |value, domain, type| value.asBoolean },
-			// Char (from index 15)
-			{ |value, domain, type| value.asAscii },
-			{ |value, domain, type| value.clip(domain.min, domain.max).asAscii },
-			{ |value, domain, type| value.max(domain.min).asAscii },
-			{ |value, domain, type| value.min(domain.max).asAscii },
-			{ |value, domain, type| domain[2].do({ |item| if (item == value)
-				{ ^value.asAscii };
-			});
-			// String (from index 20)
-			}, { |value, domain, type| domain[2].do({ |item|
-				if (item == value) { ^value.asString };
-			});
-			}, { |value, domain, type| value.asString },
-			// Array (from index 22)
-			{ |value, domain, type| value.asArray },
-			{ |value, domain, type| value.collect({ |item, i|
-				item.clip(domain.min[i], domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |item, i|
-				item.max(domain.min[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |item, i|
-				item.min(domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |item, i|
-				item.wrap(domain.min[i], domain.max[i]) }).asArray },
-			{ |value, domain, type| value.collect({ |item, i|
-				item.fold(domain.min[i], domain.max[i]) }).asArray },
-			{ |value, domain, type| domain[2].do({ |item| if (item == value)
-				{ ^value.asArray };
-			});
-			// VecNf (from index 29)
-			}, { |value, domain, type| type.asOssiaVec(value) },
-			{ |value, domain, type| type.asOssiaVec(
-				value.collect({ |item, i|
-					item.clip(domain.min[i], domain.max[i]) }) ) },
-			{ |value, domain, type| type.asOssiaVec(value.max(
-				value.collect({ |item, i|
-					item.max(domain.min[i]) }) ))
-			}, { |value, domain, type| type.asOssiaVec(value.max(
-				value.collect({ |item, i|
-					item.min(domain.max[i]) }) ))
-			}, { |value, domain, type| type.asOssiaVec(
-				value.collect({ |item, i|
-					item.wrap(domain.min[i], domain.max[i]) }) )
-			}, { |value, domain, type| type.asOssiaVec(
-				value.collect({ |item, i|
-					item.fold(domain.min[i], domain.max[i]) }) )
-			}, { |value, domain, type| domain[2].do({ |item| if (item == value)
-				{ ^type.asOssiaVec(value) };
-			});
-			}
-		];
-
-		switch_tree = { |mode, type, domain|
-			switch(type.class,
-				Meta_Integer, {
-					switch(mode,
-						'free', {
-							func_array[0];
-						},
-						'clip', {
-							func_array[1];
-						},
-						'low', {
-							func_array[2];
-						},
-						'high', {
-							func_array[3];
-						},
-						'wrap', {
-							func_array[4];
-						},
-						'fold', {
-							func_array[5];
-						}, {
-							func_array[6];
-					});
-				},
-				Meta_Float, {
-					switch(mode,
-						'free', {
-							func_array[7];
-						},
-						'clip', {
-							func_array[8];
-						},
-						'low', {
-							func_array[9];
-						},
-						'high', {
-							func_array[10];
-						},
-						'wrap', {
-							func_array[11];
-						},
-						'fold', {
-							func_array[12];
-						}, {
-							func_array[13];
-					});
-				},
-				Meta_Boolean, {
-					func_array[14];
-				},
-				Meta_Char, {
-					switch(mode,
-						'free', {
-							func_array[15];
-						},
-						'clip', {
-							func_array[16];
-						},
-						'low', {
-							func_array[17];
-						},
-						'high', {
-							func_array[18];
-						}, {
-							func_array[19];
-					});
-				},
-				Meta_String, {
-					if (mode == 'values') {
-						func_array[20];
-					} {
-						func_array[21];
-					};
-				},
-				Meta_Array, {
-					switch(mode,
-						'free', {
-							func_array[22];
-						},
-						'clip', {
-							func_array[23];
-						},
-						'low', {
-							func_array[24];
-						},
-						'high', {
-							func_array[25];
-						},
-						'wrap', {
-							func_array[26];
-						},
-						'fold', {
-							func_array[27];
-						}, {
-							func_array[28];
-					});
-				},
-				Meta_OSSIA_vec2f, {
-					switch(mode,
-						'free', {
-							func_array[29];
-						},
-						'clip', {
-							func_array[30];
-						},
-						'low', {
-							func_array[31];
-						},
-						'high', {
-							func_array[32];
-						},
-						'wrap', {
-							func_array[33];
-						},
-						'fold', {
-							func_array[34];
-						}, {
-							func_array[35];
-					});
-				},
-				Meta_OSSIA_vec3f, {
-					switch(mode,
-						'free', {
-							func_array[29];
-						},
-						'clip', {
-							func_array[30];
-						},
-						'low', {
-							func_array[31];
-						},
-						'high', {
-							func_array[32];
-						},
-						'wrap', {
-							func_array[33];
-						},
-						'fold', {
-							func_array[34];
-						}, {
-							func_array[35];
-					});
-				},
-				Meta_OSSIA_vec4f, {
-					switch(mode,
-						'free', {
-							func_array[29];
-						},
-						'clip', {
-							func_array[30];
-						},
-						'low', {
-							func_array[31];
-						},
-						'high', {
-							func_array[32];
-						},
-						'wrap', {
-							func_array[33];
-						},
-						'fold', {
-							func_array[34];
-						}, {
-							func_array[35];
-					});
-				};
-			);
-		};
-	}
 
 	*new { |mode, anOssiaType, anOssiaDomain|
 
@@ -411,12 +358,11 @@ OSSIA_bounding_mode {
 
 		type = tp;
 
-		handle_bounds = switch_tree.value(mode, type, domain);
-
+		handle_bounds = type.ossiaBounds(mode);
 	}
 
 	bound { |value|
-		^handle_bounds.value(value, domain, type);
+		^handle_bounds.value(value, domain);
 	}
 
 	*free { ^'free' }

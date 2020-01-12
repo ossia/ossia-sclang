@@ -28,8 +28,7 @@ OSSIA_OSCProtocol
 	}
 
 	push { |anOssiaParameter|
-		netAddr.sendRaw(
-			([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+		anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 	}
 
 	instantiateParameter { |anOssiaParameter|
