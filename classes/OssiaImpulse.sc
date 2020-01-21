@@ -14,6 +14,10 @@
 
 	*ossiaDefaultValue { ^nil; }
 
+	*ossiaNaNFilter { |newVal, oldval|
+		^newVal;
+	}
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 

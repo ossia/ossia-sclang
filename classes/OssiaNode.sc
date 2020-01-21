@@ -264,7 +264,7 @@ OSSIA_Parameter : OSSIA_Node {
 	//-------------------------------------------//
 
 	value_ { |v|
-		var handle_value = bounding_mode.bound(v, domain);
+		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value), domain);
 
 		if (access_mode != 'get') {
 
@@ -282,7 +282,7 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	valueQuiet { |v| // same as value_ without sending the updated value back to the device
-		var handle_value = bounding_mode.bound(v, domain);
+		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value), domain);
 
 		if (access_mode != 'set') {
 
@@ -304,7 +304,7 @@ OSSIA_Parameter : OSSIA_Node {
 		bounding_mode.free;
 		domain.free;
 
-		domain = OSSIA_domain(max, max, values);
+		domain = OSSIA_domain(max, max, values, type);
 		bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
 	}
 

@@ -17,6 +17,10 @@
 		^{ |value, domain| value.asBoolean };
 	}
 
+	*ossiaNaNFilter { |newVal, oldval|
+		^newVal;
+	}
+
 	*ossiaDefaultValue { ^false; }
 
 	*ossiaWidget { |anOssiaParameter|

@@ -32,13 +32,17 @@
 			'fold', {
 				^{ |value, domain, type| value.fold(domain.min, domain.max).asAscii }
 			}, {
-				^{ |value, domain, type| domain[2].do({ |item| if (item == value)
-					{ ^value.asAscii }; });
+				^{ |value, domain, type| domain[2].detect({ |item|
+					item == value.asAscii });
 				};
 		});
 	}
 
 	*ossiaDefaultValue { ^$ ; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		^newVal;
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;

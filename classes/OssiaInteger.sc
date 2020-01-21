@@ -32,10 +32,14 @@
 			'fold', {
 				^{ |value, domain| value.fold(domain.min, domain.max).asInteger }
 			}, {
-				^{ |value, domain| domain[2].do({ |item| if (item == value)
-					{ value.asInteger }; });
+				^{ |value, domain| domain[2].detect({ |item|
+					item == value.asInteger });
 				};
 		});
+	}
+
+	*ossiaNaNFilter { |newVal, oldval|
+		if (newVal.isNaN) { oldval } { newVal };
 	}
 
 	*ossiaDefaultValue { ^0; }

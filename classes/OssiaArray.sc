@@ -37,13 +37,17 @@
 				^{ |value, domain| value.collect({ |item, i|
 				item.fold(domain.min[i], domain.max[i]) }).asArray };
 			}, {
-				^{ |value, domain| domain[2].do({ |item| if (item == value)
-					{ ^value.asArray }; });
+				^{ |value, domain| domain[2].detect({ |item|
+					item == value.asArray });
 				};
 		});
 	}
 
 	*ossiaDefaultValue { ^[]; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		^newVal;
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;

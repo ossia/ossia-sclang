@@ -15,7 +15,7 @@
 	*ossiaBounds { |mode|
 		switch(mode,
 			'free', {
-				^{ |value, domain| value.asFloat };
+				^{ |value, domain| value.asFloat.class.postln };
 			},
 			'clip', {
 				^{ |value, domain| value.clip(domain.min, domain.max).asFloat };
@@ -32,13 +32,17 @@
 			'fold', {
 				^{ |value, domain| value.fold(domain.min, domain.max).asFloat };
 			}, {
-				^{ |value, domain| domain[2].do({ |item| if (item == value)
-					{ value.asFloat }; });
+				^{ |value, domain| domain[2].detect({ |item|
+					item == value.asFloat });
 				};
 		});
 	}
 
 	*ossiaDefaultValue { ^0.0; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		if (newVal.isNaN) { oldval } { newVal };
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;

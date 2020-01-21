@@ -14,8 +14,8 @@
 
 	*ossiaBounds { |mode|
 		if (mode == 'values') {
-			^{ |value, domain| domain[2].do({ |item|
-				if (item == value) { ^value.asString }; });
+			^{ |value, domain| domain[2].detect({ |item|
+				item == value.asString });
 			};
 		} {
 			^{ |value, domain| value.asString };
@@ -23,6 +23,10 @@
 	}
 
 	*ossiaDefaultValue { ^""; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		^newVal;
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;

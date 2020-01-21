@@ -90,6 +90,11 @@ OSSIA_vec2f : OSSIA_FVector
 
 	*ossiaDefaultValue { ^[0.0, 0.0]; }
 
+	*ossiaNaNFilter { |newVal, oldval|
+		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
+			if (newVal[1].isNaN) { oldval[1] } { newVal[1] } ];
+	}
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 
@@ -125,6 +130,12 @@ OSSIA_vec3f : OSSIA_FVector
 	}
 
 	*ossiaDefaultValue { ^[0.0, 0.0, 0.0]; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
+			if (newVal[1].isNaN) { oldval[1] } { newVal[1] },
+			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },];
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
@@ -189,6 +200,13 @@ OSSIA_vec4f : OSSIA_FVector
 	}
 
 	*ossiaDefaultValue { ^[0.0, 0.0, 0.0, 0.0]; }
+
+	*ossiaNaNFilter { |newVal, oldval|
+		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
+			if (newVal[1].isNaN) { oldval[1] } { newVal[1] },
+			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },
+			if (newVal[3].isNaN) { oldval[3] } { newVal[3] } ];
+	}
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
@@ -323,8 +341,8 @@ OSSIA_FVector {
 					});
 				)};
 			}, {
-				^{ |value, domain| domain[2].do({ |item|
-					if (item == value) { this.asOssiaVec(value); }; });
+				^{ |value, domain| domain[2].detect({ |item|
+					item == this.asOssiaVec(value) });
 				};
 		});
 	}
