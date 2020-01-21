@@ -39,7 +39,7 @@
 	}
 
 	*ossiaNaNFilter { |newVal, oldval|
-		if (newVal.isNaN) { oldval } { newVal };
+		if (newVal.isNaN) { ^oldval } { ^newVal };
 	}
 
 	*ossiaDefaultValue { ^0; }

@@ -15,7 +15,7 @@
 	*ossiaBounds { |mode|
 		switch(mode,
 			'free', {
-				^{ |value, domain| value.asFloat.class.postln };
+				^{ |value, domain| value.asFloat };
 			},
 			'clip', {
 				^{ |value, domain| value.clip(domain.min, domain.max).asFloat };
@@ -41,7 +41,7 @@
 	*ossiaDefaultValue { ^0.0; }
 
 	*ossiaNaNFilter { |newVal, oldval|
-		if (newVal.isNaN) { oldval } { newVal };
+		if (newVal.isNaN) { ^oldval } { ^newVal };
 	}
 
 	*ossiaWidget { |anOssiaParameter|
