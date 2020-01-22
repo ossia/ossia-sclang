@@ -222,13 +222,13 @@ OSSIA_Tree
 			ossiaNodes.do({ |item, count|
 				json = json
 				++ if (count == 0) {"{"} {","}
-				++ this.fmt(item)
+				++ item.json
 			});
 
 			json = json ++ "}";
 
 		} {
-			json = json ++ this.fmt(ossiaNodes);
+			json = json ++ ossiaNodes.json;
 		};
 
 		^json;

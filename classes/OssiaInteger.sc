@@ -42,6 +42,8 @@
 		if (newVal.isNaN) { ^oldval } { ^newVal };
 	}
 
+	*ossiaJson { ^"\"i\""; }
+
 	*ossiaDefaultValue { ^0; }
 
 	*ossiaWidget { |anOssiaParameter|

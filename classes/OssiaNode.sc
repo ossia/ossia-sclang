@@ -88,6 +88,21 @@ OSSIA_Node {
 		^super.free;
 	}
 
+	json {
+		^"\""++ name ++"\":"
+		++"{\"FULL_PATH\":\""++ path ++"\""
+		++ this.jsonParams
+		++ if (description.notNil) {
+			",\"DESCRIPTION\":\""++ description ++"\""
+		} { "" }
+		++ if (children.isEmpty.not) {
+			",\"CONTENTS\":"++ OSSIA_Tree.stringify(children)
+		} { "" }
+		++"}"
+	}
+
+	jsonParams { ^""; }
+
 	//-------------------------------------------//
 	//     PRIMITIVE CALLS & METHODS (TOREDO)    //
 	//-------------------------------------------//
@@ -226,12 +241,14 @@ OSSIA_Parameter : OSSIA_Node {
 		);
 
 		if (dm.isNil) {
-			dom_slot = [nil, nil];
+			dom_slot = [nil, nil, nil];
 		} {
-			dom_slot = dm;
+			if (dm.size != 3) {
+				dom_slot = dm.add(nil);
+			} { dom_slot = dm; };
 		};
 
-		domain = OSSIA_domain(dom_slot[0], dom_slot[1], type:type);
+		domain = OSSIA_domain(dom_slot[0], dom_slot[1], dom_slot[2], type);
 
 		if (dv.isNil) {
 			df_val = type.ossiaDefaultValue();
@@ -324,6 +341,37 @@ OSSIA_Parameter : OSSIA_Node {
 
 	critical_ { |aBool|
 		critical = aBool;
+	}
+
+	jsonParams {
+		^",\"TYPE\":"++ type.ossiaJson
+		++ if (value.notNil) {
+			",\"VALUE\":"
+			++ if (type == String) {
+				"\""++ value ++"\""
+			} { value }
+		} { "" }
+		++ if (domain.min.notNil && domain.max.notNil) {
+			",\"RANGE\":"++
+			if (domain.min.isArray) {
+				domain.min.collect({ |item, index|
+					"{\"MIN\":"++ domain.min[index] ++",\"MAX\":"++ domain.max[index] ++"}"});
+			} {
+				"[{\"MIN\":"++ domain.min ++",\"MAX\":"++ domain.max ++"}]"
+			}
+		} { "" }
+		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
+		++ if (domain.values.notNil) {
+				",\"VALUES\":"
+			++ if (type == String) {
+				domain.values.collect({ |item| "\""++ item ++"\""})
+			} { domain.values }
+		} { "" }
+		++ if (unit.notNil) {
+			",\"UNIT\":[\""++ unit ++"\"]"
+		} { "" }
+		++",\"ACCESS\":\""++ access_mode ++"\""
+		++",\"CRITICAL\":"++ critical
 	}
 
 	// priority {

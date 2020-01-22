@@ -21,6 +21,8 @@
 		^newVal;
 	}
 
+	*ossiaJson { ^"\"F\""; }
+
 	*ossiaDefaultValue { ^false; }
 
 	*ossiaWidget { |anOssiaParameter|

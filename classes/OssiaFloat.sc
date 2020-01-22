@@ -44,6 +44,8 @@
 		if (newVal.isNaN) { ^oldval } { ^newVal };
 	}
 
+	*ossiaJson { ^"\"f\""; }
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 

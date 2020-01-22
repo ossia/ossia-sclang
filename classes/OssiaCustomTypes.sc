@@ -95,6 +95,8 @@ OSSIA_vec2f : OSSIA_FVector
 			if (newVal[1].isNaN) { oldval[1] } { newVal[1] } ];
 	}
 
+	*ossiaJson { ^"\"ff\"" }
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 
@@ -136,6 +138,8 @@ OSSIA_vec3f : OSSIA_FVector
 			if (newVal[1].isNaN) { oldval[1] } { newVal[1] },
 			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },];
 	}
+
+	*ossiaJson { ^"\"fff\"" }
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
@@ -207,6 +211,8 @@ OSSIA_vec4f : OSSIA_FVector
 			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },
 			if (newVal[3].isNaN) { oldval[3] } { newVal[3] } ];
 	}
+
+	*ossiaJson { ^"\"ffff\"" }
 
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;

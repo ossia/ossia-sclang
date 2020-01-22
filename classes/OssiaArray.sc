@@ -49,6 +49,8 @@
 		^newVal;
 	}
 
+	*ossiaJson { ^"\"l\"" }
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 

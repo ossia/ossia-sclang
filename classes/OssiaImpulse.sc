@@ -18,6 +18,8 @@
 		^newVal;
 	}
 
+	*ossiaJson { ^"\"I\""; }
+
 	*ossiaWidget { |anOssiaParameter|
 		var widgets;
 
