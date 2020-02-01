@@ -55,14 +55,16 @@ OSSIA_domain
 
 	domainCtor { |min, max, values, type|
 
-			if(type.superclass == OSSIA_FVector && (min.notNil && max.notNil)) {
-				m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), values];
-			} {
-			m_domain = [min, max, values];
+		if(type.superclass == OSSIA_FVector && (min.notNil && max.notNil)) {
+			m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), []];
+		} {
+			m_domain = [min, max, []];
 		};
+
+		this.values_(values);
 	}
 
-	at {|i| ^m_domain[i] }
+	at { |i| ^m_domain[i] }
 	put { |index, item| m_domain[index] = item }
 
 	min      { ^m_domain[0] }
@@ -75,6 +77,38 @@ OSSIA_domain
 			Error("values argument should be an array").throw;
 		};
 		m_domain[2] = anArray;
+	}
+
+	json {
+/*		var range = if (this.min.notNil) {
+		if (this.min.isArray) {
+			this.min.collect({ |item, index|
+				if (this.min[index].notNil) { "{\"MIN\":"++ this.min[index] } { "" }
+				++ if (this.max[index].notNil) { ",\"MAX\":"++ this.max[index] } { "" };
+			});
+		} {
+			"[{"
+			++ if (this.min.notNil) { "\"MIN\":"++ this.min } { "" }
+			++ if (this.max.notNil) { ",\"MAX\":"++ this.max } { "" }
+		};
+
+	++ if (this.values.size > 0) {
+		",\"VALUES\":"
+		++ if (this.values[index].class == String) {
+			this.values[index].collect({ |item| "\""++ item ++"\""})
+		} { this.values[index] };
+			++"}";
+
+			++ if (this.values.size > 0) {
+				"\"VALUES\":"
+				++ if (this.values.class == String) {
+					this.values.collect({ |item| "\""++ item ++"\""})
+				} { this.values }
+			} { "" } ++"}]";
+
+		if (range != "") { range = ",\"RANGE\":"++ range; };
+
+		^range;*/
 	}
 }
 

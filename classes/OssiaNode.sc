@@ -241,10 +241,10 @@ OSSIA_Parameter : OSSIA_Node {
 		);
 
 		if (dm.isNil) {
-			dom_slot = [nil, nil, nil];
+			dom_slot = [nil, nil, []];
 		} {
-			if (dm.size != 3) {
-				dom_slot = dm.add(nil);
+			if (dm.size == 2) {
+				dom_slot = dm.add([]);
 			} { dom_slot = dm; };
 		};
 
@@ -351,22 +351,8 @@ OSSIA_Parameter : OSSIA_Node {
 				"\""++ value ++"\""
 			} { value }
 		} { "" }
-		++ if (domain.min.notNil && domain.max.notNil) {
-			",\"RANGE\":"++
-			if (domain.min.isArray) {
-				domain.min.collect({ |item, index|
-					"{\"MIN\":"++ domain.min[index] ++",\"MAX\":"++ domain.max[index] ++"}"});
-			} {
-				"[{\"MIN\":"++ domain.min ++",\"MAX\":"++ domain.max ++"}]"
-			}
-		} { "" }
+		++ domain.json
 		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
-		++ if (domain.values.notNil) {
-				",\"VALUES\":"
-			++ if (type == String) {
-				domain.values.collect({ |item| "\""++ item ++"\""})
-			} { domain.values }
-		} { "" }
 		++ if (unit.notNil) {
 			",\"UNIT\":[\""++ unit ++"\"]"
 		} { "" }
