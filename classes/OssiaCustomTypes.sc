@@ -46,17 +46,17 @@ OSSIA_domain
 
 	*new { |min, max, values, type|
 
-		if((not(values.class == Array)) && (values.notNil)) {
+		if(not(values.class == Array)) {
 			Error("values argument should be an array").throw;
 		};
 
 		^super.new.domainCtor(min, max, values, type);
 	}
 
-	domainCtor { |min, max, values, type|
+	domainCtor { |min, max, values, tp|
 
-		if(type.superclass == OSSIA_FVector && (min.notNil && max.notNil)) {
-			m_domain = [type.asOssiaVec(min), type.asOssiaVec(max), []];
+		if(tp.superclass == OSSIA_FVector && (min.notNil && max.notNil)) {
+			m_domain = [tp.asOssiaVec(min), tp.asOssiaVec(max), []];
 		} {
 			m_domain = [min, max, []];
 		};
@@ -79,36 +79,62 @@ OSSIA_domain
 		m_domain[2] = anArray;
 	}
 
-	json {
-/*		var range = if (this.min.notNil) {
-		if (this.min.isArray) {
-			this.min.collect({ |item, index|
-				if (this.min[index].notNil) { "{\"MIN\":"++ this.min[index] } { "" }
-				++ if (this.max[index].notNil) { ",\"MAX\":"++ this.max[index] } { "" };
+	json { | type |
+		var range = "";
+
+		if (type.isArray && type.isString.not) {
+			type.do({ |item, index|
+				if (this.values.size > 0) {
+					if (this.values[index].size != type.size) {
+						Error("values aray should be the same size as the parameter type").throw;
+					};
+					if(range == "") { range = range ++"{" } { range = range ++",{" };
+					range = range ++"\"VALS\":"
+					++ if (type.class == String) {
+						this.values[index].collect({ |item| "\""++ item ++"\""});
+					} { this.values[index] };
+
+				} {
+					if (this.min.notNil) {
+						if (range == "") { range = range ++"{" } { range = range ++",{" };
+						range = range ++"\"MIN\":"++ this.min[index];
+					};
+
+					if (this.max.notNil) {
+						if (range == "") { range = range ++"{" } { range = range ++"," };
+						range = range ++"\"MAX\":"++ this.max[index];
+					};
+				};
+
+				if (range != "") { range = range ++"}"; };
+
 			});
 		} {
-			"[{"
-			++ if (this.min.notNil) { "\"MIN\":"++ this.min } { "" }
-			++ if (this.max.notNil) { ",\"MAX\":"++ this.max } { "" }
+			if (this.values.size > 0) {
+				range = "{\"VALS\":"
+				++ if (type.class == String) {
+					this.values.collect({ |item| "\""++ item ++"\""});
+				} { this.values };
+
+			} {
+				if(this.min.notNil) {
+					if(range == "") { range = "{" };
+					range = range ++"\"MIN\":"++ this.min;
+				};
+
+				if (this.max.notNil) {
+					if(range == "") { range = range ++"{" } { range = range ++"," };
+					range = range ++"\"MAX\":"++ this.max;
+				};
+			};
+
+			if (range != "") { range = range ++"}"; };
+
 		};
 
-	++ if (this.values.size > 0) {
-		",\"VALUES\":"
-		++ if (this.values[index].class == String) {
-			this.values[index].collect({ |item| "\""++ item ++"\""})
-		} { this.values[index] };
-			++"}";
+		if (range != "") { range = ",\"RANGE\":["++ range ++"]"; };
 
-			++ if (this.values.size > 0) {
-				"\"VALUES\":"
-				++ if (this.values.class == String) {
-					this.values.collect({ |item| "\""++ item ++"\""})
-				} { this.values }
-			} { "" } ++"}]";
-
-		if (range != "") { range = ",\"RANGE\":"++ range; };
-
-		^range;*/
+		^range;
 	}
 }
 
@@ -408,7 +434,7 @@ OSSIA_bounding_mode {
 
 		domain = dn;
 
-		if (domain.values.notNil) {
+		if (domain.values.size != 0) {
 			mode = 'values';
 		} {
 			mode = bm;

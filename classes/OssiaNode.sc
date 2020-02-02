@@ -242,11 +242,9 @@ OSSIA_Parameter : OSSIA_Node {
 
 		if (dm.isNil) {
 			dom_slot = [nil, nil, []];
-		} {
-			if (dm.size == 2) {
-				dom_slot = dm.add([]);
-			} { dom_slot = dm; };
-		};
+		} { dom_slot = dm; };
+
+		if (dom_slot.size != 3) { dom_slot = dom_slot.add([]); };
 
 		domain = OSSIA_domain(dom_slot[0], dom_slot[1], dom_slot[2], type);
 
@@ -263,7 +261,7 @@ OSSIA_Parameter : OSSIA_Node {
 		access_mode = 'bi';
 		m_has_callback = false;
 
-		value = bounding_mode.bound(df_val, domain);
+		value = df_val;
 		device.instantiateParameter(this);
 	}
 
@@ -345,13 +343,11 @@ OSSIA_Parameter : OSSIA_Node {
 
 	jsonParams {
 		^",\"TYPE\":"++ type.ossiaJson
-		++ if (value.notNil) {
-			",\"VALUE\":"
-			++ if (type == String) {
-				"\""++ value ++"\""
-			} { value }
-		} { "" }
-		++ domain.json
+		++",\"VALUE\":"
+		++ if (type == String) {
+			"\""++ value ++"\""
+		} { value }
+		++ domain.json(type.ossiaDefaultValue)
 		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
 		++ if (unit.notNil) {
 			",\"UNIT\":[\""++ unit ++"\"]"
