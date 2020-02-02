@@ -415,9 +415,9 @@ OSSIA_FVector {
 }
 
 OSSIA_access_mode {
-	*bi { ^'bi' }
-	*get { ^'get' }
-	*set { ^'set' }
+	*get { ^1 }
+	*set { ^2 }
+	*bi { ^3 }
 }
 
 OSSIA_bounding_mode {
