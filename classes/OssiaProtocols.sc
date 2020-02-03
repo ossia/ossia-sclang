@@ -122,7 +122,7 @@ OSSIA_OSCQSProtocol
 			con.onOscMessageReceived = { |array|
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
-				//dictionary.at(array[0]).valueQuiet(array[1]);
+				dictionary.at(array[0]).valueQuiet(array[1]);
 			};
 		};
 
@@ -172,8 +172,6 @@ OSSIA_OSCQSProtocol
 
 	instantiateNode { |anOssiaNode|
 
-		dictionary.put(anOssiaNode.path, anOssiaNode);
-
 		if(anOssiaNode.class == OSSIA_Parameter) {
 			this.instantiateParameter(anOssiaNode);
 		};
@@ -181,7 +179,11 @@ OSSIA_OSCQSProtocol
 
 	instantiateParameter { |anOssiaParameter|
 
-		if (anOssiaParameter.critical.not) {
+		if (anOssiaParameter.critical) {
+
+			dictionary.put(anOssiaParameter.path, anOssiaParameter);
+
+		} {
 			var path = anOssiaParameter.path;
 
 			OSCFunc(

@@ -350,7 +350,10 @@ OSSIA_Parameter : OSSIA_Node {
 		++ domain.json(type.ossiaDefaultValue)
 		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
 		++ if (unit.notNil) {
-			",\"UNIT\":[\""++ unit ++"\"]"
+			",\"UNIT\":[\""++ unit.string ++"\"]"
+			++ if (unit.extended_types.notNil) {
+				",\"EXTENDED_TYPE\":"++ unit.extended_types
+			} { "" }
 		} { "" }
 		++",\"ACCESS\":\""++ access_mode ++"\""
 		++",\"CRITICAL\":"++ critical
