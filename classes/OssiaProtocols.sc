@@ -68,7 +68,8 @@ OSSIA_OSCQSProtocol
 	var zeroconf_service;
 	var host_info;
 	var json_tree;
-	var dictionary;
+	var <dictionary;
+	var connection;
 
 	*new { |name, osc_port, ws_port, device|
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
@@ -122,7 +123,7 @@ OSSIA_OSCQSProtocol
 			con.onOscMessageReceived = { |array|
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
-				dictionary.at(array[0]).valueQuiet(array[1]);
+				dictionary.at(array[0].asSymbol).valueQuiet(array[1]);
 			};
 		};
 
@@ -137,7 +138,7 @@ OSSIA_OSCQSProtocol
 			};
 
 			if (req.uri == "/") {
-				var connection = ws_server[ws_server.numConnections()-1];
+				connection = ws_server[ws_server.numConnections()-1];
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
 					// note: this below is only temporary,
@@ -157,23 +158,16 @@ OSSIA_OSCQSProtocol
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 
-		device.tree().flat.do(this.instantiateNode(_));
+		device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
 	}
 
 	push { |anOssiaParameter|
 
 		if (anOssiaParameter.critical) {
-
+			connection.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
 		} {
 			netAddr.sendRaw(
 				([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
-		};
-	}
-
-	instantiateNode { |anOssiaNode|
-
-		if(anOssiaNode.class == OSSIA_Parameter) {
-			this.instantiateParameter(anOssiaNode);
 		};
 	}
 
@@ -181,7 +175,7 @@ OSSIA_OSCQSProtocol
 
 		if (anOssiaParameter.critical) {
 
-			dictionary.put(anOssiaParameter.path, anOssiaParameter);
+			dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
 
 		} {
 			var path = anOssiaParameter.path;
