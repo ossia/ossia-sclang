@@ -158,26 +158,87 @@ OSSIA_vec2f : OSSIA_FVector
 	*ossiaJson { ^"\"ff\"" }
 
 	*ossiaWidget { |anOssiaParameter|
-		var widgets;
+		var widgets, isCartesian = false, xLim = [0, 1], yLim = [0, 1];
 
-		widgets = EZRanger(anOssiaParameter.window, 392@20, anOssiaParameter.name,
-			action:{ | val | anOssiaParameter.value_(val.value); },
-			initVal: anOssiaParameter.value, labelWidth:100, gap:0@0).onClose_({
-			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
-
-		if(anOssiaParameter.domain.min.notNil) {
-			widgets.controlSpec.minval_(anOssiaParameter.domain.min[0]);
-			widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+		if(anOssiaParameter.unit.notNil) {
+			if(anOssiaParameter.unit.string == "position.cart2D") { isCartesian = true };
 		};
 
-		anOssiaParameter.addToEvenGui_(
-			name.asSymbol,
-			{
-				if (anOssiaParameter.value != widgets.value) {
-					widgets.value_(anOssiaParameter.value);
-				};
+		if(isCartesian) {
+			widgets = [
+				EZNumber(anOssiaParameter.window, 244@20, anOssiaParameter.name,
+					action:{ | val | anOssiaParameter.value_([
+						val.value,
+						anOssiaParameter.value[1]
+					])},
+					initVal: anOssiaParameter.value[0], labelWidth:100, gap:0@0),
+				EZNumber(anOssiaParameter.window, 144@20,
+					action:{ | val | anOssiaParameter.value_([
+						anOssiaParameter.value[0],
+						val.value
+					])},
+					initVal: anOssiaParameter.value[1], gap:0@0)
+			];
+
+			if(anOssiaParameter.domain.min.notNil) {
+				widgets[0].controlSpec.minval_(anOssiaParameter.domain.min[0]);
+				widgets[1].controlSpec.minval_(anOssiaParameter.domain.min[1]);
+				widgets[0].controlSpec.maxval_(anOssiaParameter.domain.max[0]);
+				widgets[1].controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+				xLim[0] = anOssiaParameter.domain.min[0];
+				xLim[1] = anOssiaParameter.domain.max[0];
+				yLim[0] = anOssiaParameter.domain.min[1];
+				yLim[1] = anOssiaParameter.domain.max[1];
 			};
-		);
+
+			widgets = widgets ++ Slider2D(anOssiaParameter.window, 392@392)
+			.x_(anOssiaParameter.value[0].linlin(xLim[0], xLim[1], 0, 1)) // initial location of x
+			.y_(anOssiaParameter.value[1].linlin(yLim[0], yLim[1], 0, 1)) // initial location of y
+			.action_({ | val | anOssiaParameter.value_([
+				val.x.linlin(0, 1, xLim[0], xLim[1]),
+				val.y.linlin(0, 1, yLim[0], yLim[1])
+			])
+			}).onClose_({
+				anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+
+			anOssiaParameter.addToEvenGui_(
+				anOssiaParameter.name.asSymbol,
+				{
+					if (anOssiaParameter.value != [widgets[0].value, widgets[1].value]) {
+						widgets[0].value_(anOssiaParameter.value[0]);
+						widgets[1].value_(anOssiaParameter.value[1]);
+					};
+
+					if (widgets[2].notNil) {
+						if (anOssiaParameter.value !=
+							[widgets[2].x.linlin(0, 1, xLim[0], xLim[1]), widgets[2].y.linlin(0, 1, yLim[0], yLim[1])]) {
+							widgets[2].x_(anOssiaParameter.value[0].linlin(xLim[0], xLim[1], 0, 1));
+							widgets[2].y_(anOssiaParameter.value[1].linlin(yLim[0], yLim[1], 0, 1));
+						};
+					};
+				};
+			);
+
+		} {
+			widgets = EZRanger(anOssiaParameter.window, 392@20, anOssiaParameter.name,
+				action:{ | val | anOssiaParameter.value_(val.value); },
+				initVal: anOssiaParameter.value, labelWidth:100, gap:0@0).onClose_({
+				anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+
+			if(anOssiaParameter.domain.min.notNil) {
+				widgets.controlSpec.minval_(anOssiaParameter.domain.min[0]);
+				widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+			};
+
+			anOssiaParameter.addToEvenGui_(
+				name.asSymbol,
+				{
+					if (anOssiaParameter.value != widgets.value) {
+						widgets.value_(anOssiaParameter.value);
+					};
+				};
+			);
+		};
 	}
 }
 
@@ -205,26 +266,24 @@ OSSIA_vec3f : OSSIA_FVector
 		var widgets;
 
 		widgets = [
-			EZNumber(anOssiaParameter.window, 170@20, anOssiaParameter.name,
+			EZNumber(anOssiaParameter.window, 196@20, anOssiaParameter.name,
 				action:{ | val | anOssiaParameter.value_([
 					val.value,
 					anOssiaParameter.value[1],
 					anOssiaParameter.value[2]
 				])},
 				initVal: anOssiaParameter.value[0], labelWidth:100, gap:0@0),
-			EZNumber(anOssiaParameter.window, 70@20,
+			EZNumber(anOssiaParameter.window, 94@20,
 				action:{ | val | anOssiaParameter.value_([
 					anOssiaParameter.value[0],
 					val.value,
 					anOssiaParameter.value[2],
-					anOssiaParameter.value[3]
 				])},
 				initVal: anOssiaParameter.value[1], gap:0@0),
-			EZNumber(anOssiaParameter.window, 70@20,
+			EZNumber(anOssiaParameter.window, 94@20,
 				action:{ | val | anOssiaParameter.value_([
 					anOssiaParameter.value[0],
 					anOssiaParameter.value[1],
-					anOssiaParameter.value[2],
 					val.value
 				])},
 				initVal: anOssiaParameter.value[2], gap:0@0).onClose_({

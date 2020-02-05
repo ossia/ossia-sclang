@@ -163,7 +163,7 @@ OSSIA_OSCQSProtocol
 
 	push { |anOssiaParameter|
 
-		if (anOssiaParameter.critical) {
+		if (anOssiaParameter.critical && connection.notNil) {
 			connection.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
 		} {
 			netAddr.sendRaw(
