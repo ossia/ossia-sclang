@@ -206,10 +206,11 @@ OSSIA_Parameter : OSSIA_Node {
 	var <bounding_mode;
 	var <critical;
 	var <repetition_filter;
-	var <access_mode;
+	var <access_mode = 3;
 	var <unit;
 	var <m_callback;
-	var m_has_callback;
+	var m_has_callback = false;
+	var >listening = true;
 	var widgets;
 
 	classvar skipJack, evenGui;
@@ -258,8 +259,6 @@ OSSIA_Parameter : OSSIA_Node {
 
 		critical = cl;
 		repetition_filter = rf;
-		access_mode = 'bi';
-		m_has_callback = false;
 
 		value = df_val;
 		device.instantiateParameter(this);
@@ -283,15 +282,12 @@ OSSIA_Parameter : OSSIA_Node {
 
 		if (access_mode != 'get') {
 
-			if (repetition_filter.nand( (handle_value == value) )) {
-
-				if (m_has_callback)
-				{
-					m_callback.value(handle_value);
-				};
-
+			if (repetition_filter.nand(handle_value == value)) {
 				value = handle_value;
-				device.updateParameter(this);
+
+				if (m_has_callback) { m_callback.value(value); };
+
+				if (listening) { device.updateParameter(this); };
 			};
 		};
 	}
@@ -302,13 +298,9 @@ OSSIA_Parameter : OSSIA_Node {
 		if (access_mode != 'set') {
 
 			if (repetition_filter.nand( (handle_value == value) )) {
-
-				if (m_has_callback)
-				{
-					m_callback.value(handle_value);
-				};
-
 				value = handle_value;
+
+				if (m_has_callback) { m_callback.value(value); };
 			};
 		};
 	}
@@ -343,10 +335,12 @@ OSSIA_Parameter : OSSIA_Node {
 
 	jsonParams {
 		^",\"TYPE\":"++ type.ossiaJson
-		++",\"VALUE\":"
-		++ if (type == String) {
-			"\""++ value ++"\""
-		} { value }
+		++ if (type != Impulse) {
+			",\"VALUE\":"
+			++ if (type == String) {
+				"\""++ value ++"\""
+			} { value }
+		} { "" }
 		++ domain.json(type.ossiaDefaultValue)
 		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
 		++ if (unit.notNil) {

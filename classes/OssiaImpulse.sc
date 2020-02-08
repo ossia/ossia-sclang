@@ -9,7 +9,7 @@
 + Impulse {
 
 	*ossiaSendMsg {	|anOssiaParameter, addr|
-		addr.sendMsg(anOssiaParameter.path, $I);
+		addr.sendMsg(anOssiaParameter.path);
 	}
 
 	*ossiaBounds { |mode| ^nil; }

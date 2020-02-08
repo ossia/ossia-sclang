@@ -114,10 +114,15 @@ OSSIA_OSCQSProtocol
 				var command = msg.parseYAML;
 				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
 				postln(msg);
-				if (command["COMMAND"] == "START_OSC_STREAMING") {
-					netAddr.hostname_(con.address);
-					netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInt);
-				};
+				switch (command["COMMAND"],
+					"START_OSC_STREAMING", {
+						netAddr.hostname_(con.address);
+						netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInt);
+					}, "LISTEN", {
+						dictionary.at(command["DATA"].asSymbol).listening_(true);
+					}, "IGNORE", {
+						dictionary.at(command["DATA"].asSymbol).listening_(false);
+				});
 			};
 
 			con.onOscMessageReceived = { |array|
