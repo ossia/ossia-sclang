@@ -12,9 +12,9 @@
 		addr.sendMsg(anOssiaParameter.path);
 	}
 
-	*ossiaBounds { |mode| ^nil; }
+	*ossiaBounds { |mode| ^"null"; }
 
-	*ossiaDefaultValue { ^nil; }
+	*ossiaDefaultValue { ^"null"; }
 
 	*ossiaNaNFilter { |newVal, oldval|
 		^newVal;

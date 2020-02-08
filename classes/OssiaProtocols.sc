@@ -139,7 +139,8 @@ OSSIA_OSCQSProtocol
 			postln(req.query);
 
 			if (req.query == "VALUE") {
-				this.push(dictionary.at(req.uri.asSymbol));
+				req.replyJson("{\"VALUE\": " ++ dictionary.at(req.uri.asSymbol).value ++"}");
+				//this.push(dictionary.at(req.uri.asSymbol));
 				postln(format("[http-server] reply sent"));
 			};
 

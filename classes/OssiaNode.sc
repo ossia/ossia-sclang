@@ -335,12 +335,10 @@ OSSIA_Parameter : OSSIA_Node {
 
 	jsonParams {
 		^",\"TYPE\":"++ type.ossiaJson
-		++ if (type != Impulse) {
-			",\"VALUE\":"
-			++ if (type == String) {
-				"\""++ value ++"\""
-			} { value }
-		} { "" }
+		++ ",\"VALUE\":"
+		++ if (type == String) {
+			"\""++ value ++"\""
+		} { value }
 		++ domain.json(type.ossiaDefaultValue)
 		++",\"CLIPMODE\":\""++ bounding_mode.mode ++"\""
 		++ if (unit.notNil) {
