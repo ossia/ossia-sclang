@@ -56,7 +56,7 @@
 
 		widgets = EZText(anOssiaParameter.window, 392@20, anOssiaParameter.name,
 			action:{ | val | anOssiaParameter.value_(val.value); },
-			initVal: anOssiaParameter.value, labelWidth:100, gap:0@0).onClose_({
+			initVal: anOssiaParameter.value, labelWidth:100, gap:4@0).onClose_({
 			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
 
 		anOssiaParameter.addToEvenGui_(

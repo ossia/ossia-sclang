@@ -12,6 +12,8 @@
 		addr.sendMsg(anOssiaParameter.path, $I);
 	}
 
+	*ossiaBounds { |mode| ^nil; }
+
 	*ossiaDefaultValue { ^nil; }
 
 	*ossiaNaNFilter { |newVal, oldval|

@@ -31,8 +31,8 @@
 		StaticText(anOssiaParameter.window, 100@20).string_(anOssiaParameter.name).align_(\right);
 
 		widgets = Button(anOssiaParameter.window, 288@20).states_([
-			["true", Color.black, Color.green()],
-			["false", Color.white, Color.red()]
+			["false", Color.white, Color.red()],
+			["true", Color.black, Color.green()]
 		]).action_({ | val | anOssiaParameter.value_(val.value); }).onClose_({
 			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
 

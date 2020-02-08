@@ -133,8 +133,9 @@ OSSIA_OSCQSProtocol
 			postln(format("[http-server] uri: %", req.uri));
 			postln(req.query);
 
-			if (req.query.isEmpty().not()) {
-				postln(format("[http-server] query: %", req.query));
+			if (req.query == "VALUE") {
+				this.push(dictionary.at(req.uri.asSymbol));
+				postln(format("[http-server] reply sent"));
 			};
 
 			if (req.uri == "/") {
@@ -166,18 +167,16 @@ OSSIA_OSCQSProtocol
 		if (anOssiaParameter.critical && connection.notNil) {
 			connection.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
 		} {
-			netAddr.sendRaw(
-				([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
+			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
 	}
 
 	instantiateParameter { |anOssiaParameter|
 
-		if (anOssiaParameter.critical) {
+		dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
 
-			dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
+		if (anOssiaParameter.critical.not) {
 
-		} {
 			var path = anOssiaParameter.path;
 
 			OSCFunc(
