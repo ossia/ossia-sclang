@@ -148,15 +148,9 @@ OSSIA_OSCQSProtocol
 				connection = ws_server[ws_server.numConnections()-1];
 				if (req.query == "HOST_INFO") {
 					req.replyJson(host_info);
-					// note: this below is only temporary,
-					// until the score asio bug is resolved:
-					// obviously, we shouldn't reply to http requests via ws
-					if (connection.notNil) { connection.writeText(host_info);};
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
-					// note: same for this
-					// req.replyJson(json_tree);
-					if (connection.notNil) { connection.writeText(json_tree) };
+					req.replyJson(json_tree);
 				}
 			}
 		};
