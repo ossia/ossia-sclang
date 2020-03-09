@@ -112,7 +112,8 @@ OSSIA_Device {
 		switch(method,
 			'oscqs', { if (protocol.notNil) { protocol.free; };
 				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)},
-			// 'oscqm', { this.pyrOSCQM(vargs[0])},
+			'oscqm', { if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQMProtocol(vargs[0], this)},
 			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
 			'osc', { if (protocol.notNil) { protocol.free; };
 				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)}
@@ -126,11 +127,11 @@ OSSIA_Device {
 	*newOSCQueryServer { |name, osc_port = 1234, ws_port = 5678, callback|
 		^this.new(name).exposeOSCQueryServer(osc_port, ws_port, callback);
 	}
-	//
-	// *newOSCQueryMirror { |name, host_addr, callback|
-	// 	^this.new(name).exposeOSCQueryMirror(host_addr, callback);
-	// }
-	//
+
+	*newOSCQueryMirror { |name, host_addr, callback|
+		^this.new(name).exposeOSCQueryMirror(host_addr, callback);
+	}
+
 	// *newMinuit { |name, remote_ip, remote_port, local_port, callback|
 	// 	^this.new(name).exposeMinuit(remote_ip, remote_port, local_port, callback);
 	// }
@@ -153,10 +154,10 @@ OSSIA_Device {
 		this.forkExpose('oscqs', [name, osc_port, ws_port], callback);
 	}
 
-	// exposeOSCQueryMirror { |host_addr, callback|
-	// 	this.forkExpose('oscqm', [host_addr], callback);
-	// }
-	//
+	exposeOSCQueryMirror { |host_addr, callback|
+		this.forkExpose('oscqm', [host_addr], callback);
+	}
+
 	// exposeMinuit { |remote_ip, remote_port, local_port, callback|
 	// 	this.forkExpose('minuit', [remote_ip, remote_port, local_port], callback);
 	// }
