@@ -151,8 +151,10 @@ OSSIA_vec2f : OSSIA_FVector
 	*ossiaDefaultValue { ^[0.0, 0.0]; }
 
 	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
-			if (newVal[1].isNaN) { oldval[1] } { newVal[1] } ];
+		^[if (newVal[0].isNil) { newVal[0] }
+			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
+			if (newVal[1].isNil) { newVal[1] }
+			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }} ];
 	}
 
 	*ossiaJson { ^"\"ff\"" }
@@ -255,9 +257,12 @@ OSSIA_vec3f : OSSIA_FVector
 	*ossiaDefaultValue { ^[0.0, 0.0, 0.0]; }
 
 	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
-			if (newVal[1].isNaN) { oldval[1] } { newVal[1] },
-			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },];
+		^[if (newVal[0].isNil) { newVal[0] }
+			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
+			if (newVal[1].isNil) { newVal[1] }
+			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }},
+			if (newVal[2].isNil) { newVal[2] }
+			{ if (newVal[2].isNaN) { oldval[2] } { newVal[2] }},];
 	}
 
 	*ossiaJson { ^"\"fff\"" }
@@ -388,10 +393,14 @@ OSSIA_vec4f : OSSIA_FVector
 	*ossiaDefaultValue { ^[0.0, 0.0, 0.0, 0.0]; }
 
 	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNaN) { oldval[0] } { newVal[0] },
-			if (newVal[1].isNaN) { oldval[1] } { newVal[1] },
-			if (newVal[2].isNaN) { oldval[2] } { newVal[2] },
-			if (newVal[3].isNaN) { oldval[3] } { newVal[3] } ];
+		^[if (newVal[0].isNil) { newVal[0] }
+			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
+			if (newVal[1].isNil) { newVal[1] }
+			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }},
+			if (newVal[2].isNil) { newVal[2] }
+			{ if (newVal[2].isNaN) { oldval[2] } { newVal[2] }},
+			if (newVal[3].isNil) { newVal[3] }
+			{ if (newVal[3].isNaN) { oldval[3] } { newVal[3] }} ];
 	}
 
 	*ossiaJson { ^"\"ffff\"" }

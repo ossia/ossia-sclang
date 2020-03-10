@@ -41,7 +41,8 @@
 	*ossiaDefaultValue { ^0.0; }
 
 	*ossiaNaNFilter { |newVal, oldval|
-		if (newVal.isNaN) { ^oldval } { ^newVal };
+		if (newVal.isNil) { newVal }
+		{ if (newVal.isNaN) { ^oldval } { ^newVal }};
 	}
 
 	*ossiaJson { ^"\"f\""; }
