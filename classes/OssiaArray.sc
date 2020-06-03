@@ -52,15 +52,17 @@
 	*ossiaJson { ^"\"l\"" }
 
 	*ossiaWidget { |anOssiaParameter|
-		var widgets;
+		var widgets, enventName = (anOssiaParameter.device.name ++ anOssiaParameter.path).asSymbol;
+		// apend the device Name to diferentiate between multiple devices with identical parameters
+		// ei. server and mirror
 
 		widgets = EZText(anOssiaParameter.window, 392@20, anOssiaParameter.name,
 			action:{ | val | anOssiaParameter.value_(val.value); },
 			initVal: anOssiaParameter.value, labelWidth:100, gap:4@0).onClose_({
-			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+			anOssiaParameter.removeFromEvenGui_(enventName); });
 
 		anOssiaParameter.addToEvenGui_(
-			name.asSymbol,
+			enventName,
 			{
 				if (anOssiaParameter.value != widgets.value) {
 					widgets.value_(anOssiaParameter.value);

@@ -26,7 +26,9 @@
 	*ossiaDefaultValue { ^false; }
 
 	*ossiaWidget { |anOssiaParameter|
-		var widgets;
+		var widgets, enventName = (anOssiaParameter.device.name ++ anOssiaParameter.path).asSymbol;
+		// apend the device Name to diferentiate between multiple devices with identical parameters
+		// ei. server and mirror
 
 		StaticText(anOssiaParameter.window, 100@20).string_(anOssiaParameter.name).align_(\right);
 
@@ -34,10 +36,10 @@
 			["false", Color.white, Color.red()],
 			["true", Color.black, Color.green()]
 		]).action_({ | val | anOssiaParameter.value_(val.value); }).onClose_({
-			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+			anOssiaParameter.removeFromEvenGui_(enventName); });
 
 		anOssiaParameter.addToEvenGui_(
-			anOssiaParameter.name.asSymbol,
+			enventName,
 			{
 				if (anOssiaParameter.value != widgets.value) {
 					widgets.value_(anOssiaParameter.value);

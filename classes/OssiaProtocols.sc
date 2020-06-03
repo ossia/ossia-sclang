@@ -38,7 +38,8 @@ OSSIA_OSCProtocol
 			{ |msg|
 				if (msg.size == 2) {
 					anOssiaParameter.valueQuiet(msg[1]);
-				} { msg.removeAt(0);
+				} {
+					msg.removeAt(0);
 					anOssiaParameter.valueQuiet(msg);
 				};
 			},
@@ -166,7 +167,9 @@ OSSIA_OSCQSProtocol
 
 	push { |anOssiaParameter|
 
-		ws_server.numConnections.do({ |i| ws_server[i].writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value)});
+		ws_server.numConnections.do({ |i|
+			// ws_server[i].writeOsc(anOssiaParameter.path, anOssiaParameter.value)});
+			ws_server[i].writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value)});
 
 		if (anOssiaParameter.critical.not && (ws_server.numConnections == 0)) {
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
@@ -185,7 +188,8 @@ OSSIA_OSCQSProtocol
 				{ |msg|
 					if (msg.size == 2) {
 						anOssiaParameter.valueQuiet(msg[1]);
-					} { msg.removeAt(0);
+					} {
+						msg.removeAt(0);
 						anOssiaParameter.valueQuiet(msg);
 					};
 				}, path, recvPort: osc_port);
@@ -261,8 +265,8 @@ OSSIA_OSCQMProtocol
 				this.free;
 			};
 
-			//ws_client.connect(target.address, target.port);
-			netAddr = NetAddr(target.address);
+			ws_client.connect(target.address, target.port);
+			netAddr = NetAddr(target.address.asString);
 		});
 
 		dictionary = IdentityDictionary.new;
@@ -299,7 +303,7 @@ OSSIA_OSCQMProtocol
 			postln(format("[http-client] reply from server for uri: %, %", reply.uri, reply.body));
 
 			if (host["OSC_PORT"].notNil) {
-				netAddr.port_(host["OSC_PORT"]);
+				netAddr.port_(host["OSC_PORT"].asInt);
 			};
 		};
 
@@ -314,7 +318,7 @@ OSSIA_OSCQMProtocol
 
 		if (anOssiaParameter.critical) {
 			ws_client.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
-		}{
+		} {
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
 	}

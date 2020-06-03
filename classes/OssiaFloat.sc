@@ -48,12 +48,14 @@
 	*ossiaJson { ^"\"f\""; }
 
 	*ossiaWidget { |anOssiaParameter|
-		var widgets;
+		var widgets, enventName = (anOssiaParameter.device.name ++ anOssiaParameter.path).asSymbol;
+		// apend the device Name to diferentiate between multiple devices with identical parameters
+		// ei. server and mirror
 
 		widgets = EZSlider(anOssiaParameter.window, 392@20, anOssiaParameter.name,
 			action:{ | val | anOssiaParameter.value_(val.value); },
 			labelWidth:100, gap:4@0).onClose_({
-			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+			anOssiaParameter.removeFromEvenGui_(enventName); });
 
 		if(anOssiaParameter.domain.min.notNil) {
 			widgets.controlSpec.minval_(anOssiaParameter.domain.min);
@@ -63,7 +65,7 @@
 		widgets.value_(anOssiaParameter.value);
 
 		anOssiaParameter.addToEvenGui_(
-			name.asSymbol,
+			enventName,
 			{
 				if (anOssiaParameter.value != widgets.value) {
 					widgets.value_(anOssiaParameter.value);

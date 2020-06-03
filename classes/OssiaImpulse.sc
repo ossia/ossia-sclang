@@ -23,13 +23,15 @@
 	*ossiaJson { ^"\"I\""; }
 
 	*ossiaWidget { |anOssiaParameter|
-		var widgets;
+		var widgets, enventName = (anOssiaParameter.device.name ++ anOssiaParameter.path).asSymbol;
+		// apend the device Name to diferentiate between multiple devices with identical parameters
+		// ei. server and mirror
 
 		StaticText(anOssiaParameter.window, 100@20).string_(anOssiaParameter.name).align_(\right);
 
 		widgets = Button(anOssiaParameter.window, 288@20).states_([
 			["Pulse"]]).action_({ | val | anOssiaParameter.value_(val); }).onClose_({
-			anOssiaParameter.removeFromEvenGui_(anOssiaParameter.name.asSymbol); });
+			anOssiaParameter.removeFromEvenGui_(enventName); });
 
 		if(anOssiaParameter.domain.min.notNil) {
 			widgets.controlSpec.minval_(anOssiaParameter.domain.min);
