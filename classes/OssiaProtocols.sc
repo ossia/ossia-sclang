@@ -184,8 +184,7 @@ OSSIA_OSCQSProtocol
 					} { msg.removeAt(0);
 						anOssiaParameter.valueQuiet(msg);
 					};
-				},
-				path, recvPort: osc_port);
+				}, path, recvPort: osc_port);
 		};
 	}
 
@@ -244,18 +243,20 @@ OSSIA_OSCQMProtocol
 
 	oscQuerryProtocolCtor {
 
-		netAddr = NetAddr();
 		ws_client = WebSocketClient();
 		zeroconf_service = ZeroconfBrowser("_oscjson._tcp", host_addr, { |target|
 			postln(format("[zeroconf] target resolved: % (%) at address: %:%",
 				target.name, target.domain, target.address, target.port));
+
+			netAddr = NetAddr(target.address, target.port);
 			target.onDisconnected = {
 				postln(format("[zeroconf] target % is now offline", target.name));
+				this.free;
 			};
-			// when our target 'supercollider' (our websocket server) is online and resolved
-			// through zeroconf, automatically connect the client to it from its address and port.
-			// ws_client.connect(target.address, target.port)
+
+			ws_client.connect(target.address, target.port)
 		});
+
 		dictionary = IdentityDictionary.new;
 
 		ws_client.onConnected = {
@@ -280,20 +281,17 @@ OSSIA_OSCQMProtocol
 		};
 
 		ws_client.onOscMessageReceived = { |array|
-			postln(format("[websocket-server] new osc message from: %:%", array));
+			postln(format("[websocket-client] new osc message from: %:%", array));
 			postln(array);
 			//dictionary.at(array[0].asSymbol).valueQuiet(array[1]);
 		};
 
-		ws_client.onHttpReplyReceived = { |rep|
-
-			postln("[http-server] reply received");
-			postln(format("[http-server] uri: %", rep.uri));
-			postln(rep.query);
+		ws_client.onHttpReplyReceived = { |reply|
+			postln(format("[http-client] reply from server for uri: %, %", reply.uri, reply.body));
 		};
 
 		ws_client.onDisconnected = { |con|
-			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
+			postln(format("[websocket-client] client %:% disconnected", con.address, con.port));
 		};
 
 		device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
@@ -301,9 +299,11 @@ OSSIA_OSCQMProtocol
 
 	push { |anOssiaParameter|
 
-		ws_client.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
+		postln([anOssiaParameter.path] ++ anOssiaParameter.value);
 
-		if (anOssiaParameter.critical.not) {
+		if (anOssiaParameter.critical) {
+			ws_client.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
+		}{
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
 	}

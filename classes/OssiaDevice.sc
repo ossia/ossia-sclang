@@ -138,7 +138,7 @@ OSSIA_Device {
 
 	*newOSC { |name, remote_ip = "127.0.0.1",
 		remote_port = 9997, local_port = 9996, callback|
-		^this.exposeOSC(remote_ip, remote_port, local_port, callback);
+		^this.new(name).exposeOSC(remote_ip, remote_port, local_port, callback);
 	}
 
 	//-------------------------------------------//
