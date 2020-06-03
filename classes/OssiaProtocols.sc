@@ -7,7 +7,7 @@
  */
 
 	//-------------------------------------------//
-	//                 PROTOCOLS                 //
+	//                   OSC                     //
 	//-------------------------------------------//
 
 OSSIA_OSCProtocol
@@ -56,6 +56,10 @@ OSSIA_OSCProtocol
 		^super.free;
 	}
 }
+
+	//-------------------------------------------//
+	//              OSCQUERY SERVER              //
+	//-------------------------------------------//
 
 OSSIA_OSCQSProtocol
 {
@@ -227,6 +231,10 @@ OSSIA_Tree
 	}
 }
 
+	//-------------------------------------------//
+	//              OSCQUERY MIRROR              //
+	//-------------------------------------------//
+
 OSSIA_OSCQMProtocol
 {
 	var host_addr;
@@ -248,13 +256,13 @@ OSSIA_OSCQMProtocol
 			postln(format("[zeroconf] target resolved: % (%) at address: %:%",
 				target.name, target.domain, target.address, target.port));
 
-			netAddr = NetAddr(target.address, target.port);
 			target.onDisconnected = {
 				postln(format("[zeroconf] target % is now offline", target.name));
 				this.free;
 			};
 
-			ws_client.connect(target.address, target.port)
+			//ws_client.connect(target.address, target.port);
+			netAddr = NetAddr(target.address);
 		});
 
 		dictionary = IdentityDictionary.new;
@@ -272,6 +280,7 @@ OSSIA_OSCQMProtocol
 			var command = msg.parseYAML;
 			postln(format("[websocket-client] new message from: %:%", msg));
 			postln(msg);
+
 			switch (command["COMMAND"],
 					"LISTEN", {
 					dictionary.at(command["DATA"].asSymbol).listening_(true);
@@ -283,11 +292,15 @@ OSSIA_OSCQMProtocol
 		ws_client.onOscMessageReceived = { |array|
 			postln(format("[websocket-client] new osc message from: %:%", array));
 			postln(array);
-			//dictionary.at(array[0].asSymbol).valueQuiet(array[1]);
 		};
 
 		ws_client.onHttpReplyReceived = { |reply|
+			var host = reply.body.parseYAML;
 			postln(format("[http-client] reply from server for uri: %, %", reply.uri, reply.body));
+
+			if (host["OSC_PORT"].notNil) {
+				netAddr.port_(host["OSC_PORT"]);
+			};
 		};
 
 		ws_client.onDisconnected = { |con|
@@ -299,10 +312,8 @@ OSSIA_OSCQMProtocol
 
 	push { |anOssiaParameter|
 
-		postln([anOssiaParameter.path] ++ anOssiaParameter.value);
-
 		if (anOssiaParameter.critical) {
-			ws_client.writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value);
+			ws_client.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 		}{
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
