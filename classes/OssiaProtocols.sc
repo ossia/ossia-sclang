@@ -121,7 +121,7 @@ OSSIA_OSCQSProtocol
 				switch (command["COMMAND"],
 					"START_OSC_STREAMING", {
 						netAddr.hostname_(con.address);
-						netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInt);
+						netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInteger);
 					}, "LISTEN", {
 						dictionary.at(command["DATA"].asSymbol).listening_(true);
 					}, "IGNORE", {
@@ -168,10 +168,11 @@ OSSIA_OSCQSProtocol
 	push { |anOssiaParameter|
 
 		ws_server.numConnections.do({ |i|
-			// ws_server[i].writeOsc(anOssiaParameter.path, anOssiaParameter.value)});
-			ws_server[i].writeOsc([anOssiaParameter.path] ++ anOssiaParameter.value)});
+			anOssiaParameter.type.ossiaWsWrite(anOssiaParameter, ws_server[i]);
+		});
 
 		if (anOssiaParameter.critical.not && (ws_server.numConnections == 0)) {
+			// only send osc through udp if the parameter is not critical and at least 1 connection was established
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
 	}
@@ -256,6 +257,8 @@ OSSIA_OSCQMProtocol
 	oscQuerryProtocolCtor {
 
 		ws_client = WebSocketClient();
+		dictionary = IdentityDictionary.new;
+
 		zeroconf_service = ZeroconfBrowser("_oscjson._tcp", host_addr, { |target|
 			postln(format("[zeroconf] target resolved: % (%) at address: %:%",
 				target.name, target.domain, target.address, target.port));
@@ -268,8 +271,6 @@ OSSIA_OSCQMProtocol
 			ws_client.connect(target.address, target.port);
 			netAddr = NetAddr(target.address.asString);
 		});
-
-		dictionary = IdentityDictionary.new;
 
 		ws_client.onConnected = {
 			// client connection callback
@@ -294,24 +295,35 @@ OSSIA_OSCQMProtocol
 		};
 
 		ws_client.onOscMessageReceived = { |array|
-			postln(format("[websocket-client] new osc message from: %:%", array));
-			postln(array);
+			//postln(format("[websocket-client] new osc message", array));
+
+			var address = array[0].asSymbol;
+
+			if (array.size == 2) {
+				dictionary.at(address).do(_.valueQuiet(array[1]));
+			} {
+				array.removeAt(0);
+				dictionary.at(address).do(_.valueQuiet(array));
+			};
 		};
 
 		ws_client.onHttpReplyReceived = { |reply|
-			var host = reply.body.parseYAML;
+			var json = reply.body.parseYAML;
 			postln(format("[http-client] reply from server for uri: %, %", reply.uri, reply.body));
 
-			if (host["OSC_PORT"].notNil) {
-				netAddr.port_(host["OSC_PORT"].asInt);
+			if (json["FULL_PATH"] == "/") {
+				this.setupIdentityDict(json["CONTENTS"]);
+				device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
+			};
+
+			if (json["OSC_PORT"].notNil) {
+				netAddr.port_(json["OSC_PORT"].asInteger);
 			};
 		};
 
 		ws_client.onDisconnected = { |con|
 			postln(format("[websocket-client] client %:% disconnected", con.address, con.port));
 		};
-
-		device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
 	}
 
 	push { |anOssiaParameter|
@@ -323,9 +335,22 @@ OSSIA_OSCQMProtocol
 		};
 	}
 
+	setupIdentityDict { |aDictionaryAray|
+
+		aDictionaryAray.do({ |aDictionary|
+			if (aDictionary["VALUE"].notNil) { dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); }; // only keep parameters
+			if (aDictionary["CONTENTS"].notNil) { this.setupIdentityDict(aDictionary["CONTENTS"]); };
+		});
+	}
+
 	instantiateParameter { |anOssiaParameter|
 
-		dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
+		var key = anOssiaParameter.path.asSymbol;
+
+		if (dictionary.includesKey(key)) {
+			dictionary.put(key,
+				dictionary.at(dictionary).add(anOssiaParameter));
+		};
 	}
 
 	freeParameter { |anOssiaNode|

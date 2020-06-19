@@ -8,6 +8,10 @@
 
 + Char {
 
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
+	}
+
 	*ossiaSendMsg {	|anOssiaParameter, addr|
 		addr.sendRaw(([anOssiaParameter.path] ++ anOssiaParameter.value.asSymbol).asRawOSC);
 	}

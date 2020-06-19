@@ -8,6 +8,10 @@
 
 + Boolean {
 
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
+	}
+
 	*ossiaSendMsg {	|anOssiaParameter, addr|
 		addr.sendMsg(anOssiaParameter.path,
 			if (anOssiaParameter.value) { $T } { $F });

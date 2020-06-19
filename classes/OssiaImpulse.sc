@@ -8,6 +8,10 @@
 
 + Impulse {
 
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path);
+	}
+
 	*ossiaSendMsg {	|anOssiaParameter, addr|
 		addr.sendMsg(anOssiaParameter.path);
 	}

@@ -8,6 +8,11 @@
 
 + String {
 
+
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
+	}
+
 	*ossiaSendMsg {	|anOssiaParameter, addr|
 		addr.sendMsg(anOssiaParameter.path, anOssiaParameter.value);
 	}

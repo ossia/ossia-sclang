@@ -266,6 +266,10 @@ OSSIA_vec2f : OSSIA_FVector
 		^super.new(2, v1.asFloat, v2.asFloat);
 	}
 
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value[0], anOssiaParameter.value[1]);
+	}
+
 	*asOssiaVec { |anArray|
 		^[anArray[0].asFloat, anArray[1].asFloat];
 	}
@@ -373,6 +377,13 @@ OSSIA_vec3f : OSSIA_FVector
 {
 	*new {|v1 = 0.0, v2 = 0.0, v3 = 0.0|
 		^super.new(3, v1.asFloat, v2.asFloat, v3.asFloat);
+	}
+
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path,
+			anOssiaParameter.value[0],
+			anOssiaParameter.value[1],
+			anOssiaParameter.value[2]);
 	}
 
 	*asOssiaVec { |anArray|
@@ -512,6 +523,13 @@ OSSIA_vec4f : OSSIA_FVector
 {
 	*new {|v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0|
 		^super.new(4, v1.asFloat, v2.asFloat, v3.asFloat, v4.asFloat);
+	}
+
+	*ossiaWsWrite {	|anOssiaParameter, ws|
+		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value[0],
+			anOssiaParameter.value[1],
+			anOssiaParameter.value[2],
+			anOssiaParameter.value[3]);
 	}
 
 	*asOssiaVec { |anArray|
