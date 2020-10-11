@@ -1,18 +1,18 @@
 /*
- * This project is a fork of Pierre Cohard's ossia-supercollider
- * https://github.com/OSSIA/ossia-supercollider.git
- * Form his sclang files, the aim is to provide the same message structure
- * specific to the OSSIA library (https://github.com/OSSIA/libossia.git)
- * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
- */
+* This project is a fork of Pierre Cohard's ossia-supercollider
+* https://github.com/OSSIA/ossia-supercollider.git
+* Form his sclang files, the aim is to provide the same message structure
+* specific to the OSSIA library (https://github.com/OSSIA/libossia.git)
+* and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
+*/
 
-	//-------------------------------------------//
-	//                    NODE                   //
-	//-------------------------------------------//
+//-------------------------------------------//
+//                    NODE                   //
+//-------------------------------------------//
 
 OSSIA_Node {
 
-	var parent;
+	var <parent;
 	var <name;
 	var <path;
 	var <device;
@@ -56,37 +56,15 @@ OSSIA_Node {
 
 	paramExplore { ^[children.collect(_.paramExplore)]; }
 
-	//-------------------------------------------//
-	//                    GUI                    //
-	//-------------------------------------------//
-
-	gui { |parent_window, childrenDepth = 1|
-		this.windowIfNeeded(parent_window);
-		this.childGui(childrenDepth);
-	}
-
-	windowIfNeeded { |win|
-		if (win.isNil) {
-			window = Window(name).front; // resize later to the flow layout size
-			window.addFlowLayout;
-		} {
-			window = win;
-		};
-	}
-
-	childGui { |childrenDepth|
-		if (childrenDepth > 0) {
-			children.do({ |item|
-				item.gui(window, childrenDepth - 1);
-			});
-		};
-	}
-
 	free {
 		children.collect(_.free);
 		parent.children.remove(this);
 		^super.free;
 	}
+
+	//-------------------------------------------//
+	//                   JSON                    //
+	//-------------------------------------------//
 
 	json {
 		^"\""++ name ++"\":"
@@ -102,6 +80,34 @@ OSSIA_Node {
 	}
 
 	jsonParams { ^""; }
+
+	//-------------------------------------------//
+	//                    GUI                    //
+	//-------------------------------------------//
+
+	gui { |parent_window, childrenDepth = 1|
+		this.windowIfNeeded(parent_window);
+		this.childGui(childrenDepth);
+	}
+
+	windowIfNeeded { |win|
+		if (win.isNil) {
+			window = Window(name).front; // resize later to the flow layout size
+			window.view.palette_(OSSIA.pallette);
+			window.view.background_(OSSIA.pallette.base);
+			window.addFlowLayout;
+		} {
+			window = win;
+		};
+	}
+
+	childGui { |childrenDepth|
+		if (childrenDepth > 0) {
+			children.do({ |item|
+				item.gui(window, childrenDepth - 1);
+			});
+		};
+	}
 
 	//-------------------------------------------//
 	//     PRIMITIVE CALLS & METHODS (TOREDO)    //
@@ -209,11 +215,8 @@ OSSIA_Parameter : OSSIA_Node {
 	var <access_mode = 3;
 	var <unit;
 	var <m_callback;
-	var m_has_callback = false;
 	var >listening = true;
-	var widgets;
-
-	classvar skipJack, evenGui;
+	var <>widgets;
 
 	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
@@ -262,6 +265,8 @@ OSSIA_Parameter : OSSIA_Node {
 
 		value = df_val;
 		device.instantiateParameter(this);
+
+		m_callback = {};
 	}
 
 	paramExplore { ^[this, children.collect(_.paramExplore)]; }
@@ -285,7 +290,8 @@ OSSIA_Parameter : OSSIA_Node {
 			if (repetition_filter.nand(handle_value == value)) {
 				value = handle_value;
 
-				if (m_has_callback) { m_callback.value(value); };
+				this.changed();
+				this.pvOnCallback();
 
 				if (listening) { device.updateParameter(this); };
 			};
@@ -295,12 +301,13 @@ OSSIA_Parameter : OSSIA_Node {
 	valueQuiet { |v| // same as value_ without sending the updated value back to the device
 		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
 
-		if (access_mode != 'set') {
+		if (access_mode != 'get') {
 
 			if (repetition_filter.nand( (handle_value == value) )) {
 				value = handle_value;
 
-				if (m_has_callback) { m_callback.value(value); };
+				this.changed();
+				this.pvOnCallback();
 			};
 		};
 	}
@@ -378,21 +385,17 @@ OSSIA_Parameter : OSSIA_Node {
 	// }
 
 	callback { ^m_callback }
+
 	callback_ { |callback_function|
-		if(not(m_has_callback)) {
-			m_has_callback = true;
-		} {
-			if(callback_function.isNil()) {
-				m_has_callback = false;
-			}
-		};
+
+		// if(m_callback.notNil()) { this.removeDependant(m_callback); };
 
 		m_callback = callback_function;
 	}
 
 	// interpreter callback from attached ossia lambda
-	pvOnCallback { |v|
-		m_callback.value(v);
+	pvOnCallback {
+		m_callback.value(value);
 	}
 
 	//-------------------------------------------//
@@ -410,7 +413,9 @@ OSSIA_Parameter : OSSIA_Node {
 
 	kr { | bind = true |
 		if(bind) {
-			if(not(m_has_callback)) { m_has_callback = true };
+
+			if(m_callback.notNil()) { this.removeDependant(m_callback); };
+
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
@@ -419,7 +424,9 @@ OSSIA_Parameter : OSSIA_Node {
 
 	ar { | bind = true |
 		if(bind) {
-			if(not(m_has_callback)) { m_has_callback = true };
+
+			if(m_callback.notNil()) { this.removeDependant(m_callback); };
+
 			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
@@ -432,35 +439,29 @@ OSSIA_Parameter : OSSIA_Node {
 	//                    GUI                    //
 	//-------------------------------------------//
 
-	addToEvenGui_ { |key, obj| evenGui[key] = obj; }
-
-	removeFromEvenGui_ { |key| evenGui.removeAt(key); }
-
 	gui { |parent_window, childrenDepth = 0|
 
 		this.windowIfNeeded(parent_window);
 
-		if (evenGui.isNil) {
-			evenGui = ();
-		};
-
 		type.ossiaWidget(this);
 		this.childGui(childrenDepth);
-
-		if (skipJack.isNil) {
-			skipJack = SkipJack({
-				evenGui.do(_.defer);
-			},
-			0.1,
-			evenGui.size == 0,
-			name: this.name
-			);
-		} { skipJack.start; };
 
 		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
 			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
 		};
 	}
+	//
+	// closeWigets {
+	//
+	// 	this.windowIfNeeded(parent_window);
+	//
+	// 	type.ossiaWidget(this);
+	// 	this.childGui(childrenDepth);
+	//
+	// 	if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
+	// 		window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
+	// 	};
+	// }
 
 }
 

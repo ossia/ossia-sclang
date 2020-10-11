@@ -12,7 +12,7 @@
 
 OSSIA_Device {
 
-	classvar g_devices;
+	classvar <g_devices;
 	var <protocol;
 	var <name;
 	var <path;

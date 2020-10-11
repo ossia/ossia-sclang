@@ -68,7 +68,7 @@ OSSIA_OSCQSProtocol
 	var osc_port;
 	var ws_port;
 	var device;
-	var netAddr;
+	var <netAddr;
 	var ws_server;
 	var zeroconf_service;
 	var host_info;
@@ -81,7 +81,7 @@ OSSIA_OSCQSProtocol
 
 	oscQuerryProtocolCtor {
 
-		netAddr = NetAddr();
+		netAddr = [];
 		ws_server = WebSocketServer(ws_port).granularity_(25);
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 		dictionary = IdentityDictionary.new;
@@ -120,8 +120,7 @@ OSSIA_OSCQSProtocol
 				postln(msg);
 				switch (command["COMMAND"],
 					"START_OSC_STREAMING", {
-						netAddr.hostname_(con.address);
-						netAddr.port_(command["DATA"]["LOCAL_SERVER_PORT"].asInteger);
+						netAddr = netAddr.add(NetAddr(con.address, command["DATA"]["LOCAL_SERVER_PORT"].asInteger));
 					}, "LISTEN", {
 						dictionary.at(command["DATA"].asSymbol).listening_(true);
 					}, "IGNORE", {
@@ -167,14 +166,14 @@ OSSIA_OSCQSProtocol
 
 	push { |anOssiaParameter|
 
-		ws_server.numConnections.do({ |i|
-			anOssiaParameter.type.ossiaWsWrite(anOssiaParameter, ws_server[i]);
+		ws_server.numConnections.do({ |iter|
+			if (anOssiaParameter.critical) {
+				ws_server[iter].port.postln;
+				anOssiaParameter.type.ossiaWsWrite(anOssiaParameter, ws_server[iter]);
+			} {
+				anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr[iter]);
+			}
 		});
-
-		if (anOssiaParameter.critical.not && (ws_server.numConnections == 0)) {
-			// only send osc through udp if the parameter is not critical and at least 1 connection was established
-			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
-		};
 	}
 
 	instantiateParameter { |anOssiaParameter|

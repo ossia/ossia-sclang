@@ -6,5 +6,5 @@ Form his sclang files, the aim is to provide the same message structure
 specific to the [OSSIA](https://github.com/OSSIA/libossia.git) library
 and the interactive sequencer [OSSIA/score](https://github.com/OSSIA/score.git)
 
-![OSSIAScreenshot](HelpSource/wsclang_snapshot-2.png)
+![OSSIAScreenshot](HelpSource/wsclang_snapshot-4.png)
 
