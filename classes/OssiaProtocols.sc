@@ -142,8 +142,20 @@ OSSIA_OSCQSProtocol
 			postln(req.query);
 
 			if (req.query == "VALUE") {
-				req.replyJson("{\"VALUE\": " ++ dictionary.at(req.uri.asSymbol).value ++"}");
-				//this.push(dictionary.at(req.uri.asSymbol));
+				var param = dictionary.at(req.uri.asSymbol);
+
+				switch(param.type,
+						{ String },
+						{ req.replyJson("{\"VALUE\": \""
+							++ param.value ++"\"}"); },
+						{ Char },
+						{ req.replyJson("{\"VALUE\": \'"
+							++ param.value ++"\'}"); },
+						{ req.replyJson("{\"VALUE\": "
+							++ param.value ++"}"); }
+					);
+
+				this.push(dictionary.at(req.uri.asSymbol));
 				postln(format("[http-server] reply sent"));
 			};
 

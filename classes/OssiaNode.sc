@@ -45,6 +45,7 @@ OSSIA_Node {
 	}
 
 	tree { |with_attributes = false, parameters_only = false|
+
 		if (parameters_only) {
 			^this.paramExplore;
 		} {
@@ -86,11 +87,13 @@ OSSIA_Node {
 	//-------------------------------------------//
 
 	gui { |parent_window, childrenDepth = 1|
+
 		this.windowIfNeeded(parent_window);
 		this.childGui(childrenDepth);
 	}
 
 	windowIfNeeded { |win|
+
 		if (win.isNil) {
 			window = Window(name).front; // resize later to the flow layout size
 			window.view.palette_(OSSIA.pallette);
@@ -102,6 +105,7 @@ OSSIA_Node {
 	}
 
 	childGui { |childrenDepth|
+
 		if (childrenDepth > 0) {
 			children.do({ |item|
 				item.gui(window, childrenDepth - 1);
@@ -215,7 +219,7 @@ OSSIA_Parameter : OSSIA_Node {
 	var <access_mode = 3;
 	var <unit;
 	var <m_callback;
-	var >listening = true;
+	var <>listening = true;
 	var <>widgets;
 
 	*new { |parent_node, name, type, domain, default_value,
@@ -230,7 +234,7 @@ OSSIA_Parameter : OSSIA_Node {
 		bounding_mode = 'free', critical = false , repetition_filter = false|
 
 		^Array.fill(size, {|i|
-			OSSIA_Parameter(parent_node, name++'_'++i, type, domain,
+			OSSIA_Parameter(parent_node, name ++ '_' ++ i, type, domain,
 				default_value, bounding_mode, critical, repetition_filter);
 		});
 	}
@@ -285,7 +289,7 @@ OSSIA_Parameter : OSSIA_Node {
 	value_ { |v|
 		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
 
-		if (access_mode != 'get') {
+		if (access_mode != 1) { // if differnet from get
 
 			if (repetition_filter.nand(handle_value == value)) {
 				value = handle_value;
@@ -301,7 +305,7 @@ OSSIA_Parameter : OSSIA_Node {
 	valueQuiet { |v| // same as value_ without sending the updated value back to the device
 		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
 
-		if (access_mode != 'get') {
+		if (access_mode != 1) { // if differnet from get
 
 			if (repetition_filter.nand( (handle_value == value) )) {
 				value = handle_value;
@@ -323,17 +327,18 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	bounding_mode_ { |mode|
+
 		bounding_mode.free;
 		bounding_mode = OSSIA_bounding_mode(mode, type, domain);
 	}
 
-	unit_ { |anOssiaUnit|
+	unit_ { | anOssiaUnit |
 		if (unit.notNil) { unit.free };
 		unit = anOssiaUnit;
 	}
 
-	access_mode_ { |aSymbol|
-		access_mode = aSymbol;
+	access_mode_ { | anOssiaAccessMode |
+		access_mode = anOssiaAccessMode;
 	}
 
 	critical_ { |aBool|
