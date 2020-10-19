@@ -12,28 +12,28 @@
 
 OSSIA {
 
-	classvar <pallette, server;
+	classvar <palette, server;
 
 	*initClass {
 
-		pallette = QPalette.auto(Color.fromHexString("#1d1c1a"), Color.fromHexString("#222222"));
+		palette = QPalette.auto(Color.fromHexString("#1d1c1a"), Color.fromHexString("#222222"));
 
-		pallette.setColor(Color.fromHexString("#222222"), 'window');
-		pallette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
-		pallette.setColor(Color.fromHexString("#222222"), 'button');
-		pallette.setColor(Color.fromHexString("#f0f0f0"), 'buttonText');
-		pallette.setColor(Color.fromHexString("#161514"), 'base');
-		pallette.setColor(Color.fromHexString("#1e1d1c"), 'alternateBase');
-		pallette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
-		pallette.setColor(Color.fromHexString("#c0c0c0c0"), 'toolTipText');
-		pallette.setColor(Color.fromHexString("#9062400a"), 'highlight');
-		pallette.setColor(Color.fromHexString("#FDFDFD"), 'highlightText');
+		palette.setColor(Color.fromHexString("#222222"), 'window');
+		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
+		palette.setColor(Color.fromHexString("#222222"), 'button');
+		palette.setColor(Color.fromHexString("#f0f0f0"), 'buttonText');
+		palette.setColor(Color.fromHexString("#161514"), 'base');
+		palette.setColor(Color.fromHexString("#1e1d1c"), 'alternateBase');
+		palette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
+		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'toolTipText');
+		palette.setColor(Color.fromHexString("#9062400a"), 'highlight');
+		palette.setColor(Color.fromHexString("#FDFDFD"), 'highlightText');
 
-		pallette.setColor(Color.fromHexString("#e0b01e"), 'light'); // welow slider
-		pallette.setColor(Color.fromHexString("#62400a"), 'midlight'); // brown contour
-		pallette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
-		pallette.setColor(Color.fromHexString("#a7dd0d"), 'baseText'); // green param
-		pallette.setColor(Color.fromHexString("#c58014"), 'brightText');
+		palette.setColor(Color.fromHexString("#e0b01e"), 'light'); // welow slider
+		palette.setColor(Color.fromHexString("#62400a"), 'midlight'); // brown contour
+		palette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
+		palette.setColor(Color.fromHexString("#a7dd0d"), 'baseText'); // green param
+		palette.setColor(Color.fromHexString("#c58014"), 'brightText');
 	}
 
 	*server  { if(server.isNil) { ^Server.default } { ^server } }

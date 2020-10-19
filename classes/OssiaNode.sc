@@ -219,8 +219,8 @@ OSSIA_Parameter : OSSIA_Node {
 	var <access_mode = 3;
 	var <unit;
 	var <m_callback;
-	var <>listening = true;
-	var <>widgets;
+	var >listening = true;
+	var <widgets;
 
 	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
