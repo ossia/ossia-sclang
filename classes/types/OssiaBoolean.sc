@@ -8,50 +8,58 @@
 
 + Boolean {
 
-	*ossiaWsWrite {	|anOssiaParameter, ws|
+	*ossiaWsWrite
+	{
+		| anOssiaParameter, ws |
+
 		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
-	*ossiaSendMsg {	|anOssiaParameter, addr|
-		addr.sendMsg(anOssiaParameter.path,
-			if (anOssiaParameter.value) { $T } { $F });
+	*ossiaSendMsg
+	{
+		| anOssiaParameter, addr |
+
+		addr.sendMsg(
+			anOssiaParameter.path,
+			if (anOssiaParameter.value) { $T } { $F }
+		);
 	}
 
-	*ossiaBounds { |mode|
-		^{ |value, domain| value.asBoolean };
-	}
+	*ossiaBounds { | mode | ^{ | value, domain | value.asBoolean } }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^newVal;
-	}
+	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 
-	*ossiaJson { ^"\"F\""; }
+	*ossiaJson { ^"\"F\"" }
 
-	*ossiaDefaultValue { ^false; }
+	*ossiaDefaultValue { ^false }
 
-	*ossiaWidget { |anOssiaParameter|
-		var event = { | param |
-			if (param.value != param.widgets.value) {
-				{ param.widgets.value_(param.value); }.defer;
-			};
+	*ossiaWidget
+	{
+		| anOssiaParameter |
+
+		if (anOssiaParameter.domain.values == [])
+		{
+			OSSIA.makeButtonGui(anOssiaParameter);
+
+			// Boolean specific states, actions and initial value
+			anOssiaParameter.widgets.states_(
+				[
+					[
+						"false",
+						anOssiaParameter.window.view.palette.color('light', 'active'),
+						anOssiaParameter.window.view.palette.color('middark', 'active')
+					],
+					[
+						"true",
+						anOssiaParameter.window.view.palette.color('middark', 'active'),
+						anOssiaParameter.window.view.palette.color('light', 'active')
+					]
+				]
+			).action_({ | val | anOssiaParameter.value_(val.value) });
+
+			{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
+		} {
+			OSSIA.makeDropDownGui(anOssiaParameter);
 		};
-
-		StaticText(anOssiaParameter.window, 100@20).string_(anOssiaParameter.name)
-		.stringColor_(OSSIA.pallette.color('baseText', 'active')).align_(\right);
-
-		anOssiaParameter.widgets = Button(anOssiaParameter.window, 288@20).states_([
-			["false",
-				OSSIA.pallette.color('light', 'active'),
-				OSSIA.pallette.color('middark', 'active')
-			],
-			["true",
-				OSSIA.pallette.color('middark', 'active'),
-				OSSIA.pallette.color('light', 'active')
-			]
-		]).action_({ | val | anOssiaParameter.value_(val.value); })
-		.onClose_({ anOssiaParameter.removeDependant(event);
-		}).focusColor_(OSSIA.pallette.color('midlight', 'active'));
-
-		{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
 	}
 }

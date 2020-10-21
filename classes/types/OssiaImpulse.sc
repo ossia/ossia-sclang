@@ -8,38 +8,42 @@
 
 + Impulse {
 
-	*ossiaWsWrite {	|anOssiaParameter, ws|
+	*ossiaWsWrite
+	{
+		| anOssiaParameter, ws |
+
 		ws.writeOsc(anOssiaParameter.path);
 	}
 
-	*ossiaSendMsg {	|anOssiaParameter, addr|
+	*ossiaSendMsg
+	{
+		| anOssiaParameter, addr |
+
 		addr.sendMsg(anOssiaParameter.path);
 	}
 
-	*ossiaBounds { |mode| ^"null"; }
+	*ossiaBounds { | mode | ^"null" }
 
-	*ossiaDefaultValue { ^"null"; }
+	*ossiaDefaultValue { ^"null" }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^newVal;
-	}
+	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 
-	*ossiaJson { ^"\"I\""; }
+	*ossiaJson { ^"\"I\"" }
 
-	*ossiaWidget { |anOssiaParameter|
-		var event = { | param |
-			if (param.value != param.widgets.value) {
-				{ param.widgets.value_(param.value); }.defer;
-			};
+	*ossiaWidget
+	{
+		| anOssiaParameter |
+
+		if (anOssiaParameter.domain.values == [])
+		{
+			OSSIA.makeButtonGui(anOssiaParameter);
+
+			// Impulse specific states and action
+			anOssiaParameter.widgets.states_([
+				["Pulse"]
+			]).action_({ | val | anOssiaParameter.value_() });
+		} {
+			OSSIA.makeDropDownGui(anOssiaParameter);
 		};
-
-		StaticText(anOssiaParameter.window, 100@20).string_(anOssiaParameter.name)
-		.stringColor_(OSSIA.pallette.color('baseText', 'active')).align_(\right);
-
-		anOssiaParameter.widgets = Button(anOssiaParameter.window, 288@20).states_([
-			["Pulse"]
-		]).action_({ | val | anOssiaParameter.value_(val); })
-		.onClose_({ anOssiaParameter.removeDependant(event);
-		}).focusColor_(OSSIA.pallette.color('midlight', 'active'));
 	}
 }

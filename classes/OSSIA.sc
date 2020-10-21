@@ -10,12 +10,12 @@
 	//                  UTILITIES                //
 	//-------------------------------------------//
 
-OSSIA {
-
+OSSIA
+{
 	classvar <palette, server;
 
-	*initClass {
-
+	*initClass
+	{
 		palette = QPalette.auto(Color.fromHexString("#1d1c1a"), Color.fromHexString("#222222"));
 
 		palette.setColor(Color.fromHexString("#222222"), 'window');
@@ -36,28 +36,165 @@ OSSIA {
 		palette.setColor(Color.fromHexString("#c58014"), 'brightText');
 	}
 
-	*server  { if(server.isNil) { ^Server.default } { ^server } }
-	*server_ { |target| server = target }
-	*domain { |min, max, values| ^OSSIA_domain(min, max, values)}
+	*server  { if (server.isNil) { ^Server.default } { ^server } }
+	*server_ { | target | server = target }
+
+	*domain { | min, max, values | ^OSSIA_domain(min, max, values) }
 	*access_mode { ^OSSIA_access_mode }
 	*bounding_mode { ^OSSIA_bounding_mode }
 
-	*vec2f { |v1 = 0.0, v2 = 0.0| ^OSSIA_vec2f(v1, v2) }
-	*vec3f { |v1 = 0.0, v2 = 0.0, v3 = 0.0| ^OSSIA_vec3f(v1, v2, v3) }
-	*vec4f { |v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0| ^OSSIA_vec4f(v1, v2, v3, v4) }
+	*vec2f { | v1 = 0.0, v2 = 0.0 | ^OSSIA_vec2f(v1, v2) }
+	*vec3f { | v1 = 0.0, v2 = 0.0, v3 = 0.0 | ^OSSIA_vec3f(v1, v2, v3) }
+	*vec4f { | v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0 | ^OSSIA_vec4f(v1, v2, v3, v4) }
 
-	*device  { |name| ^OSSIA_Device(name) }
-	*node { |parent_node, name| ^OSSIA_Node(parent_node, name) }
+	*device  { | name | ^OSSIA_Device(name) }
 
-	*parameter { |parent_node, name, type, domain, default_value, bounding_mode = 'free',
+	*node { | parent_node, name | ^OSSIA_Node(parent_node, name) }
+
+	*parameter
+	{
+		| parent_node, name, type, domain, default_value, bounding_mode = 'free',
 		critical = false, repetition_filter = false |
-		^OSSIA_Parameter(parent_node, name, type, domain,
-			default_value, bounding_mode, critical, repetition_filter);
+
+		^OSSIA_Parameter(parent_node, name, type, domain, default_value,
+			bounding_mode, critical, repetition_filter);
 	}
 
-	*parameter_array { |size, parent_node, name, type, domain, default_value,
-		bounding_mode = 'free', critical = false, repetition_filter = false|
+	*parameter_array
+	{
+		| size, parent_node, name, type, domain, default_value, bounding_mode = 'free',
+		critical = false, repetition_filter = false |
+
 		^OSSIA_Parameter.array(size, parent_node, name, type, domain, default_value,
 			bounding_mode, critical, repetition_filter);
+	}
+
+	//-------------------------------------------//
+	//                    GUI                    //
+	//-------------------------------------------//
+
+	*makeDropDownGui
+	{
+		|anOssiaParameter|
+
+		var event = { | param |
+			{
+				if (param.value != param.widgets.value)
+				{ param.widgets.value_(param.value) };
+			}.defer;
+		};
+
+		anOssiaParameter.addDependant(event);
+
+		anOssiaParameter.widgets = EZText(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
+			label: anOssiaParameter.name,
+			action: { | val | anOssiaParameter.value_(val.value) },
+			initVal: anOssiaParameter.value,
+			labelWidth: 100,
+			layout: 'vert',
+			gap: 2@0
+		).onClose_(
+			{ anOssiaParameter.removeDependant(event) }
+		).setColors(
+			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
+			textBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
+			textStringColor: anOssiaParameter.window.view.palette.color('windowText', 'active'));
+	}
+
+	*makeSliderGui
+	{
+		| anOssiaParameter |
+
+		var event = { | param |
+			{
+				if (param.value != param.widgets.value)
+				{ param.widgets.value_(param.value) };
+			}.defer;
+		};
+
+		anOssiaParameter.addDependant(event);
+
+		anOssiaParameter.widgets = EZSlider(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
+			label: anOssiaParameter.name,
+			action: { | val | anOssiaParameter.value_(val.value) },
+			layout: 'line2',
+			gap: 2@0
+		).onClose_(
+			{ anOssiaParameter.removeDependant(event) }
+		).setColors(
+			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
+			sliderBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
+			numNormalColor: anOssiaParameter.window.view.palette.color('windowText', 'active'),
+			knobColor: anOssiaParameter.window.view.palette.color('light', 'active')
+		);
+
+		anOssiaParameter.widgets.sliderView.focusColor_(
+			anOssiaParameter.window.view.palette.color('midlight', 'active');
+		);
+
+		if (anOssiaParameter.domain.min.notNil)
+		{
+			anOssiaParameter.widgets.controlSpec.minval_(anOssiaParameter.domain.min);
+			anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max);
+		};
+
+		// set GUI value after min and max are set
+		{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
+	}
+
+	*makeButtonGui
+	{
+		| anOssiaParameter |
+
+		var event = { | param |
+			if (param.value != param.widgets.value)
+			{ { param.widgets.value_(param.value) }.defer };
+		};
+
+		StaticText(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
+		.string_(anOssiaParameter.name)
+		.stringColor_(anOssiaParameter.window.view.palette.color('baseText', 'active'));
+
+		anOssiaParameter.widgets = Button(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
+		.onClose_({ anOssiaParameter.removeDependant(event); })
+		.focusColor_(anOssiaParameter.window.view.palette.color('midlight', 'active'));
+	}
+
+	*makeTxtGui
+	{
+		|anOssiaParameter|
+
+		var event = { | param |
+			{
+				if (param.value != param.widgets.value)
+				{ param.widgets.value_(param.value) };
+			}.defer;
+		};
+
+		anOssiaParameter.addDependant(event);
+
+		anOssiaParameter.widgets = EZText(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
+			label: anOssiaParameter.name,
+			action: { | val | anOssiaParameter.value_(val.value) },
+			initVal: anOssiaParameter.value,
+			labelWidth: 100,
+			layout: 'vert',
+			gap: 2@0
+		).onClose_(
+			{ anOssiaParameter.removeDependant(event) }
+		).setColors(
+			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
+			textBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
+			textStringColor: anOssiaParameter.window.view.palette.color('windowText', 'active'));
 	}
 }

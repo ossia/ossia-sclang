@@ -12,76 +12,101 @@
 
 + Array {
 
-	*ossiaWsWrite {	|anOssiaParameter, ws|
+	*ossiaWsWrite
+	{
+		| anOssiaParameter, ws |
+
 		var msg = [anOssiaParameter.path] ++ anOssiaParameter.value;
 		ws.writeOsc(*msg);
 	}
 
-	*ossiaSendMsg {	|anOssiaParameter, addr|
+	*ossiaSendMsg
+	{
+		| anOssiaParameter, addr |
+
 		var msg = [anOssiaParameter.path] ++ anOssiaParameter.value;
 		addr.sendMsg(*msg);
 	}
 
-	*ossiaBounds { |mode|
-		switch(mode,
+	*ossiaBounds
+	{
+		| mode |
+
+		switch (mode,
 			'free', {
-				^{ |value, domain| value.asArray };
+				^{ | value, domain | value.asArray };
 			},
 			'clip', {
-				^{ |value, domain| value.collect({ |item, i|
-				item.clip(domain.min[i], domain.max[i]) }).asArray };
+				^{
+					| value, domain |
+
+					value.collect(
+						{ | item, i | item.clip(domain.min[i], domain.max[i]) }
+					).asArray;
+				};
 			},
 			'low', {
-				^{ |value, domain| value.collect({ |item, i|
-				item.max(domain.min[i]) }).asArray };
+				^{
+					| value, domain |
+
+					value.collect(
+						{ | item, i | item.max(domain.min[i]) }
+					).asArray;
+				};
 			},
 			'high', {
-				^{ |value, domain| value.collect({ |item, i|
-				item.min(domain.max[i]) }).asArray };
+				^{
+					| value, domain |
+
+					value.collect(
+						{ | item, i | item.min(domain.max[i]) }
+					).asArray;
+				};
 			},
 			'wrap', {
-				^{ |value, domain| value.collect({ |item, i|
-				item.wrap(domain.min[i], domain.max[i]) }).asArray };
+				^{
+					| value, domain |
+
+					value.collect(
+						{ | item, i | item.wrap(domain.min[i], domain.max[i]) }
+					).asArray ;
+				};
 			},
 			'fold', {
-				^{ |value, domain| value.collect({ |item, i|
-				item.fold(domain.min[i], domain.max[i]) }).asArray };
-			}, {
-				^{ |value, domain| domain[2].detect({ |item|
-					item == value.asArray });
+				^{
+					| value, domain |
+
+					value.collect(
+						{ | item, i | item.fold(domain.min[i], domain.max[i]) }
+					).asArray;
 				};
-		});
+			}, {
+				^{
+					| value, domain |
+
+					domain[2].detect(
+						{ | item | item == value.asArray }
+					);
+				};
+			}
+		);
 	}
 
-	*ossiaDefaultValue { ^[0, 0]; }
+	*ossiaDefaultValue { ^[0, 0] }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^newVal;
-	}
+	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 
 	*ossiaJson { ^"\"l\"" }
 
-	*ossiaWidget { |anOssiaParameter|
+	*ossiaWidget
+	{
+		| anOssiaParameter |
 
-		var event = { | param |
-			{
-				if (param.value != param.widgets.value) {
-					param.widgets.value_(param.value);
-				};
-			}.defer;
+		if (anOssiaParameter.domain.values == [])
+		{
+			OSSIA.makeTxtGui(anOssiaParameter);
+		} {
+			OSSIA.makeDropDownGui(anOssiaParameter);
 		};
-
-		anOssiaParameter.addDependant(event);
-
-		anOssiaParameter.widgets = EZText(anOssiaParameter.window, 392@20, anOssiaParameter.name,
-			action:{ | val | anOssiaParameter.value_(val.value); },
-			initVal: anOssiaParameter.value, labelWidth:100,
-			initVal:anOssiaParameter.value,
-			gap:4@0).onClose_({
-			anOssiaParameter.removeDependant(event); })
-		.setColors(
-			stringColor:OSSIA.pallette.color('baseText', 'active'),
-			textBackground:OSSIA.pallette.color('middark', 'active'),
-			textStringColor:OSSIA.pallette.color('windowText', 'active'));
 	}
 }

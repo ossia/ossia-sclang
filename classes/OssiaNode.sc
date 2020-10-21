@@ -96,8 +96,8 @@ OSSIA_Node {
 
 		if (win.isNil) {
 			window = Window(name).front; // resize later to the flow layout size
-			window.view.palette_(OSSIA.pallette);
-			window.view.background_(OSSIA.pallette.base);
+			window.view.palette_(OSSIA.palette);
+			window.view.background_(OSSIA.palette.base);
 			window.addFlowLayout;
 		} {
 			window = win;
@@ -220,7 +220,7 @@ OSSIA_Parameter : OSSIA_Node {
 	var <unit;
 	var <m_callback;
 	var >listening = true;
-	var <widgets;
+	var <>widgets;
 
 	*new { |parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
@@ -452,7 +452,7 @@ OSSIA_Parameter : OSSIA_Node {
 		this.childGui(childrenDepth);
 
 		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
-			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
+			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2));
 		};
 	}
 	//

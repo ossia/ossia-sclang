@@ -8,53 +8,51 @@
 
 + String {
 
-	*ossiaWsWrite {	|anOssiaParameter, ws|
+	*ossiaWsWrite
+	{
+		| anOssiaParameter, ws |
+
 		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
-	*ossiaSendMsg {	|anOssiaParameter, addr|
+	*ossiaSendMsg
+	{
+		| anOssiaParameter, addr |
+
 		addr.sendMsg(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
-	*ossiaBounds { |mode|
-		if (mode == 'values') {
-			^{ |value, domain| domain[2].detect({ |item|
-				item == value.asString });
+	*ossiaBounds
+	{
+		| mode |
+
+		if (mode == 'values')
+		{
+			^{
+				| value, domain |
+
+				domain[2].detect({ | item | item == value.asString });
 			};
 		} {
-			^{ |value, domain| value.asString };
+			^{ | value, domain | value.asString };
 		};
 	}
 
-	*ossiaDefaultValue { ^""; }
+	*ossiaDefaultValue { ^"" }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^newVal;
-	}
+	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 
-	*ossiaJson { ^"\"s\""; }
+	*ossiaJson { ^"\"s\"" }
 
-	*ossiaWidget { |anOssiaParameter|
+	*ossiaWidget
+	{
+		| anOssiaParameter |
 
-		var event = { | param |
-			{
-				if (param.value != param.widgets.value) {
-					param.widgets.value_(param.value);
-				};
-			}.defer;
+		if (anOssiaParameter.domain.values == [])
+		{
+			OSSIA.makeTxtGui(anOssiaParameter);
+		} {
+			OSSIA.makeDropDownGui(anOssiaParameter);
 		};
-
-		anOssiaParameter.addDependant(event);
-
-		anOssiaParameter.widgets = EZText(anOssiaParameter.window, 392@20, anOssiaParameter.name,
-			action:{ | val | anOssiaParameter.value_(val.value); },
-			initVal: anOssiaParameter.value, labelWidth:100,
-			initVal:anOssiaParameter.value,
-			gap:4@0).onClose_({
-			anOssiaParameter.removeDependant(event); })
-		.setColors(
-			stringColor:OSSIA.pallette.color('baseText', 'active'),
-			textBackground:OSSIA.pallette.color('middark', 'active'),
-			textStringColor:OSSIA.pallette.color('windowText', 'active'));
 	}
 }
