@@ -75,32 +75,30 @@ OSSIA
 
 	*makeDropDownGui
 	{
-		|anOssiaParameter|
+		| anOssiaParameter |
 
 		var event = { | param |
-			{
-				if (param.value != param.widgets.value)
-				{ param.widgets.value_(param.value) };
-			}.defer;
+			var i = param.domain.values.detectIndex({ | item | item == param.value });
+
+			{ param.widgets.value_(i) }.defer;
 		};
 
 		anOssiaParameter.addDependant(event);
 
-		anOssiaParameter.widgets = EZText(
-			parent: anOssiaParameter.window,
+		anOssiaParameter.widgets = EZPopUpMenu(
+			parentView: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
 			label: anOssiaParameter.name,
-			action: { | val | anOssiaParameter.value_(val.value) },
-			initVal: anOssiaParameter.value,
-			labelWidth: 100,
+			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
+			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
 			layout: 'vert',
 			gap: 2@0
 		).onClose_(
 			{ anOssiaParameter.removeDependant(event) }
 		).setColors(
 			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
-			textBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
-			textStringColor: anOssiaParameter.window.view.palette.color('windowText', 'active'));
+			menuStringColor: anOssiaParameter.window.view.palette.color('light', 'active')
+		);
 	}
 
 	*makeSliderGui
@@ -151,8 +149,10 @@ OSSIA
 		| anOssiaParameter |
 
 		var event = { | param |
-			if (param.value != param.widgets.value)
-			{ { param.widgets.value_(param.value) }.defer };
+			{
+				if (param.value != param.widgets.value)
+				{ param.widgets.value_(param.value) };
+			}.defer;
 		};
 
 		StaticText(

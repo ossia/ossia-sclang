@@ -6,30 +6,26 @@
  * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
  */
 
-+ String {
-
++ String
+{
 	*ossiaWsWrite
-	{
-		| anOssiaParameter, ws |
+	{ | anOssiaParameter, ws |
 
 		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
 	*ossiaSendMsg
-	{
-		| anOssiaParameter, addr |
+	{ | anOssiaParameter, addr |
 
 		addr.sendMsg(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
 	*ossiaBounds
-	{
-		| mode |
+	{ | mode |
 
 		if (mode == 'values')
 		{
-			^{
-				| value, domain |
+			^{ | value, domain |
 
 				domain[2].detect({ | item | item == value.asString });
 			};
@@ -45,8 +41,7 @@
 	*ossiaJson { ^"\"s\"" }
 
 	*ossiaWidget
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		if (anOssiaParameter.domain.values == [])
 		{

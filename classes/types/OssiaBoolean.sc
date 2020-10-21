@@ -6,18 +6,16 @@
  * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
  */
 
-+ Boolean {
-
++ Boolean
+{
 	*ossiaWsWrite
-	{
-		| anOssiaParameter, ws |
+	{ | anOssiaParameter, ws |
 
 		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
 	*ossiaSendMsg
-	{
-		| anOssiaParameter, addr |
+	{ | anOssiaParameter, addr |
 
 		addr.sendMsg(
 			anOssiaParameter.path,
@@ -34,32 +32,26 @@
 	*ossiaDefaultValue { ^false }
 
 	*ossiaWidget
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
-		if (anOssiaParameter.domain.values == [])
-		{
-			OSSIA.makeButtonGui(anOssiaParameter);
+		OSSIA.makeButtonGui(anOssiaParameter);
 
-			// Boolean specific states, actions and initial value
-			anOssiaParameter.widgets.states_(
+		// Boolean specific states, actions and initial value
+		anOssiaParameter.widgets.states_(
+			[
 				[
-					[
-						"false",
-						anOssiaParameter.window.view.palette.color('light', 'active'),
-						anOssiaParameter.window.view.palette.color('middark', 'active')
+					"false",
+					anOssiaParameter.window.view.palette.color('light', 'active'),
+					anOssiaParameter.window.view.palette.color('middark', 'active')
 					],
-					[
-						"true",
-						anOssiaParameter.window.view.palette.color('middark', 'active'),
-						anOssiaParameter.window.view.palette.color('light', 'active')
-					]
+				[
+					"true",
+					anOssiaParameter.window.view.palette.color('middark', 'active'),
+					anOssiaParameter.window.view.palette.color('light', 'active')
 				]
-			).action_({ | val | anOssiaParameter.value_(val.value) });
+			]
+		).action_({ | val | anOssiaParameter.value_(val.value) });
 
-			{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
-		} {
-			OSSIA.makeDropDownGui(anOssiaParameter);
-		};
+		{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
 	}
 }

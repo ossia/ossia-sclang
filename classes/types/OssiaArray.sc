@@ -10,35 +10,31 @@
 // Arrays are not suported by supercollider. comenting out for now
 
 
-+ Array {
-
++ Array
+{
 	*ossiaWsWrite
-	{
-		| anOssiaParameter, ws |
+	{ | anOssiaParameter, ws |
 
 		var msg = [anOssiaParameter.path] ++ anOssiaParameter.value;
 		ws.writeOsc(*msg);
 	}
 
 	*ossiaSendMsg
-	{
-		| anOssiaParameter, addr |
+	{ | anOssiaParameter, addr |
 
 		var msg = [anOssiaParameter.path] ++ anOssiaParameter.value;
 		addr.sendMsg(*msg);
 	}
 
 	*ossiaBounds
-	{
-		| mode |
+	{ | mode |
 
 		switch (mode,
 			'free', {
 				^{ | value, domain | value.asArray };
 			},
 			'clip', {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.clip(domain.min[i], domain.max[i]) }
@@ -46,8 +42,7 @@
 				};
 			},
 			'low', {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.max(domain.min[i]) }
@@ -55,8 +50,7 @@
 				};
 			},
 			'high', {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.min(domain.max[i]) }
@@ -64,8 +58,7 @@
 				};
 			},
 			'wrap', {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.wrap(domain.min[i], domain.max[i]) }
@@ -73,16 +66,14 @@
 				};
 			},
 			'fold', {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.fold(domain.min[i], domain.max[i]) }
 					).asArray;
 				};
 			}, {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					domain[2].detect(
 						{ | item | item == value.asArray }
@@ -99,8 +90,7 @@
 	*ossiaJson { ^"\"l\"" }
 
 	*ossiaWidget
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		if (anOssiaParameter.domain.values == [])
 		{

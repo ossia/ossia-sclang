@@ -10,114 +10,149 @@
 //               OSSIA_VECNF                 //
 //-------------------------------------------//
 
-OSSIA_FVector {
-
+OSSIA_FVector
+{
 	var <am_val, m_sz;
 
-	*new {|sz ... values|
-		^super.new.init(sz, values);
-	}
+	*new { | sz ... values | ^super.new.init(sz, values) }
 
-	init { |sz, v|
+	init
+	{
+		| sz, v |
 
-		v.do({|item|
-			if((item.isFloat.not) && (item.isInteger.not)) {
-				Error("OSSIA: Error! Arguments are not of Float type").throw;
-			};
-		});
+		v.do({ | item |
+
+			if ((item.isFloat.not) && (item.isInteger.not))
+			{ Error("OSSIA: Error! Arguments are not of Float type").throw };
+		}
+		);
 
 		am_val = v;
 		m_sz = sz;
 	}
 
-	at {|i| ^am_val[i] }
-	put { |index, item| am_val[index] = item.asFloat }
+	at { | i | ^am_val[i] }
+	put { | index, item | am_val[index] = item.asFloat }
 
-	*ossiaSendMsg {	|anOssiaParameter, addr|
+	*ossiaSendMsg
+	{
+		| anOssiaParameter, addr |
+
 		addr.sendRaw(([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
 	}
 
-	*ossiaWsWrite {	|anOssiaParameter, ws|
+	*ossiaWsWrite
+	{
+		| anOssiaParameter, ws |
+
 		var msg = [anOssiaParameter.path] ++ anOssiaParameter.value;
 		ws.writeOsc(*msg);
 	}
 
-	*ossiaBounds { |mode|
-		switch(mode,
+	*ossiaBounds
+	{
+		| mode |
+
+		switch (mode,
 			'free', {
-				^{ |value, domain| this.asOssiaVec(value) };
+				^{ | value, domain | this.asOssiaVec(value) };
 			},
 			'clip', {
-				^{ |value, domain| this.asOssiaVec(
-					value.collect({ |item, i|
-						item.clip(domain.min[i], domain.max[i]);
-					});
+				^{ | value, domain |
+
+					this.asOssiaVec(value.collect(
+						{ | item, i |
+							item.clip(domain.min[i], domain.max[i]);
+						}
+					);
 				)};
 			},
 			'low', {
-				^{ |value, domain| this.asOssiaVec(
-					value.collect({ |item, i|
-						item.max(domain.min[i])};
+				^{ | value, domain |
+
+					this.asOssiaVec(value.collect(
+						{ | item, i |
+							item.max(domain.min[i])
+						}
 					);
 				)};
 			},
 			'high', {
-				^{ |value, domain| this.asOssiaVec(
-					value.collect({ |item, i|
-						item.min(domain.max[i]);
-					});
+				^{ | value, domain |
+
+					this.asOssiaVec(value.collect(
+						{ | item, i |
+							item.min(domain.max[i])
+						}
+					);
 				)};
 			},
 			'wrap', {
-				^{ |value, domain| this.asOssiaVec(
-					value.collect({ |item, i|
-						item.wrap(domain.min[i], domain.max[i]);
-					});
+				^{ | value, domain |
+
+					this.asOssiaVec(value.collect(
+						{ | item, i |
+							item.wrap(domain.min[i], domain.max[i]);
+						}
+					);
 				)};
 			},
 			'fold', {
-				^{ |value, domain| this.asOssiaVec(
-					value.collect({ |item, i|
-						item.fold(domain.min[i], domain.max[i]);
-					});
+				^{ | value, domain |
+
+					this.asOssiaVec(value.collect(
+						{ | item, i |
+							item.fold(domain.min[i], domain.max[i]);
+						}
+					);
 				)};
 			}, {
-				^{ |value, domain| domain[2].detect({ |item|
-					item == this.asOssiaVec(value) });
+				^{ | value, domain |
+
+					domain[2].detect(
+						{ | item |
+							item == this.asOssiaVec(value)
+						}
+					);
 				};
-		});
+			}
+		);
 	}
 }
 
-OSSIA_vec2f : OSSIA_FVector {
+OSSIA_vec2f : OSSIA_FVector
+{
+	*new { | v1 = 0.0, v2 = 0.0 | ^super.new(2, v1.asFloat, v2.asFloat) }
 
-	*new {|v1 = 0.0, v2 = 0.0|
-		^super.new(2, v1.asFloat, v2.asFloat);
-	}
+	*asOssiaVec { | anArray | ^[anArray[0].asFloat, anArray[1].asFloat] }
 
-	*asOssiaVec { |anArray|
-		^[anArray[0].asFloat, anArray[1].asFloat];
-	}
+	*ossiaDefaultValue { ^[0.0, 0.0] }
 
-	*ossiaDefaultValue { ^[0.0, 0.0]; }
+	*ossiaNaNFilter
+	{ | newVal, oldval |
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNil) { newVal[0] }
+		^[
+			if (newVal[0].isNil) { newVal[0] }
 			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
 			if (newVal[1].isNil) { newVal[1] }
-			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }} ];
+			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }}
+		];
 	}
 
 	*ossiaJson { ^"\"ff\"" }
 
-	*ossiaWidget { |anOssiaParameter|
+	*ossiaWidget
+	{ | anOssiaParameter |
+
 		var isCartesian = false, event;
 
-		if (anOssiaParameter.unit.notNil) {
-			if (anOssiaParameter.unit.string == "position.cart2D") { isCartesian = true; };
+		if (anOssiaParameter.unit.notNil)
+		{
+			if (anOssiaParameter.unit.string == "position.cart2D") { isCartesian = true };
 		};
 
-		if (isCartesian) {
+		if (isCartesian)
+		{
 			var specs = [ControlSpec(), ControlSpec()];
 			var width = anOssiaParameter.window.bounds.width;
 			var firstThird = (width / 1.64).asInteger;
@@ -125,13 +160,15 @@ OSSIA_vec2f : OSSIA_FVector {
 			event = { | param |
 				{
 					if (param.value != [param.widgets[0].value,
-						param.widgets[1].value]) {
+						param.widgets[1].value])
+					{
 						param.widgets[0].value_(param.value[0]);
 						param.widgets[1].value_(param.value[1]);
 					};
 
 					if (param.value != [specs[0].map(param.widgets[2].x),
-						specs[1].map(param.widgets[2].y)]) {
+						specs[1].map(param.widgets[2].y)])
+					{
 						param.widgets[2].x_(specs[0].unmap(param.value[0]));
 						param.widgets[2].y_(specs[1].unmap(param.value[1]));
 					};
@@ -144,39 +181,50 @@ OSSIA_vec2f : OSSIA_FVector {
 					bounds: (anOssiaParameter.window.bounds.width - 57)@20,
 					numberWidth: 45,
 					label: anOssiaParameter.name,
-					action: { | val | anOssiaParameter.value_([
-						val.value,
-						anOssiaParameter.value[1]
-				])}, gap: 4@0),
+					action: { | val |
+						anOssiaParameter.value_(
+							[
+								val.value,
+								anOssiaParameter.value[1]
+							]
+						)
+				}, gap: 4@0),
 				EZNumber(
 					parent: anOssiaParameter.window,
 					bounds: 45@20,
-					action:{ | val | anOssiaParameter.value_([
-						anOssiaParameter.value[0],
-						val.value
-				])}, gap:0@0)
+					action:{ | val |
+						anOssiaParameter.value_(
+							[
+								anOssiaParameter.value[0],
+								val.value
+							]
+						)
+				}, gap:0@0)
 			];
 
-			anOssiaParameter.widgets.do({ | item, i |
-				item.setColors(
-					stringColor:anOssiaParameter.window.view.palette.color('baseText', 'active'),
-					numNormalColor:anOssiaParameter.window.view.palette.color('windowText', 'active')
-				);
+			anOssiaParameter.widgets.do(
+				{ | item, i |
 
-				// set numberBoxes scroll step and colors
-				item.numberView.maxDecimals_(3)
-				.step_(0.001).scroll_step_(0.001);
+					item.setColors(
+						stringColor:anOssiaParameter.window.view.palette.color('baseText', 'active'),
+						numNormalColor:anOssiaParameter.window.view.palette.color('windowText', 'active')
+					);
 
-				if (anOssiaParameter.domain.min.notNil) {
-					item.controlSpec.minval_(anOssiaParameter.domain.min[i]);
-					item.controlSpec.maxval_(anOssiaParameter.domain.max[i]);
-					specs[i].minval_(anOssiaParameter.domain.min[i]);
-					specs[i].maxval_(anOssiaParameter.domain.max[i]);
-				};
+					// set numberBoxes scroll step and colors
+					item.numberView.maxDecimals_(3)
+					.step_(0.001).scroll_step_(0.001);
 
-				{ item.value_(anOssiaParameter.value[0]); }.defer;
+					if (anOssiaParameter.domain.min.notNil)
+					{
+						item.controlSpec.minval_(anOssiaParameter.domain.min[i]);
+						item.controlSpec.maxval_(anOssiaParameter.domain.max[i]);
+						specs[i].minval_(anOssiaParameter.domain.min[i]);
+						specs[i].maxval_(anOssiaParameter.domain.max[i]);
+					};
 
-			});
+					{ item.value_(anOssiaParameter.value[0]) }.defer;
+				}
+			);
 
 			anOssiaParameter.widgets = anOssiaParameter.widgets ++
 			Slider2D(
@@ -184,11 +232,15 @@ OSSIA_vec2f : OSSIA_FVector {
 				bounds: width@width)
 			.x_(specs[0].unmap(anOssiaParameter.value[0])) // initial location of x
 			.y_(specs[1].unmap(anOssiaParameter.value[1])) // initial location of y
-			.action_({ | val | anOssiaParameter.value_([
-				specs[0].map(val.x),
-				specs[1].map(val.y)
-			])
-			}).onClose_({ anOssiaParameter.removeDependant(event); });
+			.action_({ | val |
+
+				anOssiaParameter.value_(
+					[
+						specs[0].map(val.x),
+						specs[1].map(val.y)
+					]
+				)
+			}).onClose_({ anOssiaParameter.removeDependant(event) });
 
 			anOssiaParameter.widgets[2].focusColor_(
 				anOssiaParameter.window.view.palette.color('midlight', 'active'))
@@ -197,12 +249,11 @@ OSSIA_vec2f : OSSIA_FVector {
 			.knobColor_(
 				anOssiaParameter.window.view.palette.color('light', 'active')
 			);
-
 		} {
-
 			event = { | param |
 				{
-					if (param.value != param.widgets.value) {
+					if (param.value != param.widgets.value)
+					{
 						param.widgets.value_(param.value);
 					};
 				}.defer;
@@ -214,8 +265,8 @@ OSSIA_vec2f : OSSIA_FVector {
 				label: anOssiaParameter.name,
 				action: { | val | anOssiaParameter.value_(val.value); },
 				layout: 'line2',
-				gap:4@0).onClose_({ anOssiaParameter.removeDependant(event);
-			}).setColors(
+				gap:4@0).onClose_({ anOssiaParameter.removeDependant(event) })
+			.setColors(
 				stringColor:anOssiaParameter.window.view.palette.color('baseText', 'active'),
 				sliderColor:anOssiaParameter.window.view.palette.color('middark', 'active'),
 				numNormalColor:anOssiaParameter.window.view.palette.color('windowText', 'active'),
@@ -231,87 +282,119 @@ OSSIA_vec2f : OSSIA_FVector {
 			anOssiaParameter.widgets.loBox.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
 
-			if (anOssiaParameter.domain.min.notNil) {
+			if (anOssiaParameter.domain.min.notNil)
+			{
 				anOssiaParameter.widgets.controlSpec.minval_(anOssiaParameter.domain.min[0]);
 				anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
 			};
 
 			// set GUI value after min and max are set
-			{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer
+			{ anOssiaParameter.widgets.value_(anOssiaParameter.value) }.defer
 		};
 
 		anOssiaParameter.addDependant(event);
 	}
 }
 
-OSSIA_vec3f : OSSIA_FVector {
+OSSIA_vec3f : OSSIA_FVector
+{
+	*new
+	{ | v1 = 0.0, v2 = 0.0, v3 = 0.0 |
 
-	*new {|v1 = 0.0, v2 = 0.0, v3 = 0.0|
 		^super.new(3, v1.asFloat, v2.asFloat, v3.asFloat);
 	}
 
-	*asOssiaVec { |anArray|
+	*asOssiaVec
+	{ | anArray |
+
 		^[anArray[0].asFloat, anArray[1].asFloat, anArray[2].asFloat];
 	}
 
-	*ossiaDefaultValue { ^[0.0, 0.0, 0.0]; }
+	*ossiaDefaultValue { ^[0.0, 0.0, 0.0] }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNil) { newVal[0] }
-			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
+	*ossiaNaNFilter
+	{ | newVal, oldval |
+
+		^[
+			if (newVal[0].isNil) { newVal[0] }
+			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] } },
 			if (newVal[1].isNil) { newVal[1] }
-			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }},
+			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] } },
 			if (newVal[2].isNil) { newVal[2] }
-			{ if (newVal[2].isNaN) { oldval[2] } { newVal[2] }},];
+			{ if (newVal[2].isNaN) { oldval[2] } { newVal[2] } }
+		];
 	}
 
 	*ossiaJson { ^"\"fff\"" }
 
-	*ossiaWidget { |anOssiaParameter|
+	*ossiaWidget
+	{ | anOssiaParameter |
+
 		var isCartesian = false, event;
 
 		anOssiaParameter.widgets = [
 			EZNumber(anOssiaParameter.window, 196@20, anOssiaParameter.name,
-				action:{ | val | anOssiaParameter.value_([
-					val.value,
-					anOssiaParameter.value[1],
-					anOssiaParameter.value[2]
-			])}, labelWidth:100,
+				action:{ | val |
+
+					anOssiaParameter.value_(
+						[
+							val.value,
+							anOssiaParameter.value[1],
+							anOssiaParameter.value[2]
+						]
+					)
+				}, labelWidth:100,
 				initVal:anOssiaParameter.value[0],
 				gap:4@0),
 			EZNumber(anOssiaParameter.window, 94@20,
-				action:{ | val | anOssiaParameter.value_([
-					anOssiaParameter.value[0],
-					val.value,
-					anOssiaParameter.value[2],
-			])}, initVal:anOssiaParameter.value[1],
+				action:{ | val |
+
+					anOssiaParameter.value_(
+						[
+							anOssiaParameter.value[0],
+							val.value,
+							anOssiaParameter.value[2]
+						]
+					)
+				}, initVal:anOssiaParameter.value[1],
 				gap:0@0),
 			EZNumber(anOssiaParameter.window, 94@20,
-				action:{ | val | anOssiaParameter.value_([
-					anOssiaParameter.value[0],
-					anOssiaParameter.value[1],
-					val.value
-			])}, initVal:anOssiaParameter.value[2],
-				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event); });
+				action:{ | val |
+
+					anOssiaParameter.value_(
+						[
+							anOssiaParameter.value[0],
+							anOssiaParameter.value[1],
+							val.value
+						]
+					)
+				}, initVal:anOssiaParameter.value[2],
+				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event) });
 		];
 
-		anOssiaParameter.widgets.do({ | item |
-			item.setColors(stringColor:OSSIA.palette.color('baseText', 'active'),
-			numNormalColor:OSSIA.palette.color('windowText', 'active'));
+		anOssiaParameter.widgets.do(
+			{ | item |
 
-			// set numberBoxes scroll step and colors
-			item.numberView.maxDecimals_(3)
-			.step_(0.001).scroll_step_(0.001);
-		});
+				item.setColors(stringColor:OSSIA.palette.color('baseText', 'active'),
+					numNormalColor:OSSIA.palette.color('windowText', 'active'));
 
-		if (anOssiaParameter.unit.notNil) {
-			if (anOssiaParameter.unit.string == "position.cart3D") { isCartesian = true; };
+				// set numberBoxes scroll step and colors
+				item.numberView.maxDecimals_(3)
+				.step_(0.001).scroll_step_(0.001);
+			}
+		);
+
+		if (anOssiaParameter.unit.notNil)
+		{
+			if (anOssiaParameter.unit.string == "position.cart3D") { isCartesian = true };
 		};
 
-		if (isCartesian) {
+		if (isCartesian)
+		{
 			var specX = ControlSpec(), specY = ControlSpec(), specZ = ControlSpec(), sliders;
 
-			if(anOssiaParameter.domain.min.notNil) {
+			if(anOssiaParameter.domain.min.notNil)
+			{
 				anOssiaParameter.widgets[0].controlSpec.minval_(anOssiaParameter.domain.min[0]);
 				anOssiaParameter.widgets[1].controlSpec.minval_(anOssiaParameter.domain.min[1]);
 				anOssiaParameter.widgets[0].controlSpec.maxval_(anOssiaParameter.domain.max[0]);
@@ -330,32 +413,45 @@ OSSIA_vec3f : OSSIA_FVector {
 				Slider2D(anOssiaParameter.window, 368@368)
 				.x_(specX.unmap(anOssiaParameter.value[0])) // initial value of x
 				.y_(specY.unmap(anOssiaParameter.value[1])) // initial value of y
-				.action_({ | val | anOssiaParameter.value_(
-					[
-						specX.map(val.x),
-						specY.map(val.y),
-						anOssiaParameter.value[2]
-					]
-				)}),
+				.action_(
+					{ | val |
+
+						anOssiaParameter.value_(
+							[
+								specX.map(val.x),
+								specY.map(val.y),
+								anOssiaParameter.value[2]
+							]
+						)
+					}
+				),
 				Slider(anOssiaParameter.window, 20@368)
 				.orientation_(\vertical)
 				.value_(specZ.unmap(anOssiaParameter.value[2])) // initial value of z
-				.action_({ | val | anOssiaParameter.value_(
-					[
-						anOssiaParameter.value[0],
-						anOssiaParameter.value[1],
-						specZ.map(val.value)
-					]
-				)})
+				.action_(
+					{ | val |
+
+						anOssiaParameter.value_(
+							[
+								anOssiaParameter.value[0],
+								anOssiaParameter.value[1],
+								specZ.map(val.value)
+							]
+						)
+					}
+				)
 			];
 
-			sliders.do({ | item |
-				item.focusColor_(
-					OSSIA.palette.color('midlight', 'active'))
-				.background_(
-					OSSIA.palette.color('middark', 'active'))
-				.knobColor_(OSSIA.palette.color('light', 'active'));
-			});
+			sliders.do(
+				{ | item |
+
+					item.focusColor_(
+						OSSIA.palette.color('midlight', 'active'))
+					.background_(
+						OSSIA.palette.color('middark', 'active'))
+					.knobColor_(OSSIA.palette.color('light', 'active'));
+				}
+			);
 
 			anOssiaParameter.widgets = anOssiaParameter.widgets ++ sliders;
 
@@ -363,7 +459,8 @@ OSSIA_vec3f : OSSIA_FVector {
 				{
 					if (param.value != [param.widgets[0].value,
 						param.widgets[1].value,
-						param.widgets[2].value]) {
+						param.widgets[2].value])
+					{
 						param.widgets[0].value_(param.value[0]);
 						param.widgets[1].value_(param.value[1]);
 						param.widgets[2].value_(param.value[2]);
@@ -371,8 +468,8 @@ OSSIA_vec3f : OSSIA_FVector {
 
 					if (param.value != [specX.map(param.widgets[3].x),
 						specY.map(param.widgets[3].y),
-						specZ.map(param.widgets[4].value)]
-					) {
+						specZ.map(param.widgets[4].value)])
+					{
 						param.widgets[3].x_(specX.unmap(param.value[0]));
 						param.widgets[3].y_(specY.unmap(param.value[1]));
 						param.widgets[4].value_(specZ.unmap(param.value[2]));
@@ -382,7 +479,8 @@ OSSIA_vec3f : OSSIA_FVector {
 
 		} {
 
-			if(anOssiaParameter.domain.min.notNil) {
+			if(anOssiaParameter.domain.min.notNil)
+			{
 				anOssiaParameter.widgets[0].controlSpec.minval_(anOssiaParameter.domain.min[0]);
 				anOssiaParameter.widgets[0].controlSpec.maxval_(anOssiaParameter.domain.max[0]);
 				anOssiaParameter.widgets[1].controlSpec.minval_(anOssiaParameter.domain.min[1]);
@@ -395,10 +493,11 @@ OSSIA_vec3f : OSSIA_FVector {
 				{
 					if (param.value != [param.widgets[0].value,
 						param.widgets[1].value,
-						param.widgets[2].value]) {
+						param.widgets[2].value])
+					{
 						param.widgets[0].value_(param.value[0]);
-							param.widgets[1].value_(param.value[1]);
-							param.widgets[2].value_(param.value[2]);
+						param.widgets[1].value_(param.value[1]);
+						param.widgets[2].value_(param.value[2]);
 					}
 				}.defer;
 			};
@@ -408,39 +507,50 @@ OSSIA_vec3f : OSSIA_FVector {
 	}
 }
 
-OSSIA_vec4f : OSSIA_FVector {
+OSSIA_vec4f : OSSIA_FVector
+{
 
-	*new {|v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0|
+	*new
+	{ | v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0 |
+
 		^super.new(4, v1.asFloat, v2.asFloat, v3.asFloat, v4.asFloat);
 	}
 
-	*asOssiaVec { |anArray|
+	*asOssiaVec
+	{ | anArray |
+
 		^[anArray[0].asFloat, anArray[1].asFloat,  anArray[2].asFloat,  anArray[3].asFloat];
 	}
 
-	*ossiaDefaultValue { ^[0.0, 0.0, 0.0, 0.0]; }
+	*ossiaDefaultValue { ^[0.0, 0.0, 0.0, 0.0] }
 
-	*ossiaNaNFilter { |newVal, oldval|
-		^[if (newVal[0].isNil) { newVal[0] }
+	*ossiaNaNFilter
+	{ | newVal, oldval |
+
+		^[
+			if (newVal[0].isNil) { newVal[0] }
 			{ if (newVal[0].isNaN) { oldval[0] } { newVal[0] }},
 			if (newVal[1].isNil) { newVal[1] }
 			{ if (newVal[1].isNaN) { oldval[1] } { newVal[1] }},
 			if (newVal[2].isNil) { newVal[2] }
 			{ if (newVal[2].isNaN) { oldval[2] } { newVal[2] }},
 			if (newVal[3].isNil) { newVal[3] }
-			{ if (newVal[3].isNaN) { oldval[3] } { newVal[3] }} ];
+			{ if (newVal[3].isNaN) { oldval[3] } { newVal[3] }}
+		];
 	}
 
 	*ossiaJson { ^"\"ffff\"" }
 
-	*ossiaWidget { |anOssiaParameter|
+	*ossiaWidget
+	{ | anOssiaParameter |
 
 		var event = { | param |
 			{
 				if (param.value != [param.widgets[0].value,
 					param.widgets[1].value,
 					param.widgets[2].value,
-					param.widgets[3].value]) {
+					param.widgets[3].value])
+				{
 					param.widgets[0].value_(param.value[0]);
 					param.widgets[1].value_(param.value[1]);
 					param.widgets[2].value_(param.value[2]);

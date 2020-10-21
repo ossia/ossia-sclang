@@ -6,18 +6,16 @@
  * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
  */
 
-+ Impulse {
-
++ Impulse
+{
 	*ossiaWsWrite
-	{
-		| anOssiaParameter, ws |
+	{ | anOssiaParameter, ws |
 
 		ws.writeOsc(anOssiaParameter.path);
 	}
 
 	*ossiaSendMsg
-	{
-		| anOssiaParameter, addr |
+	{ | anOssiaParameter, addr |
 
 		addr.sendMsg(anOssiaParameter.path);
 	}
@@ -31,19 +29,13 @@
 	*ossiaJson { ^"\"I\"" }
 
 	*ossiaWidget
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
-		if (anOssiaParameter.domain.values == [])
-		{
-			OSSIA.makeButtonGui(anOssiaParameter);
+		OSSIA.makeButtonGui(anOssiaParameter);
 
-			// Impulse specific states and action
-			anOssiaParameter.widgets.states_([
-				["Pulse"]
-			]).action_({ | val | anOssiaParameter.value_() });
-		} {
-			OSSIA.makeDropDownGui(anOssiaParameter);
-		};
+		// Impulse specific states and action
+		anOssiaParameter.widgets.states_([
+			["Pulse"]
+		]).action_({ | val | anOssiaParameter.value_() });
 	}
 }

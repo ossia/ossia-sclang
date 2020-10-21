@@ -6,25 +6,22 @@
  * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
  */
 
-+ Float {
-
++ Float
+{
 	*ossiaWsWrite
-	{
-		| anOssiaParameter, ws |
+	{ | anOssiaParameter, ws |
 
 		ws.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 	}
 
 	*ossiaSendMsg
-	{
-		| anOssiaParameter, addr |
+	{ | anOssiaParameter, addr |
 
 		addr.sendRaw(([anOssiaParameter.path] ++ anOssiaParameter.value).asRawOSC);
 	}
 
 	*ossiaBounds
-	{
-		| mode |
+	{ | mode |
 
 		switch(mode,
 			'free', {
@@ -45,8 +42,7 @@
 			'fold', {
 				^{ | value, domain | value.fold(domain.min, domain.max).asFloat };
 			}, {
-				^{
-					| value, domain |
+				^{ | value, domain |
 
 					domain[2].detect(
 						{ | item | item == value.asFloat };
@@ -59,8 +55,7 @@
 	*ossiaDefaultValue { ^0.0 }
 
 	*ossiaNaNFilter
-	{
-		| newVal, oldval |
+	{ | newVal, oldval |
 
 		if (newVal.isNil) { ^newVal }
 		{ if (newVal.isNaN) { ^oldval } { ^newVal } };
@@ -69,8 +64,7 @@
 	*ossiaJson { ^"\"f\"" }
 
 	*ossiaWidget
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		if (anOssiaParameter.domain.values == [])
 		{
