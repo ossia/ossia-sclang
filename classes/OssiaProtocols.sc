@@ -18,25 +18,33 @@ OSSIA_OSCProtocol
 	var device;
 	var netAddr;
 
-	*new { |remoteAddr, remotePort, localPort, device|
+	*new
+	{ | remoteAddr, remotePort, localPort, device |
+
 		^this.newCopyArgs(remoteAddr, remotePort, localPort, device).oscProtocolCtor;
 	}
 
-	oscProtocolCtor {
+	oscProtocolCtor
+	{
 		netAddr = NetAddr(remoteAddr, remotePort);
 		device.tree(parameters_only: true).do(this.instantiateParameter(_));
 	}
 
-	push { |anOssiaParameter|
+	push
+	{ | anOssiaParameter |
+
 		anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 	}
 
-	instantiateParameter { |anOssiaParameter|
+	instantiateParameter
+	{ | anOssiaParameter |
+
 		var path = anOssiaParameter.path;
 
 		OSCFunc(
-			{ |msg|
-				if (msg.size == 2) {
+			{ | msg |
+				if (msg.size == 2)
+				{
 					anOssiaParameter.valueQuiet(msg[1]);
 				} {
 					msg.removeAt(0);
@@ -48,11 +56,14 @@ OSSIA_OSCProtocol
 		this.push(anOssiaParameter);
 	}
 
-	freeParameter { |anOssiaParameter|
+	freeParameter
+	{ | anOssiaParameter |
+
 		OSCdef(anOssiaParameter.path.asSymbol).free;
 	}
 
-	free {
+	free
+	{
 		device.tree(parameters_only: true).do(this.freeParameter(_));
 		^super.free;
 	}
@@ -75,12 +86,14 @@ OSSIA_OSCQSProtocol
 	var json_tree;
 	var <dictionary;
 
-	*new { |name, osc_port, ws_port, device|
+	*new
+	{ | name, osc_port, ws_port, device |
+
 		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
 	}
 
-	oscQuerryProtocolCtor {
-
+	oscQuerryProtocolCtor
+	{
 		netAddr = [];
 		ws_server = WebSocketServer(ws_port).granularity_(25);
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
@@ -111,56 +124,60 @@ OSSIA_OSCQSProtocol
 		++"}"
 		++"}";
 
-		ws_server.onNewConnection = { |con|
+		ws_server.onNewConnection = { | con |
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
 
-			con.onTextMessageReceived = { |msg|
+			con.onTextMessageReceived = { | msg |
 				var command = msg.parseYAML;
+
 				postln(format("[websocket-server] new message from: %:%", con.address, con.port));
 				postln(msg);
+
 				switch (command["COMMAND"],
-					"START_OSC_STREAMING", {
-						netAddr = netAddr.add(NetAddr(con.address, command["DATA"]["LOCAL_SERVER_PORT"].asInteger));
-					}, "LISTEN", {
-						dictionary.at(command["DATA"].asSymbol).listening_(true);
-					}, "IGNORE", {
-						dictionary.at(command["DATA"].asSymbol).listening_(false);
-				});
+					"START_OSC_STREAMING",
+					{ netAddr = netAddr.add(NetAddr(con.address, command["DATA"]["LOCAL_SERVER_PORT"].asInteger)) },
+					"LISTEN",
+					{ dictionary.at(command["DATA"].asSymbol).listening_(true) },
+					"IGNORE",
+					{ dictionary.at(command["DATA"].asSymbol).listening_(false) }
+				);
 			};
 
-			con.onOscMessageReceived = { |array|
+			con.onOscMessageReceived = { | array |
+
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
+
 				dictionary.at(array[0].asSymbol).valueQuiet(array[1]);
 			};
 		};
 
-		ws_server.onHttpRequestReceived = { |req|
+		ws_server.onHttpRequestReceived = { | req |
 
 			postln("[http-server] request received");
 			postln(format("[http-server] uri: %", req.uri));
 			postln(req.query);
 
-			if (req.query == "VALUE") {
+			if (req.query == "VALUE")
+			{
 				var param = dictionary.at(req.uri.asSymbol);
 
-				switch(param.type,
-						{ String },
-						{ req.replyJson("{\"VALUE\": \""
-							++ param.value ++"\"}"); },
-						{ Char },
-						{ req.replyJson("{\"VALUE\": \'"
-							++ param.value ++"\'}"); },
-						{ req.replyJson("{\"VALUE\": "
-							++ param.value ++"}"); }
-					);
+				switch (param.type,
+					String,
+					{ req.replyJson("{\"VALUE\": \"" ++ param.value ++"\"}") },
+					Char,
+					{ req.replyJson("{\"VALUE\": \'" ++ param.value ++"\'}") },
+					{ req.replyJson("{\"VALUE\": " ++ param.value ++"}") }
+				);
 
 				this.push(dictionary.at(req.uri.asSymbol));
 				postln(format("[http-server] reply sent"));
 			};
 
-			if (req.uri == "/") {
-				if (req.query == "HOST_INFO") {
+			if (req.uri == "/")
+			{
+				if (req.query == "HOST_INFO")
+				{
 					req.replyJson(host_info);
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
@@ -169,17 +186,20 @@ OSSIA_OSCQSProtocol
 			}
 		};
 
-		ws_server.onDisconnection = { |con|
+		ws_server.onDisconnection = { | con |
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 
 		device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
 	}
 
-	push { |anOssiaParameter|
+	push
+	{ | anOssiaParameter |
 
-		ws_server.numConnections.do({ |iter|
-			if (anOssiaParameter.critical) {
+		ws_server.numConnections.do({ | iter |
+
+			if (anOssiaParameter.critical)
+			{
 				ws_server[iter].port.postln;
 				anOssiaParameter.type.ossiaWsWrite(anOssiaParameter, ws_server[iter]);
 			} {
@@ -188,17 +208,20 @@ OSSIA_OSCQSProtocol
 		});
 	}
 
-	instantiateParameter { |anOssiaParameter|
+	instantiateParameter
+	{ | anOssiaParameter |
 
 		dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
 
-		if (anOssiaParameter.critical.not) {
-
+		if (anOssiaParameter.critical.not)
+		{
 			var path = anOssiaParameter.path;
 
 			OSCFunc(
-				{ |msg|
-					if (msg.size == 2) {
+				{ | msg |
+
+					if (msg.size == 2)
+					{
 						anOssiaParameter.valueQuiet(msg[1]);
 					} {
 						msg.removeAt(0);
@@ -208,16 +231,18 @@ OSSIA_OSCQSProtocol
 		};
 	}
 
-	freeParameter { |anOssiaNode|
+	freeParameter
+	{ | anOssiaNode |
 
-		if (anOssiaNode.class == OSSIA_Parameter) {
-			if (anOssiaNode.critical.not) {
-				OSCdef(anOssiaNode.path.asSymbol).free;
-			};
+		if (anOssiaNode.class == OSSIA_Parameter)
+		{
+			if (anOssiaNode.critical.not)
+			{ OSCdef(anOssiaNode.path.asSymbol).free };
 		};
 	}
 
-	free {
+	free
+	{
 		device.tree().flat.do(this.freeParameter(_));
 		^super.free;
 	}
@@ -225,13 +250,14 @@ OSSIA_OSCQSProtocol
 
 OSSIA_Tree
 {
-	*stringify { |ossiaNodes|
+	*stringify
+	{ | ossiaNodes |
 
 		var json = "";
 
-		if (ossiaNodes.isArray) {
-
-			ossiaNodes.do({ |item, count|
+		if (ossiaNodes.isArray)
+		{
+			ossiaNodes.do({ | item, count |
 				json = json
 				++ if (count == 0) {"{"} {","}
 				++ item.json
@@ -261,27 +287,32 @@ OSSIA_OSCQMProtocol
 	var host_info;
 	var <dictionary;
 
-	*new { |host_addr, device|
+	*new
+	{ | host_addr, device |
+
 		^this.newCopyArgs(host_addr, device).oscQuerryProtocolCtor;
 	}
 
-	oscQuerryProtocolCtor {
-
+	oscQuerryProtocolCtor
+	{
 		ws_client = WebSocketClient();
 		dictionary = IdentityDictionary.new;
 
-		zeroconf_service = ZeroconfBrowser("_oscjson._tcp", host_addr, { |target|
-			postln(format("[zeroconf] target resolved: % (%) at address: %:%",
-				target.name, target.domain, target.address, target.port));
+		zeroconf_service = ZeroconfBrowser("_oscjson._tcp", host_addr,
+			{ | target |
 
-			target.onDisconnected = {
-				postln(format("[zeroconf] target % is now offline", target.name));
-				this.free;
-			};
+				postln(format("[zeroconf] target resolved: % (%) at address: %:%",
+					target.name, target.domain, target.address, target.port));
 
-			ws_client.connect(target.address, target.port);
-			netAddr = NetAddr(target.address.asString);
-		});
+				target.onDisconnected = {
+					postln(format("[zeroconf] target % is now offline", target.name));
+					this.free;
+				};
+
+				ws_client.connect(target.address, target.port);
+				netAddr = NetAddr(target.address.asString);
+			}
+		);
 
 		ws_client.onConnected = {
 			// client connection callback
@@ -292,25 +323,26 @@ OSSIA_OSCQMProtocol
 			ws_client.request("/");
 		};
 
-		ws_client.onTextMessageReceived = { |msg|
+		ws_client.onTextMessageReceived = { | msg |
 			var command = msg.parseYAML;
 			postln(format("[websocket-client] new message from: %:%", msg));
 			postln(msg);
 
 			switch (command["COMMAND"],
-					"LISTEN", {
-					dictionary.at(command["DATA"].asSymbol).listening_(true);
-				}, "IGNORE", {
-					dictionary.at(command["DATA"].asSymbol).listening_(false);
-			});
+				"LISTEN",
+				{ dictionary.at(command["DATA"].asSymbol).listening_(true) },
+				"IGNORE",
+				{ dictionary.at(command["DATA"].asSymbol).listening_(false) }
+			);
 		};
 
-		ws_client.onOscMessageReceived = { |array|
+		ws_client.onOscMessageReceived = { | array |
 			//postln(format("[websocket-client] new osc message", array));
 
 			var address = array[0].asSymbol;
 
-			if (array.size == 2) {
+			if (array.size == 2)
+			{
 				dictionary.at(address).do(_.valueQuiet(array[1]));
 			} {
 				array.removeAt(0);
@@ -318,62 +350,71 @@ OSSIA_OSCQMProtocol
 			};
 		};
 
-		ws_client.onHttpReplyReceived = { |reply|
+		ws_client.onHttpReplyReceived = { | reply |
 			var json = reply.body.parseYAML;
 			postln(format("[http-client] reply from server for uri: %, %", reply.uri, reply.body));
 
-			if (json["FULL_PATH"] == "/") {
+			if (json["FULL_PATH"] == "/")
+			{
 				this.setupIdentityDict(json["CONTENTS"]);
 				device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
 			};
 
-			if (json["OSC_PORT"].notNil) {
+			if (json["OSC_PORT"].notNil)
+			{
 				netAddr.port_(json["OSC_PORT"].asInteger);
 			};
 		};
 
-		ws_client.onDisconnected = { |con|
+		ws_client.onDisconnected = { | con |
 			postln(format("[websocket-client] client %:% disconnected", con.address, con.port));
 		};
 	}
 
-	push { |anOssiaParameter|
+	push
+	{ | anOssiaParameter |
 
-		if (anOssiaParameter.critical) {
+		if (anOssiaParameter.critical)
+		{
 			ws_client.writeOsc(anOssiaParameter.path, anOssiaParameter.value);
 		} {
 			anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 		};
 	}
 
-	setupIdentityDict { |aDictionaryAray|
+	setupIdentityDict
+	{ | aDictionaryAray |
 
-		aDictionaryAray.do({ |aDictionary|
+		aDictionaryAray.do({ | aDictionary |
+
 			if (aDictionary["VALUE"].notNil) { dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); }; // only keep parameters
 			if (aDictionary["CONTENTS"].notNil) { this.setupIdentityDict(aDictionary["CONTENTS"]); };
 		});
 	}
 
-	instantiateParameter { |anOssiaParameter|
+	instantiateParameter
+	{ | anOssiaParameter |
 
 		var key = anOssiaParameter.path.asSymbol;
 
-		if (dictionary.includesKey(key)) {
-			dictionary.put(key,
-				dictionary.at(dictionary).add(anOssiaParameter));
+		if (dictionary.includesKey(key))
+		{
+			dictionary.put(key, dictionary.at(dictionary).add(anOssiaParameter));
 		};
 	}
 
-	freeParameter { |anOssiaNode|
+	freeParameter
+	{ | anOssiaNode |
 
-		if (anOssiaNode.class == OSSIA_Parameter) {
-			if (anOssiaNode.critical.not) {
-				OSCdef(anOssiaNode.path.asSymbol).free;
-			};
+		if (anOssiaNode.class == OSSIA_Parameter)
+		{
+			if (anOssiaNode.critical.not)
+			{ OSCdef(anOssiaNode.path.asSymbol).free };
 		};
 	}
 
-	free {
+	free
+	{
 		device.tree().flat.do(this.freeParameter(_));
 		^super.free;
 	}

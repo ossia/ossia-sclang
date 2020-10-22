@@ -54,59 +54,64 @@ OSSIA_FVector
 		| mode |
 
 		switch (mode,
-			'free', {
-				^{ | value, domain | this.asOssiaVec(value) };
-			},
-			'clip', {
+			'free',
+			{ ^{ | value, domain | this.asOssiaVec(value) } },
+			'clip',
+			{
 				^{ | value, domain |
 
 					this.asOssiaVec(value.collect(
 						{ | item, i |
 							item.clip(domain.min[i], domain.max[i]);
 						}
-					);
-				)};
+					))
+				};
 			},
-			'low', {
+			'low',
+			{
 				^{ | value, domain |
 
 					this.asOssiaVec(value.collect(
 						{ | item, i |
 							item.max(domain.min[i])
 						}
-					);
-				)};
+					))
+				};
 			},
-			'high', {
+			'high',
+			{
 				^{ | value, domain |
 
 					this.asOssiaVec(value.collect(
 						{ | item, i |
 							item.min(domain.max[i])
 						}
-					);
-				)};
+					))
+				};
 			},
-			'wrap', {
+			'wrap',
+			{
 				^{ | value, domain |
 
 					this.asOssiaVec(value.collect(
 						{ | item, i |
 							item.wrap(domain.min[i], domain.max[i]);
 						}
-					);
-				)};
+					))
+				};
 			},
-			'fold', {
+			'fold',
+			{
 				^{ | value, domain |
 
 					this.asOssiaVec(value.collect(
 						{ | item, i |
 							item.fold(domain.min[i], domain.max[i]);
 						}
-					);
-				)};
-			}, {
+					))
+				};
+			},
+			{
 				^{ | value, domain |
 
 					domain[2].detect(

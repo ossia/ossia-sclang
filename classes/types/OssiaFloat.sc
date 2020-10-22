@@ -23,25 +23,20 @@
 	*ossiaBounds
 	{ | mode |
 
-		switch(mode,
-			'free', {
-				^{ | value, domain | value.asFloat };
-			},
-			'clip', {
-				^{ | value, domain | value.clip(domain.min, domain.max).asFloat };
-			},
-			'low', {
-				^{ | value, domain | value.max(domain.min).asFloat };
-			},
-			'high', {
-				^{ | value, domain | value.min(domain.max).asFloat };
-			},
-			'wrap', {
-				^{ | value, domain | value.wrap(domain.min, domain.max).asFloat };
-			},
-			'fold', {
-				^{ | value, domain | value.fold(domain.min, domain.max).asFloat };
-			}, {
+		switch (mode,
+			'free',
+			{ ^{ | value, domain | value.asFloat } },
+			'clip',
+			{ ^{ | value, domain | value.clip(domain.min, domain.max).asFloat } },
+			'low',
+			{ ^{ | value, domain | value.max(domain.min).asFloat } },
+			'high',
+			{ ^{ | value, domain | value.min(domain.max).asFloat } },
+			'wrap',
+			{ ^{ | value, domain | value.wrap(domain.min, domain.max).asFloat } },
+			'fold',
+			{ ^{ | value, domain | value.fold(domain.min, domain.max).asFloat } },
+			{
 				^{ | value, domain |
 
 					domain[2].detect(

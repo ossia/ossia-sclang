@@ -10,8 +10,8 @@
 //                    NODE                   //
 //-------------------------------------------//
 
-OSSIA_Node {
-
+OSSIA_Node
+{
 	var <parent;
 	var <name;
 	var <path;
@@ -21,18 +21,16 @@ OSSIA_Node {
 	var m_ptr_data;
 	var <window;
 
-	addChild { |anOssiaNode|
-		children = children.add(anOssiaNode);
-	}
+	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
 
-	*new { |parent, name|
-		^super.newCopyArgs(parent, name).nodeCtor();
-	}
+	*new { | parent, name | ^super.newCopyArgs(parent, name).nodeCtor() }
 
-	nodeCtor {
+	nodeCtor
+	{
 		var parent_path = parent.path;
 
-		if (parent_path != $/) {
+		if (parent_path != $/)
+		{
 			device = parent.device;
 			path = parent_path++$/++name;
 		} {
@@ -44,20 +42,23 @@ OSSIA_Node {
 		children = [];
 	}
 
-	tree { |with_attributes = false, parameters_only = false|
+	tree
+	{ | with_attributes = false, parameters_only = false |
 
-		if (parameters_only) {
+		if (parameters_only)
+		{
 			^this.paramExplore;
 		} {
 			^this.nodeExplore;
 		}
 	}
 
-	nodeExplore { ^[this, children.collect(_.nodeExplore)]; }
+	nodeExplore { ^[this, children.collect(_.nodeExplore)] }
 
-	paramExplore { ^[children.collect(_.paramExplore)]; }
+	paramExplore { ^[children.collect(_.paramExplore)] }
 
-	free {
+	free
+	{
 		children.collect(_.free);
 		parent.children.remove(this);
 		^super.free;
@@ -67,7 +68,8 @@ OSSIA_Node {
 	//                   JSON                    //
 	//-------------------------------------------//
 
-	json {
+	json
+	{
 		^"\""++ name ++"\":"
 		++"{\"FULL_PATH\":\""++ path ++"\""
 		++ this.jsonParams
@@ -80,21 +82,24 @@ OSSIA_Node {
 		++"}"
 	}
 
-	jsonParams { ^""; }
+	jsonParams { ^"" }
 
 	//-------------------------------------------//
 	//                    GUI                    //
 	//-------------------------------------------//
 
-	gui { |parent_window, childrenDepth = 1|
+	gui
+	{ | parent_window, childrenDepth = 1 |
 
 		this.windowIfNeeded(parent_window);
 		this.childGui(childrenDepth);
 	}
 
-	windowIfNeeded { |win|
+	windowIfNeeded
+	{ | win |
 
-		if (win.isNil) {
+		if (win.isNil)
+		{
 			window = Window(name).front; // resize later to the flow layout size
 			window.view.palette_(OSSIA.palette);
 			window.view.background_(OSSIA.palette.base);
@@ -104,10 +109,12 @@ OSSIA_Node {
 		};
 	}
 
-	childGui { |childrenDepth|
+	childGui
+	{ | childrenDepth |
 
-		if (childrenDepth > 0) {
-			children.do({ |item|
+		if (childrenDepth > 0)
+		{
+			children.do({ | item |
 				item.gui(window, childrenDepth - 1);
 			});
 		};
@@ -208,8 +215,8 @@ OSSIA_Node {
 
 }
 
-OSSIA_Parameter : OSSIA_Node {
-
+OSSIA_Parameter : OSSIA_Node
+{
 	var <value;
 	var <type;
 	var <domain;
@@ -222,41 +229,49 @@ OSSIA_Parameter : OSSIA_Node {
 	var >listening = true;
 	var <>widgets;
 
-	*new { |parent_node, name, type, domain, default_value,
+	*new
+	{ | parent_node, name, type, domain, default_value,
 		bounding_mode = 'free', critical = false,
-		repetition_filter = false|
+		repetition_filter = false |
 
 		^super.new(parent_node, name).parameterCtor(type, domain, default_value,
 			bounding_mode, critical, repetition_filter);
 	}
 
-	*array { |size, parent_node, name, type, domain, default_value,
-		bounding_mode = 'free', critical = false , repetition_filter = false|
+	*array
+	{ | size, parent_node, name, type, domain, default_value, bounding_mode = 'free',
+		critical = false , repetition_filter = false |
 
-		^Array.fill(size, {|i|
+		^Array.fill(size, { | i |
 			OSSIA_Parameter(parent_node, name ++ '_' ++ i, type, domain,
 				default_value, bounding_mode, critical, repetition_filter);
 		});
 	}
 
-	parameterCtor { |tp, dm, dv, bm, cl, rf|
+	parameterCtor
+	{ | tp, dm, dv, bm, cl, rf
+		|
 		var dom_slot, df_val­­­­­­;
 
-		switch(tp.class,
+		switch (tp.class,
 			Meta_Symbol, { type = String },
 			Meta_List, { type = Array },
 			{ type = tp };
 		);
 
-		if (dm.isNil) {
+		if (dm.isNil)
+		{
 			dom_slot = [nil, nil, []];
-		} { dom_slot = dm; };
+		} {
+			dom_slot = dm;
+		};
 
-		if (dom_slot.size != 3) { dom_slot = dom_slot.add([]); };
+		if (dom_slot.size != 3) { dom_slot = dom_slot.add([]) };
 
 		domain = OSSIA_domain(dom_slot[0], dom_slot[1], dom_slot[2], type);
 
-		if (dv.isNil) {
+		if (dv.isNil)
+		{
 			df_val = type.ossiaDefaultValue();
 		} {
 			df_val = dv;
@@ -273,9 +288,10 @@ OSSIA_Parameter : OSSIA_Node {
 		m_callback = {};
 	}
 
-	paramExplore { ^[this, children.collect(_.paramExplore)]; }
+	paramExplore { ^[this, children.collect(_.paramExplore)] }
 
-	free {
+	free
+	{
 		children.collect(_.free);
 		device.freeParameter(this);
 		parent.children.remove(this);
@@ -286,12 +302,16 @@ OSSIA_Parameter : OSSIA_Node {
 	//                PROPERTIES                 //
 	//-------------------------------------------//
 
-	value_ { |v|
+	value_
+	{ | v |
+
 		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
 
-		if (access_mode != 1) { // if differnet from get
+		if (access_mode != 1)
+		{ // if differnet from get
 
-			if (repetition_filter.nand(handle_value == value)) {
+			if (repetition_filter.nand(handle_value == value))
+			{
 				value = handle_value;
 
 				this.changed();
@@ -302,12 +322,16 @@ OSSIA_Parameter : OSSIA_Node {
 		};
 	}
 
-	valueQuiet { |v| // same as value_ without sending the updated value back to the device
+	valueQuiet
+	{ | v | // same as value_ without sending the updated value back to the device
+
 		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
 
-		if (access_mode != 1) { // if differnet from get
+		if (access_mode != 1)
+		{ // if differnet from get
 
-			if (repetition_filter.nand( (handle_value == value) )) {
+			if (repetition_filter.nand( (handle_value == value) ))
+			{
 				value = handle_value;
 
 				this.changed();
@@ -316,7 +340,9 @@ OSSIA_Parameter : OSSIA_Node {
 		};
 	}
 
-	domain_ { |min, max, values|
+	domain_
+	{ | min, max, values |
+
 		var recall_mode = bounding_mode.md;
 
 		bounding_mode.free;
@@ -326,26 +352,26 @@ OSSIA_Parameter : OSSIA_Node {
 		bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
 	}
 
-	bounding_mode_ { |mode|
+	bounding_mode_
+	{ | mode |
 
 		bounding_mode.free;
 		bounding_mode = OSSIA_bounding_mode(mode, type, domain);
 	}
 
-	unit_ { | anOssiaUnit |
+	unit_
+	{ | anOssiaUnit |
+
 		if (unit.notNil) { unit.free };
 		unit = anOssiaUnit;
 	}
 
-	access_mode_ { | anOssiaAccessMode |
-		access_mode = anOssiaAccessMode;
-	}
+	access_mode_ { | anOssiaAccessMode | access_mode = anOssiaAccessMode }
 
-	critical_ { |aBool|
-		critical = aBool;
-	}
+	critical_ { | aBool | critical = aBool }
 
-	jsonParams {
+	jsonParams
+	{
 		^",\"TYPE\":"++ type.ossiaJson
 		++ ",\"VALUE\":"
 		++ if (type == String) {
@@ -391,7 +417,8 @@ OSSIA_Parameter : OSSIA_Node {
 
 	callback { ^m_callback }
 
-	callback_ { |callback_function|
+	callback_
+	{ | callback_function |
 
 		// if(m_callback.notNil()) { this.removeDependant(m_callback); };
 
@@ -399,40 +426,42 @@ OSSIA_Parameter : OSSIA_Node {
 	}
 
 	// interpreter callback from attached ossia lambda
-	pvOnCallback {
-		m_callback.value(value);
-	}
+	pvOnCallback { m_callback.value(value) }
 
 	//-------------------------------------------//
 	//            SHORTCUTS & ALIASES            //
 	//-------------------------------------------//
 
 	v { ^this.value() }
-	v_ { |value| this.value_(value) }
-	sv { |value| this.value_(value) }
+	v_ { | value | this.value_(value) }
+	sv { | value | this.value_(value) }
 
 	// CONVENIENCE DEF MTHODS
 
 	sym { ^(this.name ++ "_" ++ m_ptr_data.asSymbol).asSymbol }
 	aar { ^[this.sym, this.value()] }
 
-	kr { | bind = true |
-		if(bind) {
+	kr
+	{ | bind = true |
 
+		if(bind)
+		{
 			if(m_callback.notNil()) { this.removeDependant(m_callback); };
 
-			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
+			m_callback = { | v | OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
 		^this.sym.kr
 	}
 
-	ar { | bind = true |
-		if(bind) {
+	ar
+	{ | bind = true |
 
-			if(m_callback.notNil()) { this.removeDependant(m_callback); };
+		if(bind)
+		{
+			if(m_callback.notNil()) { this.removeDependant(m_callback) };
 
-			m_callback = { |v| OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
+			m_callback = { | v | OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
 
 		^this.sym.ar
@@ -444,14 +473,16 @@ OSSIA_Parameter : OSSIA_Node {
 	//                    GUI                    //
 	//-------------------------------------------//
 
-	gui { |parent_window, childrenDepth = 0|
+	gui
+	{ | parent_window, childrenDepth = 0 |
 
 		this.windowIfNeeded(parent_window);
 
 		type.ossiaWidget(this);
 		this.childGui(childrenDepth);
 
-		if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
+		if ((window.view.decorator.used.height - window.bounds.height) != 2.0)
+		{ //resize to flow layout
 			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2));
 		};
 	}

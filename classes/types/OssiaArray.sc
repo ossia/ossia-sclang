@@ -30,10 +30,10 @@
 	{ | mode |
 
 		switch (mode,
-			'free', {
-				^{ | value, domain | value.asArray };
-			},
-			'clip', {
+			'free',
+			{ ^{ | value, domain | value.asArray } },
+			'clip',
+			{
 				^{ | value, domain |
 
 					value.collect(
@@ -41,7 +41,8 @@
 					).asArray;
 				};
 			},
-			'low', {
+			'low',
+			{
 				^{ | value, domain |
 
 					value.collect(
@@ -49,7 +50,8 @@
 					).asArray;
 				};
 			},
-			'high', {
+			'high',
+			{
 				^{ | value, domain |
 
 					value.collect(
@@ -57,7 +59,8 @@
 					).asArray;
 				};
 			},
-			'wrap', {
+			'wrap',
+			{
 				^{ | value, domain |
 
 					value.collect(
@@ -65,14 +68,16 @@
 					).asArray ;
 				};
 			},
-			'fold', {
+			'fold',
+			{
 				^{ | value, domain |
 
 					value.collect(
 						{ | item, i | item.fold(domain.min[i], domain.max[i]) }
 					).asArray;
 				};
-			}, {
+			},
+			{
 				^{ | value, domain |
 
 					domain[2].detect(

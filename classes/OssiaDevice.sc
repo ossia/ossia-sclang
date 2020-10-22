@@ -10,8 +10,8 @@
 	//                  DEVICE                   //
 	//-------------------------------------------//
 
-OSSIA_Device {
-
+OSSIA_Device
+{
 	classvar <g_devices;
 	var <protocol;
 	var <name;
@@ -19,22 +19,24 @@ OSSIA_Device {
 	var <children;
 	var m_semaphore;
 
-	*initClass {
+	*initClass
+	{
 		g_devices = [];
 		ShutDown.add({this.ossia_dtor});
 	}
 
-	addChild { |anOssiaNode|
-		children = children.add(anOssiaNode);
-	}
+	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
 
-	deviceCtor { |n|
+	deviceCtor
+	{ | n |
+
 		name = n;
 		path = $/;
 		children = [];
 	}
 
-	*new { |name|
+	*new
+	{ | name |
 
 		g_devices.do({ |dev|
 			if(name == dev.name) { dev.free() };
@@ -43,51 +45,53 @@ OSSIA_Device {
 		^super.new.deviceCtor(name).stack_up();
 	}
 
-	stack_up { g_devices = g_devices.add(this); }
+	stack_up { g_devices = g_devices.add(this) }
 
-	*ossia_dtor {
-
+	*ossia_dtor
+	{
 		"OSSIA: cleanup...".postln;
 
-		g_devices.do({ |dev|
-			if (dev.protocol.notNil) { dev.protocol.free; };
+		g_devices.do({ | dev |
+			if (dev.protocol.notNil) { dev.protocol.free };
 			dev.free;
 		});
 	}
 
-	instantiateParameter { |anOssiaParameter|
-		if (protocol.notNil) { protocol.instantiateParameter(anOssiaParameter); };
+	instantiateParameter
+	{ | anOssiaParameter |
+
+		if (protocol.notNil) { protocol.instantiateParameter(anOssiaParameter) };
 	}
 
-	freeParameter { |anOssiaParameter|
-		if (protocol.notNil) { protocol.freeParameter(anOssiaParameter); };
+	freeParameter
+	{ | anOssiaParameter |
+
+		if (protocol.notNil) { protocol.freeParameter(anOssiaParameter) };
 	}
 
-	updateParameter { |anOssiaParameter|
-		protocol.push(anOssiaParameter);
-	}
+	updateParameter { | anOssiaParameter | protocol.push(anOssiaParameter) }
 
-	tree { |with_attributes = false, parameters_only = false|
-		if (parameters_only) {
+	tree
+	{ | with_attributes = false, parameters_only = false |
+
+		if (parameters_only)
+		{
 			^this.paramExplore;
 		} {
 			^this.nodeExplore;
 		}
 	}
 
-	nodeExplore {
-		^[children.collect(_.nodeExplore)];
-	}
+	nodeExplore { ^[children.collect(_.nodeExplore)] }
 
-	paramExplore {
-		^[children.collect(_.paramExplore)].flat;
-	}
+	paramExplore { ^[children.collect(_.paramExplore)].flat }
 
 	//-------------------------------------------//
 	//               DEVICE CALLBACKS            //
 	//-------------------------------------------//
 
-	forkExpose { |method, vargs, callback|
+	forkExpose
+	{ | method, vargs, callback |
 
 		callback !? {
 			m_semaphore = Semaphore(1);
@@ -97,26 +101,34 @@ OSSIA_Device {
 			};
 
 			fork {
-				if(callback.isKindOf(Function)) {
-					callback.value();
-				}
+				if (callback.isKindOf(Function))
+				{ callback.value() }
 			};
 		};
 
-		callback ?? {
-			this.exposeRedirect(method, vargs);
-		};
+		callback ?? { this.exposeRedirect(method, vargs) };
 	}
 
-	exposeRedirect { |method, vargs|
-		switch(method,
-			'oscqs', { if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)},
-			'oscqm', { if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCQMProtocol(vargs[0], this)},
+	exposeRedirect
+	{ | method, vargs |
+
+		switch (method,
+			'oscqs',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)
+			},
+			'oscqm',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQMProtocol(vargs[0], this)
+			},
 			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
-			'osc', { if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)}
+			'osc',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)
+			}
 		);
 	}
 
@@ -124,11 +136,15 @@ OSSIA_Device {
 	//                NEW SHORTCUTS              //
 	//-------------------------------------------//
 
-	*newOSCQueryServer { |name, osc_port = 1234, ws_port = 5678, callback|
+	*newOSCQueryServer
+	{ | name, osc_port = 1234, ws_port = 5678, callback |
+
 		^this.new(name).exposeOSCQueryServer(osc_port, ws_port, callback);
 	}
 
-	*newOSCQueryMirror { |name, host_addr, callback|
+	*newOSCQueryMirror
+	{ | name, host_addr, callback |
+
 		^this.new(name).exposeOSCQueryMirror(host_addr, callback);
 	}
 
@@ -136,8 +152,9 @@ OSSIA_Device {
 	// 	^this.new(name).exposeMinuit(remote_ip, remote_port, local_port, callback);
 	// }
 
-	*newOSC { |name, remote_ip = "127.0.0.1",
-		remote_port = 9997, local_port = 9996, callback|
+	*newOSC
+	{ | name, remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback |
+
 		^this.new(name).exposeOSC(remote_ip, remote_port, local_port, callback);
 	}
 
@@ -150,11 +167,15 @@ OSSIA_Device {
 	// 	^OSSIA_MirrorParameter(this, addr)
 	// }
 
-	exposeOSCQueryServer { |osc_port = 1234, ws_port = 5678, callback|
+	exposeOSCQueryServer
+	{ | osc_port = 1234, ws_port = 5678, callback |
+
 		this.forkExpose('oscqs', [name, osc_port, ws_port], callback);
 	}
 
-	exposeOSCQueryMirror { |host_addr, callback|
+	exposeOSCQueryMirror
+	{ | host_addr, callback |
+
 		this.forkExpose('oscqm', [host_addr], callback);
 	}
 
@@ -162,7 +183,9 @@ OSSIA_Device {
 	// 	this.forkExpose('minuit', [remote_ip, remote_port, local_port], callback);
 	// }
 
-	exposeOSC { |remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback|
+	exposeOSC
+	{ | remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback |
+
 		this.forkExpose('osc', [remote_ip, remote_port, local_port], callback);
 	}
 

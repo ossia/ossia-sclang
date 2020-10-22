@@ -24,24 +24,19 @@
 	{ | mode |
 
 		switch (mode,
-			'free', {
-				^{ | value, domain | value.asAscii };
-			},
-			'clip', {
-				{ | value, domain | value.clip(domain.min, domain.max).asAscii };
-			},
-			'low', {
-				^{ | value, domain | value.max(domain.min).asAscii };
-			},
-			'high', {
-				^{ | value, domain | value.max(domain.min).asAscii };
-			},
-			'wrap', {
-				^{ | value, domain, type | value.wrap(domain.min, domain.max).asAscii };
-			},
-			'fold', {
-				^{ | value, domain, type | value.fold(domain.min, domain.max).asAscii }
-			}, {
+			'free',
+			{ ^{ | value, domain | value.asAscii } },
+			'clip',
+			{ ^{ | value, domain | value.clip(domain.min, domain.max).asAscii } },
+			'low',
+			{ ^{ | value, domain | value.max(domain.min).asAscii } },
+			'high',
+			{ ^{ | value, domain | value.max(domain.min).asAscii } },
+			'wrap',
+			{ ^{ | value, domain, type | value.wrap(domain.min, domain.max).asAscii } },
+			'fold',
+			{ ^{ | value, domain, type | value.fold(domain.min, domain.max).asAscii } },
+			{
 				^{ | value, domain, type |
 
 					domain[2].detect({ | item | item == value.asAscii });

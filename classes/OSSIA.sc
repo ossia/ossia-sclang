@@ -52,8 +52,7 @@ OSSIA
 	*node { | parent_node, name | ^OSSIA_Node(parent_node, name) }
 
 	*parameter
-	{
-		| parent_node, name, type, domain, default_value, bounding_mode = 'free',
+	{ | parent_node, name, type, domain, default_value, bounding_mode = 'free',
 		critical = false, repetition_filter = false |
 
 		^OSSIA_Parameter(parent_node, name, type, domain, default_value,
@@ -61,8 +60,7 @@ OSSIA
 	}
 
 	*parameter_array
-	{
-		| size, parent_node, name, type, domain, default_value, bounding_mode = 'free',
+	{ | size, parent_node, name, type, domain, default_value, bounding_mode = 'free',
 		critical = false, repetition_filter = false |
 
 		^OSSIA_Parameter.array(size, parent_node, name, type, domain, default_value,
@@ -74,8 +72,7 @@ OSSIA
 	//-------------------------------------------//
 
 	*makeDropDownGui
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		var event = { | param |
 			var i = param.domain.values.detectIndex({ | item | item == param.value });
@@ -102,8 +99,7 @@ OSSIA
 	}
 
 	*makeSliderGui
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		var event = { | param |
 			{
@@ -145,8 +141,7 @@ OSSIA
 	}
 
 	*makeButtonGui
-	{
-		| anOssiaParameter |
+	{ | anOssiaParameter |
 
 		var event = { | param |
 			{
@@ -169,8 +164,7 @@ OSSIA
 	}
 
 	*makeTxtGui
-	{
-		|anOssiaParameter|
+	{ | anOssiaParameter |
 
 		var event = { | param |
 			{
