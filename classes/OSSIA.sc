@@ -6,6 +6,71 @@
  * and the interactive sequencer OSSIA/score (https://github.com/OSSIA/score.git)
  */
 
+OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
+{
+	var <name;
+	var <path;
+	var <children;
+
+	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
+
+	tree
+	{ | with_attributes = false, parameters_only = false |
+
+		if (parameters_only)
+		{
+			^this.paramExplore;
+		} {
+			^this.nodeExplore;
+		}
+	}
+
+	// overwriten by OSSIA_Device and OSSIA_Node
+	nodeExplore { }
+	paramExplore { }
+
+	find
+	{ | nodePath |
+
+		var splitedPath = nodePath.split();
+
+		// clean up first and laast $/ as they are not needed
+		if (splitedPath.first == "") { splitedPath.removeAt(0) };
+		if (splitedPath.last == "")
+		{ splitedPath.removeAt(splitedPath.size - 1) };
+
+		^this.findFromArray(splitedPath);
+	}
+
+	findFromArray
+	{ | namesArray |
+
+		if (namesArray.size == 1)
+		{
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{
+					^item;
+				} {
+					^nil;
+				}
+			})
+		} {
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{
+					namesArray.removeAt(0);
+					^item.findFromArray(namesArray);
+				} {
+					^nil;
+				}
+			})
+		}
+	}
+}
+
 	//-------------------------------------------//
 	//                  UTILITIES                //
 	//-------------------------------------------//

@@ -10,24 +10,26 @@
 //                    NODE                   //
 //-------------------------------------------//
 
-OSSIA_Node
+OSSIA_Node : OSSIA_Base
 {
 	var <parent;
-	var <name;
-	var <path;
 	var <device;
 	var <>description;
-	var <children;
 	var m_ptr_data;
 	var <window;
 
-	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
+	*new { | parent, name |
 
-	*new { | parent, name | ^super.newCopyArgs(parent, name).nodeCtor() }
+		^super.newCopyArgs(name).nodeCtor(parent);
+	}
 
 	nodeCtor
-	{
-		var parent_path = parent.path;
+	{ | p |
+
+		var parent_path;
+
+		parent = p;
+		parent_path = parent.path;
 
 		if (parent_path != $/)
 		{
@@ -42,61 +44,9 @@ OSSIA_Node
 		children = [];
 	}
 
-	tree
-	{ | with_attributes = false, parameters_only = false |
-
-		if (parameters_only)
-		{
-			^this.paramExplore;
-		} {
-			^this.nodeExplore;
-		}
-	}
-
 	nodeExplore { ^[this, children.collect(_.nodeExplore)] }
 
 	paramExplore { ^[children.collect(_.paramExplore)] }
-
-	find
-	{ | nodePath |
-
-		var splitedPath = nodePath.split();
-
-		// clean up first and laast $/ as they are not needed
-		if (splitedPath.first == "") { splitedPath.removeAt(0) };
-		if (splitedPath.last == "")
-		{ splitedPath.removeAt(splitedPath.size - 1) };
-
-		^this.findFromArray(splitedPath);
-	}
-
-	findFromArray
-	{ | namesArray |
-
-		if (namesArray.size == 1)
-		{
-			children.do({ | item |
-
-				if (item.name == namesArray[0])
-				{
-					^item;
-				} {
-					^nil;
-				}
-			})
-		} {
-			children.do({ | item |
-
-				if (item.name == namesArray[0])
-				{
-					namesArray.removeAt(0);
-					^item.findFromArray(namesArray);
-				} {
-					^nil;
-				}
-			})
-		}
-	}
 
 	free
 	{
@@ -132,11 +82,11 @@ OSSIA_Node
 	gui
 	{ | parent_window, childrenDepth = 1 |
 
-		this.windowIfNeeded(parent_window);
-		this.childGui(childrenDepth);
+		this.prWindowIfNeeded(parent_window);
+		this.prChildGui(childrenDepth);
 	}
 
-	windowIfNeeded
+	prWindowIfNeeded
 	{ | win |
 
 		if (win.isNil)
@@ -150,7 +100,7 @@ OSSIA_Node
 		};
 	}
 
-	childGui
+	prChildGui
 	{ | childrenDepth |
 
 		if (childrenDepth > 0)
@@ -275,7 +225,7 @@ OSSIA_Parameter : OSSIA_Node
 		bounding_mode = 'free', critical = false,
 		repetition_filter = false |
 
-		^super.new(parent_node, name).parameterCtor(type, domain, default_value,
+		^super.new(parent_node).parameterCtor(name, type, domain, default_value,
 			bounding_mode, critical, repetition_filter);
 	}
 
@@ -290,9 +240,11 @@ OSSIA_Parameter : OSSIA_Node
 	}
 
 	parameterCtor
-	{ | tp, dm, dv, bm, cl, rf
-		|
+	{ | nm, tp, dm, dv, bm, cl, rf |
+
 		var dom_slot, df_val­­­­­­;
+
+		name = nm;
 
 		switch (tp.class,
 			Meta_Symbol, { type = String },

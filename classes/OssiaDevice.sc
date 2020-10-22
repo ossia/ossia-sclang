@@ -10,13 +10,10 @@
 	//                  DEVICE                   //
 	//-------------------------------------------//
 
-OSSIA_Device
+OSSIA_Device : OSSIA_Base
 {
 	classvar <g_devices;
 	var <protocol;
-	var <name;
-	var <path;
-	var <children;
 	var m_semaphore;
 
 	*initClass
@@ -24,8 +21,6 @@ OSSIA_Device
 		g_devices = [];
 		ShutDown.add({this.ossia_dtor});
 	}
-
-	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
 
 	deviceCtor
 	{ | n |
@@ -70,17 +65,6 @@ OSSIA_Device
 	}
 
 	updateParameter { | anOssiaParameter | protocol.push(anOssiaParameter) }
-
-	tree
-	{ | with_attributes = false, parameters_only = false |
-
-		if (parameters_only)
-		{
-			^this.paramExplore;
-		} {
-			^this.nodeExplore;
-		}
-	}
 
 	nodeExplore { ^[children.collect(_.nodeExplore)] }
 
