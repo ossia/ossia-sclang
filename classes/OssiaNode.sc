@@ -57,6 +57,47 @@ OSSIA_Node
 
 	paramExplore { ^[children.collect(_.paramExplore)] }
 
+	find
+	{ | nodePath |
+
+		var splitedPath = nodePath.split();
+
+		// clean up first and laast $/ as they are not needed
+		if (splitedPath.first == "") { splitedPath.removeAt(0) };
+		if (splitedPath.last == "")
+		{ splitedPath.removeAt(splitedPath.size - 1) };
+
+		^this.findFromArray(splitedPath);
+	}
+
+	findFromArray
+	{ | namesArray |
+
+		if (namesArray.size == 1)
+		{
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{
+					^item;
+				} {
+					^nil;
+				}
+			})
+		} {
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{
+					namesArray.removeAt(0);
+					^item.findFromArray(namesArray);
+				} {
+					^nil;
+				}
+			})
+		}
+	}
+
 	free
 	{
 		children.collect(_.free);

@@ -14,14 +14,14 @@ OSSIA_Unit
 {
 	var <string, <extended_types;
 
-	*position{ ^OSSIA_position }
-	*orientation{ ^OSSIA_orientation }
-	*color{ ^OSSIA_color }
-	*angle{ ^OSSIA_angle }
-	*distance{ ^OSSIA_distance }
-	*time{ ^OSSIA_time }
-	*gain{ ^OSSIA_gain }
-	*speed{ ^OSSIA_speed }
+	*position { ^OSSIA_position }
+	*orientation { ^OSSIA_orientation }
+	*color { ^OSSIA_color }
+	*angle { ^OSSIA_angle }
+	*distance { ^OSSIA_distance }
+	*time { ^OSSIA_time }
+	*gain { ^OSSIA_gain }
+	*speed { ^OSSIA_speed }
 
 	*fmt
 	{ | method |
@@ -134,7 +134,7 @@ OSSIA_color : OSSIA_Unit
 OSSIA_angle : OSSIA_Unit
 {
 	*degree { ^this.newCopyArgs(this.fmt(thisMethod)) }
-	*radian{ ^this.newCopyArgs(this.fmt(thisMethod)) }
+	*radian { ^this.newCopyArgs(this.fmt(thisMethod)) }
 }
 
 OSSIA_distance : OSSIA_Unit

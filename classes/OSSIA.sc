@@ -47,7 +47,7 @@ OSSIA
 	*vec3f { | v1 = 0.0, v2 = 0.0, v3 = 0.0 | ^OSSIA_vec3f(v1, v2, v3) }
 	*vec4f { | v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0 | ^OSSIA_vec4f(v1, v2, v3, v4) }
 
-	*device  { | name | ^OSSIA_Device(name) }
+	*device { | name | ^OSSIA_Device(name) }
 
 	*node { | parent_node, name | ^OSSIA_Node(parent_node, name) }
 
