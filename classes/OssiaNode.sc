@@ -18,30 +18,64 @@ OSSIA_Node : OSSIA_Base
 	var m_ptr_data;
 	var <window;
 
-	*new { | parent, name |
+	*new { | parent_node, name |
 
-		^super.newCopyArgs(name).nodeCtor(parent);
+		^super.new.prHandlePath(parent_node, name).nodeCtor();
 	}
 
 	nodeCtor
-	{ | p |
-
-		var parent_path;
-
-		parent = p;
-		parent_path = parent.path;
+	{
+		var parent_path = parent.path;
 
 		if (parent_path != $/)
 		{
 			device = parent.device;
-			path = parent_path++$/++name;
+			path = parent_path ++ $/ ++ name;
 		} {
 			device = parent;
-			path = $/++name;
+			path = $/ ++ name;
 		};
 
 		parent.addChild(this);
 		children = [];
+	}
+
+	prHandlePath
+	{ | pn, nm |
+
+		var curent_path;
+
+		if (pn.isNil)
+		{
+			if (OSSIA_Device.g_devices)
+			{
+				Error("No parent_node or OSSIA_Device found").trow;
+			} {
+				// if no parent is provided, set it as the first OSSIA_Device
+				parent = OSSIA_Device.g_devices[0];
+				curent_path = parent.find(nm);
+			}
+		} {
+			parent = pn;
+			curent_path = parent.find(nm);
+		};
+
+		if (curent_path.class == Array)
+		 {
+			var lasName, previousNode = parent;
+			// preserve the last name in the string and remove it from the path
+			lasName = curent_path.removeAt(curent_path.size - 1);
+
+			curent_path.do({ | item, i |
+				previousNode = OSSIA_Node(previousNode, item);
+			});
+
+			parent = previousNode;
+		 	name = this.prCheckPath(lasName);
+		} {
+			parent = curent_path;
+			name = this.prCheckPath(nm);
+		}
 	}
 
 	nodeExplore { ^[this, children.collect(_.nodeExplore)] }
@@ -225,7 +259,7 @@ OSSIA_Parameter : OSSIA_Node
 		bounding_mode = 'free', critical = false,
 		repetition_filter = false |
 
-		^super.new(parent_node).parameterCtor(name, type, domain, default_value,
+		^super.new(parent_node, name).parameterCtor(type, domain, default_value,
 			bounding_mode, critical, repetition_filter);
 	}
 
@@ -240,11 +274,9 @@ OSSIA_Parameter : OSSIA_Node
 	}
 
 	parameterCtor
-	{ | nm, tp, dm, dv, bm, cl, rf |
+	{ | tp, dm, dv, bm, cl, rf |
 
 		var dom_slot, df_val­­­­­­;
-
-		name = nm;
 
 		switch (tp.class,
 			Meta_Symbol, { type = String },
@@ -469,10 +501,10 @@ OSSIA_Parameter : OSSIA_Node
 	gui
 	{ | parent_window, childrenDepth = 0 |
 
-		this.windowIfNeeded(parent_window);
+		this.prWindowIfNeeded(parent_window);
 
 		type.ossiaWidget(this);
-		this.childGui(childrenDepth);
+		this.prChildGui(childrenDepth);
 
 		if ((window.view.decorator.used.height - window.bounds.height) != 2.0)
 		{ //resize to flow layout

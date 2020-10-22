@@ -32,14 +32,40 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 	find
 	{ | nodePath |
 
-		var splitedPath = nodePath.split();
+		var array, string = this.prCheckPath(nodePath);
+
+		array = this.prPath2Array(string);
+
+		^this.findFromArray(array);
+	}
+
+	prCheckPath
+	{ | roughPath |
+
+		var string;
+
+		switch (roughPath.class,
+			Symbol,
+			{ string = roughPath.asString },
+			String,
+			{ string = roughPath },
+			{ ^Error("nodePath must be of type String").throw }
+		);
+
+		^string;
+	}
+
+	prPath2Array
+	{ | pathString |
+
+		var splitedPath = pathString.split();
 
 		// clean up first and laast $/ as they are not needed
 		if (splitedPath.first == "") { splitedPath.removeAt(0) };
 		if (splitedPath.last == "")
 		{ splitedPath.removeAt(splitedPath.size - 1) };
 
-		^this.findFromArray(splitedPath);
+		^splitedPath;
 	}
 
 	findFromArray
@@ -53,7 +79,7 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 				{
 					^item;
 				} {
-					^nil;
+					^namesArray;
 				}
 			})
 		} {
@@ -64,7 +90,7 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 					namesArray.removeAt(0);
 					^item.findFromArray(namesArray);
 				} {
-					^nil;
+					^namesArray;
 				}
 			})
 		}
