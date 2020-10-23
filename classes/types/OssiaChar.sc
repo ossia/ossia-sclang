@@ -45,7 +45,7 @@
 		);
 	}
 
-	*ossiaDefaultValue { ^$ }
+	*ossiaDefaultValue { ^$\0; }
 
 	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 

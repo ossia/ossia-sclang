@@ -13,6 +13,7 @@
 OSSIA_Device : OSSIA_Base
 {
 	classvar <g_devices;
+
 	var <protocol;
 	var m_semaphore;
 
@@ -69,6 +70,10 @@ OSSIA_Device : OSSIA_Base
 	nodeExplore { ^[children.collect(_.nodeExplore)] }
 
 	paramExplore { ^[children.collect(_.paramExplore)].flat }
+
+	parent { ^this } // compatibility with OSSIA_Node
+
+	prCreateFromPAth { }
 
 	//-------------------------------------------//
 	//               DEVICE CALLBACKS            //

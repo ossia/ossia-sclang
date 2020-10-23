@@ -25,9 +25,29 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 		}
 	}
 
-	// overwriten by OSSIA_Device and OSSIA_Node
-	nodeExplore { }
-	paramExplore { }
+	prHandlePath
+	{ | nm |
+
+		var curent_path = this.parent.find(nm);
+
+		if (curent_path.class == Array)
+		{
+			var lasName, previousNode = curent_path[0];
+
+			curent_path.removeAt(0);
+
+			// preserve the last name in the string and remove it from the path
+			lasName = curent_path.removeAt(curent_path.size - 1);
+
+			curent_path.do({ | item, i |
+				previousNode = OSSIA_Node(previousNode, item);
+			});
+
+			this.prCreateOrIncrement(previousNode, lasName);
+		} {
+			this.prCreateOrIncrement(curent_path, curent_path);
+		}
+	}
 
 	find
 	{ | nodePath |
@@ -76,11 +96,7 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 			children.do({ | item |
 
 				if (item.name == namesArray[0])
-				{
-					^item;
-				} {
-					^namesArray;
-				}
+				{ ^item; }
 			})
 		} {
 			children.do({ | item |
@@ -89,16 +105,22 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 				{
 					namesArray.removeAt(0);
 					^item.findFromArray(namesArray);
-				} {
-					^namesArray;
 				}
 			})
-		}
+		};
+
+		^namesArray.addFirst(this);
 	}
+
+	// overwriten by OSSIA_Device and OSSIA_Node
+	nodeExplore { }
+	paramExplore { }
+	parent { }
+	prCreateOrIncrement { }
 }
 
 	//-------------------------------------------//
-	//                  UTILITIES                //
+	//               VIRTUAL CLASS               //
 	//-------------------------------------------//
 
 OSSIA
@@ -125,6 +147,28 @@ OSSIA
 		palette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
 		palette.setColor(Color.fromHexString("#a7dd0d"), 'baseText'); // green param
 		palette.setColor(Color.fromHexString("#c58014"), 'brightText');
+	}
+
+	*stringify
+	{ | ossiaNodes |
+
+		var json = "";
+
+		if (ossiaNodes.isArray)
+		{
+			ossiaNodes.do({ | item, count |
+				json = json
+				++ if (count == 0) {"{"} {","}
+				++ item.json
+			});
+
+			json = json ++ "}";
+
+		} {
+			json = json ++ ossiaNodes.json;
+		};
+
+		^json;
 	}
 
 	*server  { if (server.isNil) { ^Server.default } { ^server } }

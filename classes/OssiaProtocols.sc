@@ -135,7 +135,12 @@ OSSIA_OSCQSProtocol
 
 				switch (command["COMMAND"],
 					"START_OSC_STREAMING",
-					{ netAddr = netAddr.add(NetAddr(con.address, command["DATA"]["LOCAL_SERVER_PORT"].asInteger)) },
+					{
+						netAddr = netAddr.add(
+							NetAddr(con.address,
+								command["DATA"]["LOCAL_SERVER_PORT"].asInteger)
+						)
+					},
 					"LISTEN",
 					{ dictionary.at(command["DATA"].asSymbol).listening_(true) },
 					"IGNORE",
@@ -162,13 +167,12 @@ OSSIA_OSCQSProtocol
 			{
 				var param = dictionary.at(req.uri.asSymbol);
 
-				switch (param.type,
-					String,
-					{ req.replyJson("{\"VALUE\": \"" ++ param.value ++"\"}") },
-					Char,
-					{ req.replyJson("{\"VALUE\": \'" ++ param.value ++"\'}") },
-					{ req.replyJson("{\"VALUE\": " ++ param.value ++"}") }
-				);
+				if ((param.type == String) || (param.type == Char))
+					{
+						req.replyJson("{\"VALUE\": \"" ++ param.value ++"\"}")
+					} {
+						req.replyJson("{\"VALUE\": " ++ param.value ++"}")
+					};
 
 				this.push(dictionary.at(req.uri.asSymbol));
 				postln(format("[http-server] reply sent"));
@@ -180,7 +184,7 @@ OSSIA_OSCQSProtocol
 				{
 					req.replyJson(host_info);
 				} {
-					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA_Tree.stringify(device.children) ++"}";
+					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA.stringify(device.children) ++"}";
 					req.replyJson(json_tree);
 				}
 			}
@@ -245,31 +249,6 @@ OSSIA_OSCQSProtocol
 	{
 		device.tree().flat.do(this.freeParameter(_));
 		^super.free;
-	}
-}
-
-OSSIA_Tree
-{
-	*stringify
-	{ | ossiaNodes |
-
-		var json = "";
-
-		if (ossiaNodes.isArray)
-		{
-			ossiaNodes.do({ | item, count |
-				json = json
-				++ if (count == 0) {"{"} {","}
-				++ item.json
-			});
-
-			json = json ++ "}";
-
-		} {
-			json = json ++ ossiaNodes.json;
-		};
-
-		^json;
 	}
 }
 

@@ -12,15 +12,17 @@
 
 OSSIA_Node : OSSIA_Base
 {
-	var <parent;
+	var parent;
 	var <device;
 	var <>description;
 	var m_ptr_data;
 	var <window;
 
+	parent { ^parent } // homogeneity with OSSIA_Device
+
 	*new { | parent_node, name |
 
-		^super.new.prHandlePath(parent_node, name).nodeCtor();
+		^super.new.prHandleParent(parent_node).prHandlePath(name).nodeCtor();
 	}
 
 	nodeCtor
@@ -40,41 +42,46 @@ OSSIA_Node : OSSIA_Base
 		children = [];
 	}
 
-	prHandlePath
-	{ | pn, nm |
-
-		var curent_path;
+	prHandleParent
+	{ | pn |
 
 		if (pn.isNil)
 		{
-			if (OSSIA_Device.g_devices)
+			if (OSSIA_Device.g_devices == [])
 			{
 				Error("No parent_node or OSSIA_Device found").trow;
 			} {
 				// if no parent is provided, set it as the first OSSIA_Device
 				parent = OSSIA_Device.g_devices[0];
-				curent_path = parent.find(nm);
 			}
 		} {
 			parent = pn;
-			curent_path = parent.find(nm);
 		};
+	}
 
-		if (curent_path.class == Array)
-		 {
-			var lasName, previousNode = parent;
-			// preserve the last name in the string and remove it from the path
-			lasName = curent_path.removeAt(curent_path.size - 1);
+	prCreateOrIncrement
+	{ | p, n |
 
-			curent_path.do({ | item, i |
-				previousNode = OSSIA_Node(previousNode, item);
-			});
+		parent = p;
 
-			parent = previousNode;
-		 	name = this.prCheckPath(lasName);
+		if ((n.class.superclass == OSSIA_Node) || (n.class.superclass == OSSIA_Base))
+		{
+			// check if the node has a index
+			var index, splitedName = n.name.split($.);
+
+			index = splitedName[splitedName.size - 1].asInteger;
+			// returns 0 if no index is found
+
+			if ((index == 0))
+			{
+				name = n.name ++ ".1";
+			} {
+				splitedName.removeAt(splitedName.size - 1);
+
+				name = splitedName.join($.) ++ '.' ++ (index + 1);
+			}
 		} {
-			parent = curent_path;
-			name = this.prCheckPath(nm);
+			name = n;
 		}
 	}
 
@@ -102,7 +109,7 @@ OSSIA_Node : OSSIA_Base
 			",\"DESCRIPTION\":\""++ description ++"\""
 		} { "" }
 		++ if (children.isEmpty.not) {
-			",\"CONTENTS\":"++ OSSIA_Tree.stringify(children)
+			",\"CONTENTS\":"++ OSSIA.stringify(children)
 		} { "" }
 		++"}"
 	}
@@ -399,7 +406,7 @@ OSSIA_Parameter : OSSIA_Node
 	{
 		^",\"TYPE\":"++ type.ossiaJson
 		++ ",\"VALUE\":"
-		++ if (type == String) {
+		++ if ((type == String) || (type == Char)) {
 			"\""++ value ++"\""
 		} { value }
 		++ domain.json(type.ossiaDefaultValue)

@@ -39,9 +39,7 @@
 			{
 				^{ | value, domain |
 
-					domain[2].detect(
-						{ |item| item == value.asInteger };
-					);
+					domain[2].detect({ | item | item == value.asInteger });
 				};
 			};
 		);
