@@ -17,6 +17,8 @@ OSSIA_Device : OSSIA_Base
 	var <protocol;
 	var m_semaphore;
 
+	parent { ^this } // compatibility with OSSIA_Node
+
 	*initClass
 	{
 		g_devices = [];
@@ -67,59 +69,6 @@ OSSIA_Device : OSSIA_Base
 
 	updateParameter { | anOssiaParameter | protocol.push(anOssiaParameter) }
 
-	nodeExplore { ^[children.collect(_.nodeExplore)] }
-
-	paramExplore { ^[children.collect(_.paramExplore)].flat }
-
-	parent { ^this } // compatibility with OSSIA_Node
-
-	prCreateFromPAth { }
-
-	//-------------------------------------------//
-	//               DEVICE CALLBACKS            //
-	//-------------------------------------------//
-
-	forkExpose
-	{ | method, vargs, callback |
-
-		callback !? {
-			m_semaphore = Semaphore(1);
-			fork {
-				m_semaphore.wait();
-				this.exposeRedirect(method, vargs);
-			};
-
-			fork {
-				if (callback.isKindOf(Function))
-				{ callback.value() }
-			};
-		};
-
-		callback ?? { this.exposeRedirect(method, vargs) };
-	}
-
-	exposeRedirect
-	{ | method, vargs |
-
-		switch (method,
-			'oscqs',
-			{
-				if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)
-			},
-			'oscqm',
-			{
-				if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCQMProtocol(vargs[0], this)
-			},
-			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
-			'osc',
-			{
-				if (protocol.notNil) { protocol.free; };
-				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)
-			}
-		);
-	}
 
 	//-------------------------------------------//
 	//                NEW SHORTCUTS              //
@@ -159,23 +108,79 @@ OSSIA_Device : OSSIA_Base
 	exposeOSCQueryServer
 	{ | osc_port = 1234, ws_port = 5678, callback |
 
-		this.forkExpose('oscqs', [name, osc_port, ws_port], callback);
+		this.prForkExpose('oscqs', [name, osc_port, ws_port], callback);
 	}
 
 	exposeOSCQueryMirror
 	{ | host_addr, callback |
 
-		this.forkExpose('oscqm', [host_addr], callback);
+		this.prForkExpose('oscqm', [host_addr], callback);
 	}
 
 	// exposeMinuit { |remote_ip, remote_port, local_port, callback|
-	// 	this.forkExpose('minuit', [remote_ip, remote_port, local_port], callback);
+	// 	this.prForkExpose('minuit', [remote_ip, remote_port, local_port], callback);
 	// }
 
 	exposeOSC
 	{ | remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback |
 
-		this.forkExpose('osc', [remote_ip, remote_port, local_port], callback);
+		this.prForkExpose('osc', [remote_ip, remote_port, local_port], callback);
+	}
+
+	//-------------------------------------------//
+	//              PRIVATE METHODS              //
+	//-------------------------------------------//
+
+	prNodeExplore { ^[children.collect(_.prNodeExplore)] }
+
+	prParamExplore { ^[children.collect(_.prParamExplore)].flat }
+
+	prCreateFromPAth { }
+
+	//-------------------------------------------//
+	//               DEVICE CALLBACKS            //
+	//-------------------------------------------//
+
+	prForkExpose
+	{ | method, vargs, callback |
+
+		callback !? {
+			m_semaphore = Semaphore(1);
+			fork {
+				m_semaphore.wait();
+				this.prExposeRedirect(method, vargs);
+			};
+
+			fork {
+				if (callback.isKindOf(Function))
+				{ callback.value() }
+			};
+		};
+
+		callback ?? { this.prExposeRedirect(method, vargs) };
+	}
+
+	prExposeRedirect
+	{ | method, vargs |
+
+		switch (method,
+			'oscqs',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQSProtocol(vargs[0], vargs[1], vargs[2], this)
+			},
+			'oscqm',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCQMProtocol(vargs[0], this)
+			},
+			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
+			'osc',
+			{
+				if (protocol.notNil) { protocol.free; };
+				protocol = OSSIA_OSCProtocol(vargs[0], vargs[1], vargs[2], this)
+			}
+		);
 	}
 
 	//-------------------------------------------//

@@ -20,9 +20,9 @@ OSSIA_Node : OSSIA_Base
 
 	parent { ^parent } // homogeneity with OSSIA_Device
 
-	*new { | parent_node, name |
+	*new { | parent, name |
 
-		^super.new.prHandleParent(parent_node).prHandlePath(name).nodeCtor();
+		^super.new.prHandleParent(parent).prHandlePath(name).nodeCtor();
 	}
 
 	nodeCtor
@@ -40,6 +40,69 @@ OSSIA_Node : OSSIA_Base
 
 		parent.addChild(this);
 		children = [];
+	}
+
+	gui
+	{ | parent_window, childrenDepth = 1 |
+
+		this.prWindowIfNeeded(parent_window);
+		this.prChildGui(childrenDepth);
+	}
+
+	free
+	{
+		children.collect(_.free);
+		parent.children.remove(this);
+		^super.free;
+	}
+
+	//-------------------------------------------//
+	//                   JSON                    //
+	//-------------------------------------------//
+
+	json
+	{
+		^"\""++ name ++"\":"
+		++"{\"FULL_PATH\":\""++ path ++"\""
+		++ this.jsonParams
+		++ if (description.notNil) {
+			",\"DESCRIPTION\":\""++ description ++"\""
+		} { "" }
+		++ if (children.isEmpty.not) {
+			",\"CONTENTS\":"++ OSSIA.stringify(children)
+		} { "" }
+		++"}"
+	}
+
+	jsonParams { ^"" }
+
+	//-------------------------------------------//
+	//              PRIVATE METHODS              //
+	//-------------------------------------------//
+
+	prWindowIfNeeded
+	{ | win |
+
+		if (win.isNil)
+		{
+			window = Window(name).front; // resize later to the flow layout size
+			window.view.palette_(OSSIA.palette);
+			window.view.background_(OSSIA.palette.base);
+			window.addFlowLayout;
+		} {
+			window = win;
+		};
+	}
+
+	prChildGui
+	{ | childrenDepth |
+
+		if (childrenDepth > 0)
+		{
+			children.do({ | item |
+				item.gui(window, childrenDepth - 1);
+			});
+		};
 	}
 
 	prHandleParent
@@ -85,97 +148,13 @@ OSSIA_Node : OSSIA_Base
 		}
 	}
 
-	nodeExplore { ^[this, children.collect(_.nodeExplore)] }
+	prNodeExplore { ^[this, children.collect(_.prNodeExplore)] }
 
-	paramExplore { ^[children.collect(_.paramExplore)] }
-
-	free
-	{
-		children.collect(_.free);
-		parent.children.remove(this);
-		^super.free;
-	}
-
-	//-------------------------------------------//
-	//                   JSON                    //
-	//-------------------------------------------//
-
-	json
-	{
-		^"\""++ name ++"\":"
-		++"{\"FULL_PATH\":\""++ path ++"\""
-		++ this.jsonParams
-		++ if (description.notNil) {
-			",\"DESCRIPTION\":\""++ description ++"\""
-		} { "" }
-		++ if (children.isEmpty.not) {
-			",\"CONTENTS\":"++ OSSIA.stringify(children)
-		} { "" }
-		++"}"
-	}
-
-	jsonParams { ^"" }
-
-	//-------------------------------------------//
-	//                    GUI                    //
-	//-------------------------------------------//
-
-	gui
-	{ | parent_window, childrenDepth = 1 |
-
-		this.prWindowIfNeeded(parent_window);
-		this.prChildGui(childrenDepth);
-	}
-
-	prWindowIfNeeded
-	{ | win |
-
-		if (win.isNil)
-		{
-			window = Window(name).front; // resize later to the flow layout size
-			window.view.palette_(OSSIA.palette);
-			window.view.background_(OSSIA.palette.base);
-			window.addFlowLayout;
-		} {
-			window = win;
-		};
-	}
-
-	prChildGui
-	{ | childrenDepth |
-
-		if (childrenDepth > 0)
-		{
-			children.do({ | item |
-				item.gui(window, childrenDepth - 1);
-			});
-		};
-	}
+	prParamExplore { ^[children.collect(_.prParamExplore)] }
 
 	//-------------------------------------------//
 	//     PRIMITIVE CALLS & METHODS (TOREDO)    //
 	//-------------------------------------------//
-	//
-	// snapshot { |... exclude|
-	// 	var exp = this.explore(false, true);
-	// 	var res = [];
-	//
-	// 	exp.do({|item|
-	// 		var unique = item[0].split($/).last ++ "_" ++ item[1];
-	// 		res = res.add(unique.asSymbol);
-	// 		res = res.add(item[2]);
-	// 	});
-	//
-	// 	if(exclude.notEmpty)
-	// 	{
-	// 		exclude.do({|item|
-	// 			var index = res.indexOf(item.sym);
-	// 			2.do({ res.removeAt(index) });
-	// 		});
-	// 	};
-	//
-	// 	^res
-	// }
 	//
 	// is_disabled {
 	// 	_OSSIA_NodeGetDisabled
@@ -275,7 +254,7 @@ OSSIA_Parameter : OSSIA_Node
 		critical = false , repetition_filter = false |
 
 		^Array.fill(size, { | i |
-			OSSIA_Parameter(parent_node, name ++ '_' ++ i, type, domain,
+			this.new(parent_node, name ++ '_' ++ i, type, domain,
 				default_value, bounding_mode, critical, repetition_filter);
 		});
 	}
@@ -285,9 +264,10 @@ OSSIA_Parameter : OSSIA_Node
 
 		var dom_slot, df_val­­­­­­;
 
-		switch (tp.class,
-			Meta_Symbol, { type = String },
-			Meta_List, { type = Array },
+		switch (tp,
+			Signal, { type = Impulse },
+			Symbol, { type = String },
+			List, { type = Array },
 			{ type = tp };
 		);
 

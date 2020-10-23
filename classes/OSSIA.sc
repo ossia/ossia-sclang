@@ -12,18 +12,101 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 	var <path;
 	var <children;
 
+	// overwriten by OSSIA_Device and OSSIA_Node
+	parent { }
+
 	addChild { | anOssiaNode | children = children.add(anOssiaNode) }
 
-	tree
+	explore
 	{ | with_attributes = false, parameters_only = false |
 
 		if (parameters_only)
 		{
-			^this.paramExplore;
+			^this.prParamExplore;
 		} {
-			^this.nodeExplore;
+			^this.prNodeExplore;
 		}
 	}
+
+	tree
+	{ |with_attributes = false, parameters_only = false|
+
+		var exp = this.explore(with_attributes, parameters_only);
+
+		exp.do({ | item |
+
+			var str = "";
+
+			item.do({ | subitem | str = str + subitem });
+			str.postln;
+		});
+
+	}
+
+	snapshot
+	{ |... exclude|
+
+		var exp = this.explore(false, true);
+		var res = [];
+
+		exp.do({ | item |
+
+			var unique = item[0].split($/).last ++ "_" ++ item[1];
+
+			res = res.add(unique.asSymbol);
+			res = res.add(item[2]);
+		});
+
+		if(exclude.notEmpty)
+		{
+			exclude.do({ | item |
+
+				var index = res.indexOf(item.sym);
+
+				2.do({ res.removeAt(index) });
+			});
+		};
+
+		^res
+	}
+
+	find
+	{ | nodePath |
+
+		var array, string = this.prCheckPath(nodePath);
+
+		array = this.prPath2Array(string);
+
+		^this.findFromArray(array);
+	}
+
+	findFromArray
+	{ | namesArray |
+
+		if (namesArray.size == 1)
+		{
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{ ^item; }
+			})
+		} {
+			children.do({ | item |
+
+				if (item.name == namesArray[0])
+				{
+					namesArray.removeAt(0);
+					^item.findFromArray(namesArray);
+				}
+			})
+		};
+
+		^namesArray.addFirst(this);
+	}
+
+	//-------------------------------------------//
+	//              PRIVATE METHODS              //
+	//-------------------------------------------//
 
 	prHandlePath
 	{ | nm |
@@ -47,16 +130,6 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 		} {
 			this.prCreateOrIncrement(curent_path, curent_path);
 		}
-	}
-
-	find
-	{ | nodePath |
-
-		var array, string = this.prCheckPath(nodePath);
-
-		array = this.prPath2Array(string);
-
-		^this.findFromArray(array);
 	}
 
 	prCheckPath
@@ -88,34 +161,9 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 		^splitedPath;
 	}
 
-	findFromArray
-	{ | namesArray |
-
-		if (namesArray.size == 1)
-		{
-			children.do({ | item |
-
-				if (item.name == namesArray[0])
-				{ ^item; }
-			})
-		} {
-			children.do({ | item |
-
-				if (item.name == namesArray[0])
-				{
-					namesArray.removeAt(0);
-					^item.findFromArray(namesArray);
-				}
-			})
-		};
-
-		^namesArray.addFirst(this);
-	}
-
 	// overwriten by OSSIA_Device and OSSIA_Node
-	nodeExplore { }
-	paramExplore { }
-	parent { }
+	prNodeExplore { }
+	prParamExplore { }
 	prCreateOrIncrement { }
 }
 
