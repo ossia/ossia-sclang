@@ -27,7 +27,7 @@ OSSIA_OSCProtocol
 	oscProtocolCtor
 	{
 		netAddr = NetAddr(remoteAddr, remotePort);
-		device.tree(parameters_only: true).do(this.instantiateParameter(_));
+		device.explore(parameters_only: true).do(this.instantiateParameter(_));
 	}
 
 	push
@@ -64,7 +64,7 @@ OSSIA_OSCProtocol
 
 	free
 	{
-		device.tree(parameters_only: true).do(this.freeParameter(_));
+		device.explore(parameters_only: true).do(this.freeParameter(_));
 		^super.free;
 	}
 }
@@ -194,7 +194,7 @@ OSSIA_OSCQSProtocol
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 
-		device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
+		device.explore(parameters_only: true).flat.do(this.instantiateParameter(_));
 	}
 
 	push
@@ -247,7 +247,7 @@ OSSIA_OSCQSProtocol
 
 	free
 	{
-		device.tree().flat.do(this.freeParameter(_));
+		device.explore().flat.do(this.freeParameter(_));
 		^super.free;
 	}
 }
@@ -336,7 +336,7 @@ OSSIA_OSCQMProtocol
 			if (json["FULL_PATH"] == "/")
 			{
 				this.setupIdentityDict(json["CONTENTS"]);
-				device.tree(parameters_only: true).flat.do(this.instantiateParameter(_));
+				device.explore(parameters_only: true).flat.do(this.instantiateParameter(_));
 			};
 
 			if (json["OSC_PORT"].notNil)
@@ -394,7 +394,7 @@ OSSIA_OSCQMProtocol
 
 	free
 	{
-		device.tree().flat.do(this.freeParameter(_));
+		device.explore().flat.do(this.freeParameter(_));
 		^super.free;
 	}
 }

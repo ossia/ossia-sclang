@@ -336,8 +336,7 @@ OSSIA_vec3f : OSSIA_FVector
 	*ossiaWidget
 	{ | anOssiaParameter |
 
-		var isCartesian = false, event;
-		var width = anOssiaParameter.window.bounds.width;
+		var event, width = anOssiaParameter.window.bounds.width;
 
 		anOssiaParameter.widgets = [
 			EZNumber(
@@ -409,107 +408,222 @@ OSSIA_vec3f : OSSIA_FVector
 
 		if (anOssiaParameter.unit.notNil)
 		{
-			if (anOssiaParameter.unit.string == "position.cart3D") { isCartesian = true };
-		};
+			switch (anOssiaParameter.unit.string,
+				"position.cart3D",
+				{
+					var specs = [ControlSpec(), ControlSpec(), ControlSpec()], sliders;
 
-		if (isCartesian)
-		{
-			var specs = [ControlSpec(), ControlSpec(), ControlSpec()], sliders;
+					if(anOssiaParameter.domain.min.notNil)
+					{
+						specs.do(
+							{ | item, i |
+								item.minval_(anOssiaParameter.domain.min[i]);
+								item.maxval_(anOssiaParameter.domain.max[i]);
+							}
+						);
+					};
 
-			if(anOssiaParameter.domain.min.notNil)
-			{
-				specs.do(
-					{ | item, i |
-						item.minval_(anOssiaParameter.domain.min[i]);
-						item.maxval_(anOssiaParameter.domain.max[i]);
-					}
-				);
-			};
+					sliders = [
+						Slider2D(
+							parent: anOssiaParameter.window,
+							bounds: (width - 32)@(width - 32)
+						).x_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of x
+						.y_(specs[1].unmap(anOssiaParameter.value[1])) // initial value of y
+						.action_(
+							{ | val |
 
-			sliders = [
-				Slider2D(
-					parent: anOssiaParameter.window,
-					bounds: (width - 32)@(width - 32)
-				).x_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of x
-				.y_(specs[1].unmap(anOssiaParameter.value[1])) // initial value of y
-				.action_(
-					{ | val |
+								anOssiaParameter.value_(
+									[
+										specs[0].map(val.x),
+										specs[1].map(val.y),
+										anOssiaParameter.value[2]
+									]
+								)
+							}
+						),
+						Slider(
+							parent: anOssiaParameter.window,
+							bounds: 20@(width - 32))
+						.orientation_(\vertical)
+						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of z
+						.action_(
+							{ | val |
 
-						anOssiaParameter.value_(
-							[
-								specs[0].map(val.x),
-								specs[1].map(val.y),
-								anOssiaParameter.value[2]
-							]
+								anOssiaParameter.value_(
+									[
+										anOssiaParameter.value[0],
+										anOssiaParameter.value[1],
+										specs[2].map(val.value)
+									]
+								)
+							}
 						)
-					}
-				),
-				Slider(anOssiaParameter.window, 20@(width - 32))
-				.orientation_(\vertical)
-				.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of z
-				.action_(
-					{ | val |
+					];
 
-						anOssiaParameter.value_(
-							[
-								anOssiaParameter.value[0],
-								anOssiaParameter.value[1],
-								specs[2].map(val.value)
-							]
+					sliders.do(
+						{ | item |
+
+							item.focusColor_(
+								OSSIA.palette.color('midlight', 'active'))
+							.background_(
+								OSSIA.palette.color('middark', 'active'))
+							.knobColor_(OSSIA.palette.color('light', 'active'));
+						}
+					);
+
+					anOssiaParameter.widgets = anOssiaParameter.widgets ++ sliders;
+
+					event = { | param |
+						{
+							if (param.value != [param.widgets[0].value,
+								param.widgets[1].value,
+								param.widgets[2].value])
+							{
+								param.widgets[0].value_(param.value[0]);
+								param.widgets[1].value_(param.value[1]);
+								param.widgets[2].value_(param.value[2]);
+							};
+
+							if (param.value != [specs[0].map(param.widgets[3].x),
+								specs[1].map(param.widgets[3].y),
+								specs[2].map(param.widgets[4].value)])
+							{
+								param.widgets[3].x_(specs[0].unmap(param.value[0]));
+								param.widgets[3].y_(specs[1].unmap(param.value[1]));
+								param.widgets[4].value_(specs[2].unmap(param.value[2]));
+							};
+						}.defer;
+					};
+				},
+				"orientation.euler",
+				{
+					var specs = [ControlSpec(), ControlSpec(), ControlSpec()], widgets;
+
+					if(anOssiaParameter.domain.min.notNil)
+					{
+						specs.do(
+							{ | item, i |
+								item.minval_(anOssiaParameter.domain.min[i]);
+								item.maxval_(anOssiaParameter.domain.max[i]);
+							}
+						);
+					};
+
+					widgets = [
+						Knob(
+							parent: anOssiaParameter.window,
+							bounds: (width - 32)@(width - 32)
+						).value_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of roll
+						.centered_(true)
+						.action_(
+							{ | val |
+
+								anOssiaParameter.value_(
+									[
+										specs[0].map(val.value),
+										anOssiaParameter.value[1],
+										anOssiaParameter.value[2]
+									]
+								)
+							}
+						),
+						Slider(
+							parent: anOssiaParameter.window,
+							bounds: 20@(width - 32))
+						.orientation_(\vertical)
+						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of pitch
+						.action_(
+							{ | val |
+
+								anOssiaParameter.value_(
+									[
+										anOssiaParameter.value[0],
+										specs[1].map(val.value),
+										anOssiaParameter.value[2]
+									]
+								)
+							}
+						),
+						Slider(
+							parent: anOssiaParameter.window,
+							bounds: (width -6)@20)
+						.orientation_(\horizontal)
+						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of yaw
+						.action_(
+							{ | val |
+
+								anOssiaParameter.value_(
+									[
+										anOssiaParameter.value[0],
+										anOssiaParameter.value[1],
+										specs[2].map(val.value)
+									]
+								)
+							}
 						)
-					}
-				)
-			];
+					];
 
-			sliders.do(
-				{ | item , i|
+					widgets.do(
+						{ | item |
 
-					item.focusColor_(
-						OSSIA.palette.color('midlight', 'active'))
-					.background_(
-						OSSIA.palette.color('middark', 'active'))
-					.knobColor_(OSSIA.palette.color('light', 'active'));
+							item.focusColor_(
+								OSSIA.palette.color('midlight', 'active'))
+							.background_(
+								OSSIA.palette.color('middark', 'active'));
+						}
+					);
+
+					widgets[0].color_(
+						[
+							widgets[0].color[0],
+							OSSIA.palette.color('light', 'active'),
+							widgets[0].color[2],
+							widgets[0].color[3]
+						]
+					);
+					widgets[1].knobColor_(OSSIA.palette.color('light', 'active'));
+					widgets[2].knobColor_(OSSIA.palette.color('light', 'active'));
+
+
+					anOssiaParameter.widgets = anOssiaParameter.widgets ++ widgets;
+
+					event = { | param |
+						{
+							if (param.value != [param.widgets[0].value,
+								param.widgets[1].value,
+								param.widgets[2].value])
+							{
+								param.widgets[0].value_(param.value[0]);
+								param.widgets[1].value_(param.value[1]);
+								param.widgets[2].value_(param.value[2]);
+							};
+
+							if (param.value != [specs[0].map(param.widgets[3].value),
+								specs[1].map(param.widgets[4].value),
+								specs[2].map(param.widgets[5].value)])
+							{
+								param.widgets[3].value_(specs[0].unmap(param.value[0]));
+								param.widgets[4].value_(specs[1].unmap(param.value[1]));
+								param.widgets[5].value_(specs[2].unmap(param.value[2]));
+							};
+						}.defer;
+					};
+				},
+				{
+					event = { | param |
+						{
+							if (param.value != [param.widgets[0].value,
+								param.widgets[1].value,
+								param.widgets[2].value])
+							{
+								param.widgets[0].value_(param.value[0]);
+								param.widgets[1].value_(param.value[1]);
+								param.widgets[2].value_(param.value[2]);
+							}
+						}.defer;
+					};
 				}
 			);
-
-			anOssiaParameter.widgets = anOssiaParameter.widgets ++ sliders;
-
-			event = { | param |
-				{
-					if (param.value != [param.widgets[0].value,
-						param.widgets[1].value,
-						param.widgets[2].value])
-					{
-						param.widgets[0].value_(param.value[0]);
-						param.widgets[1].value_(param.value[1]);
-						param.widgets[2].value_(param.value[2]);
-					};
-
-					if (param.value != [specs[0].map(param.widgets[3].x),
-						specs[1].map(param.widgets[3].y),
-						specs[2].map(param.widgets[4].value)])
-					{
-						param.widgets[3].x_(specs[0].unmap(param.value[0]));
-						param.widgets[3].y_(specs[1].unmap(param.value[1]));
-						param.widgets[4].value_(specs[2].unmap(param.value[2]));
-					};
-				}.defer;
-			};
-
-		} {
-
-			event = { | param |
-				{
-					if (param.value != [param.widgets[0].value,
-						param.widgets[1].value,
-						param.widgets[2].value])
-					{
-						param.widgets[0].value_(param.value[0]);
-						param.widgets[1].value_(param.value[1]);
-						param.widgets[2].value_(param.value[2]);
-					}
-				}.defer;
-			};
 		};
 
 		anOssiaParameter.addDependant(event);
