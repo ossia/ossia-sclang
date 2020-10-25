@@ -86,8 +86,8 @@ OSSIA_Node : OSSIA_Base
 		if (win.isNil)
 		{
 			window = Window(name).front; // resize later to the flow layout size
-			window.view.palette_(OSSIA.palette);
-			window.view.background_(OSSIA.palette.base);
+			window.asView.palette_(OSSIA.palette);
+			window.asView.background_(OSSIA.palette.base);
 			window.addFlowLayout;
 		} {
 			window = win;
@@ -112,7 +112,7 @@ OSSIA_Node : OSSIA_Base
 		{
 			if (OSSIA_Device.g_devices == [])
 			{
-				Error("No parent_node or OSSIA_Device found").trow;
+				Error("No parent_node or OSSIA_Device found").throw;
 			} {
 				// if no parent is provided, set it as the first OSSIA_Device
 				parent = OSSIA_Device.g_devices[0];
@@ -493,12 +493,12 @@ OSSIA_Parameter : OSSIA_Node
 		type.ossiaWidget(this);
 		this.prChildGui(childrenDepth);
 
-		if ((window.view.decorator.used.height - window.bounds.height) != 2.0)
+		if ((window.asView.decorator.used.height - window.bounds.height) != 2.0)
 		{ //resize to flow layout
-			window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2));
+			window.bounds_(window.bounds.height_(window.asView.decorator.used.height + 2));
 		};
 	}
-	//
+
 	// closeWigets {
 	//
 	// 	this.windowIfNeeded(parent_window);
@@ -506,8 +506,8 @@ OSSIA_Parameter : OSSIA_Node
 	// 	type.ossiaWidget(this);
 	// 	this.childGui(childrenDepth);
 	//
-	// 	if ((window.view.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
-	// 		window.bounds_(window.bounds.height_(window.view.decorator.used.height + 2.0));
+	// 	if ((window.asView.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
+	// 		window.bounds_(window.bounds.height_(window.asView.decorator.used.height + 2.0));
 	// 	};
 	// }
 

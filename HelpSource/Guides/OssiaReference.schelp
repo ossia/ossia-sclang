@@ -121,8 +121,8 @@ code::
 (
 ~some_device = OSSIA_Device.newOSCQueryServer('supersoftware', 1234, 5678, {
     ~foo = OSSIA_Node(~some_device, 'foo');
-    ~bar = OSSIA_Parameter(~foo, 'bar', Float);
-}
+    ~bar = OSSIA_Parameter(~foo, 'bar', Float)
+	})
 )
 ::
 

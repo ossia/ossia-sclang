@@ -69,6 +69,7 @@ OSSIA_Device : OSSIA_Base
 
 	updateParameter { | anOssiaParameter | protocol.push(anOssiaParameter) }
 
+	get { | addr | ^OSSIA_MirrorParameter(this, addr) }
 
 	//-------------------------------------------//
 	//                NEW SHORTCUTS              //
@@ -86,10 +87,6 @@ OSSIA_Device : OSSIA_Base
 		^this.new(name).exposeOSCQueryMirror(host_addr, callback);
 	}
 
-	// *newMinuit { |name, remote_ip, remote_port, local_port, callback|
-	// 	^this.new(name).exposeMinuit(remote_ip, remote_port, local_port, callback);
-	// }
-
 	*newOSC
 	{ | name, remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback |
 
@@ -99,11 +96,6 @@ OSSIA_Device : OSSIA_Base
 	//-------------------------------------------//
 	//                   EXPOSE                  //
 	//-------------------------------------------//
-
-	// only OSC is suported for now
-	// get { |addr|
-	// 	^OSSIA_MirrorParameter(this, addr)
-	// }
 
 	exposeOSCQueryServer
 	{ | osc_port = 1234, ws_port = 5678, callback |
@@ -116,10 +108,6 @@ OSSIA_Device : OSSIA_Base
 
 		this.prForkExpose('oscqm', [host_addr], callback);
 	}
-
-	// exposeMinuit { |remote_ip, remote_port, local_port, callback|
-	// 	this.prForkExpose('minuit', [remote_ip, remote_port, local_port], callback);
-	// }
 
 	exposeOSC
 	{ | remote_ip = "127.0.0.1", remote_port = 9997, local_port = 9996, callback |
@@ -146,6 +134,7 @@ OSSIA_Device : OSSIA_Base
 
 		callback !? {
 			m_semaphore = Semaphore(1);
+
 			fork {
 				m_semaphore.wait();
 				this.prExposeRedirect(method, vargs);
@@ -174,7 +163,6 @@ OSSIA_Device : OSSIA_Base
 				if (protocol.notNil) { protocol.free; };
 				protocol = OSSIA_OSCQMProtocol(vargs[0], this)
 			},
-			// 'minuit', { this.pyrMinuit(vargs[0], vargs[1], vargs[2])},
 			'osc',
 			{
 				if (protocol.notNil) { protocol.free; };
@@ -199,45 +187,4 @@ OSSIA_Device : OSSIA_Base
 	//  _OSSIA_ZeroConfExplore
 	//  ^this.primitiveFailed
 	// }
-	//
-	// pyrOSCQS { |osc_port, ws_port|
-	// 	_OSSIA_ExposeOSCQueryServer
-	// 	^this.primitiveFailed
-	// }
-	//
-	// pyrOSCQM { |host_addr|
-	// 	_OSSIA_ExposeOSCQueryMirror
-	// 	^this.primitiveFailed;
-	// }
-	//
-	// pyrMinuit { |remote_ip, remote_port, local_port|
-	// 	_OSSIA_ExposeMinuit
-	// 	^this.primitiveFailed;
-	// }
-	//
-	// pyrOSC { |remote_ip, remote_port, local_port|
-	// 	_OSSIA_ExposeOSC
-	// 	^this.primitiveFailed
-	// }
-	//
-	// pyrDeviceCtor { |name|
-	// 	_OSSIA_InstantiateDevice
-	// 	^this.primitiveFailed
-	// }
-	//
-	// pyrFree {
-	// 	_OSSIA_FreeDevice
-	// 	^this.primitiveFailed
-	// }
-	//
-	// free {
-	// 	g_devices.remove(this);
-	// 	this.pyrFree();
-	// }
-	//
-	// *tests {
-	// 	_OSSIA_Tests
-	// 	^this.primitiveFailed
-	// }
-
 }

@@ -276,8 +276,8 @@ OSSIA
 		).onClose_(
 			{ anOssiaParameter.removeDependant(event) }
 		).setColors(
-			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
-			menuStringColor: anOssiaParameter.window.view.palette.color('light', 'active')
+			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
+			menuStringColor: anOssiaParameter.window.asView.palette.color('light', 'active')
 		);
 	}
 
@@ -297,20 +297,19 @@ OSSIA
 			parent: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
 			label: anOssiaParameter.name,
-			action: { | val | anOssiaParameter.value_(val.value) },
 			layout: 'line2',
 			gap: 2@0
 		).onClose_(
 			{ anOssiaParameter.removeDependant(event) }
 		).setColors(
-			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
-			sliderBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
-			numNormalColor: anOssiaParameter.window.view.palette.color('windowText', 'active'),
-			knobColor: anOssiaParameter.window.view.palette.color('light', 'active')
+			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
+			sliderBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
+			numNormalColor: anOssiaParameter.window.asView.palette.color('windowText', 'active'),
+			knobColor: anOssiaParameter.window.asView.palette.color('light', 'active')
 		);
 
 		anOssiaParameter.widgets.sliderView.focusColor_(
-			anOssiaParameter.window.view.palette.color('midlight', 'active');
+			anOssiaParameter.window.asView.palette.color('midlight', 'active');
 		);
 
 		if (anOssiaParameter.domain.min.notNil)
@@ -319,8 +318,17 @@ OSSIA
 			anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max);
 		};
 
-		// set GUI value after min and max are set
-		{ anOssiaParameter.widgets.value_(anOssiaParameter.value); }.defer;
+		if (anOssiaParameter.unit.notNil)
+		{
+			if (anOssiaParameter.unit.string == "gain.decibel")
+			{ anOssiaParameter.widgets.controlSpec.warp_(\db) };
+		};
+
+			// set GUI action and valued after min and max are set
+		{
+			anOssiaParameter.widgets.action_({ | val | anOssiaParameter.value_(val.value) });
+			anOssiaParameter.widgets.value_(anOssiaParameter.value);
+		}.defer;
 	}
 
 	*makeButtonGui
@@ -337,13 +345,13 @@ OSSIA
 			parent: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
 		.string_(anOssiaParameter.name)
-		.stringColor_(anOssiaParameter.window.view.palette.color('baseText', 'active'));
+		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active'));
 
 		anOssiaParameter.widgets = Button(
 			parent: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
 		.onClose_({ anOssiaParameter.removeDependant(event); })
-		.focusColor_(anOssiaParameter.window.view.palette.color('midlight', 'active'));
+		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active'));
 	}
 
 	*makeTxtGui
@@ -370,8 +378,8 @@ OSSIA
 		).onClose_(
 			{ anOssiaParameter.removeDependant(event) }
 		).setColors(
-			stringColor: anOssiaParameter.window.view.palette.color('baseText', 'active'),
-			textBackground: anOssiaParameter.window.view.palette.color('middark', 'active'),
-			textStringColor: anOssiaParameter.window.view.palette.color('windowText', 'active'));
+			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
+			textBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
+			textStringColor: anOssiaParameter.window.asView.palette.color('windowText', 'active'));
 	}
 }

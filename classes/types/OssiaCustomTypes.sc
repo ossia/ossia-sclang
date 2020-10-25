@@ -185,25 +185,11 @@ OSSIA_vec2f : OSSIA_FVector
 					bounds: (width - 57)@20,
 					numberWidth: 45,
 					label: anOssiaParameter.name,
-					action: { | val |
-						anOssiaParameter.value_(
-							[
-								val.value,
-								anOssiaParameter.value[1]
-							]
-						)
-				}, gap: 4@0),
+					gap: 4@0),
 				EZNumber(
 					parent: anOssiaParameter.window,
 					bounds: 45@20,
-					action:{ | val |
-						anOssiaParameter.value_(
-							[
-								anOssiaParameter.value[0],
-								val.value
-							]
-						)
-				}, gap:0@0)
+					gap:0@0)
 			];
 
 			anOssiaParameter.widgets[0].labelView.align_(\left);
@@ -212,8 +198,8 @@ OSSIA_vec2f : OSSIA_FVector
 				{ | item, i |
 
 					item.setColors(
-						stringColor:anOssiaParameter.window.view.palette.color('baseText', 'active'),
-						numNormalColor:anOssiaParameter.window.view.palette.color('windowText', 'active')
+						stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
+						numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active')
 					);
 
 					// set numberBoxes scroll step and colors
@@ -227,10 +213,30 @@ OSSIA_vec2f : OSSIA_FVector
 						specs[i].minval_(anOssiaParameter.domain.min[i]);
 						specs[i].maxval_(anOssiaParameter.domain.max[i]);
 					};
-
-					{ item.value_(anOssiaParameter.value[0]) }.defer;
 				}
 			);
+
+			// set GUI action and valued after min and max are set
+			{
+				anOssiaParameter.widgets[0].action_({ | val |
+					anOssiaParameter.value_(
+						[
+							val.value,
+							anOssiaParameter.value[1]
+						]
+					)
+				}).value_(anOssiaParameter.value[0]);
+
+				anOssiaParameter.widgets[1].action_({ | val |
+					anOssiaParameter.value_(
+						[
+							anOssiaParameter.value[0],
+							val.value
+						]
+					)
+				}).value_(anOssiaParameter.value[1]);
+
+			}.defer;
 
 			anOssiaParameter.widgets = anOssiaParameter.widgets ++
 			Slider2D(
@@ -249,11 +255,11 @@ OSSIA_vec2f : OSSIA_FVector
 			}).onClose_({ anOssiaParameter.removeDependant(event) });
 
 			anOssiaParameter.widgets[2].focusColor_(
-				anOssiaParameter.window.view.palette.color('midlight', 'active'))
+				anOssiaParameter.window.asView.palette.color('midlight', 'active'))
 			.background_(
-				anOssiaParameter.window.view.palette.color('middark', 'active'))
+				anOssiaParameter.window.asView.palette.color('middark', 'active'))
 			.knobColor_(
-				anOssiaParameter.window.view.palette.color('light', 'active')
+				anOssiaParameter.window.asView.palette.color('light', 'active')
 			);
 		} {
 			event = { | param |
@@ -269,18 +275,17 @@ OSSIA_vec2f : OSSIA_FVector
 				parent: anOssiaParameter.window,
 				bounds: (width - 6)@40,
 				label: anOssiaParameter.name,
-				action: { | val | anOssiaParameter.value_(val.value); },
 				layout: 'line2',
 				gap:4@0).onClose_({ anOssiaParameter.removeDependant(event) })
 			.setColors(
-				stringColor:anOssiaParameter.window.view.palette.color('baseText', 'active'),
-				sliderColor:anOssiaParameter.window.view.palette.color('middark', 'active'),
-				numNormalColor:anOssiaParameter.window.view.palette.color('windowText', 'active'),
-				knobColor:anOssiaParameter.window.view.palette.color('light', 'active')
+				stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
+				sliderColor:anOssiaParameter.window.asView.palette.color('middark', 'active'),
+				numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active'),
+				knobColor:anOssiaParameter.window.asView.palette.color('light', 'active')
 			);
 
 			anOssiaParameter.widgets.rangeSlider.focusColor_(
-				anOssiaParameter.window.view.palette.color('midlight', 'active'));
+				anOssiaParameter.window.asView.palette.color('midlight', 'active'));
 
 			anOssiaParameter.widgets.hiBox.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
@@ -294,8 +299,11 @@ OSSIA_vec2f : OSSIA_FVector
 				anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
 			};
 
-			// set GUI value after min and max are set
-			{ anOssiaParameter.widgets.value_(anOssiaParameter.value) }.defer
+			// set GUI action & value after min and max are set
+			{
+				anOssiaParameter.widgets.action_({ | val | anOssiaParameter.value_(val.value) });
+				anOssiaParameter.widgets.value_(anOssiaParameter.value);
+			}.defer
 		};
 
 		anOssiaParameter.addDependant(event);
@@ -344,45 +352,15 @@ OSSIA_vec3f : OSSIA_FVector
 				bounds: (width - 106)@20,
 				numberWidth: 45,
 				label: anOssiaParameter.name,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							val.value,
-							anOssiaParameter.value[1],
-							anOssiaParameter.value[2]
-						]
-					)
-				},
 				labelWidth:100,
 				gap:4@0),
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							anOssiaParameter.value[0],
-							val.value,
-							anOssiaParameter.value[2]
-						]
-					)
-				},
 				gap:0@0),
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							anOssiaParameter.value[0],
-							anOssiaParameter.value[1],
-							val.value
-						]
-					)
-				},
 				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event) });
 		];
 
@@ -405,6 +383,40 @@ OSSIA_vec3f : OSSIA_FVector
 				}
 			}
 		);
+
+		// set GUI action and valued after min and max are set
+		{
+			anOssiaParameter.widgets[0].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						val.value,
+						anOssiaParameter.value[1],
+						anOssiaParameter.value[2]
+					]
+				)
+			}).value_(anOssiaParameter.value[0]);
+
+			anOssiaParameter.widgets[1].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						anOssiaParameter.value[0],
+						val.value,
+						anOssiaParameter.value[2]
+					]
+				)
+			}).value_(anOssiaParameter.value[1]);
+
+			anOssiaParameter.widgets[2].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						anOssiaParameter.value[0],
+						anOssiaParameter.value[1],
+						val.value
+					]
+				)
+			}).value_(anOssiaParameter.value[2]);
+
+		}.defer;
 
 		if (anOssiaParameter.unit.notNil)
 		{
@@ -689,63 +701,19 @@ OSSIA_vec4f : OSSIA_FVector
 				bounds: (width - 155)@20,
 				numberWidth: 45,
 				label: anOssiaParameter.name,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							val.value,
-							anOssiaParameter.value[1],
-							anOssiaParameter.value[2],
-							anOssiaParameter.value[3]
-						]
-					)
-				},
 				labelWidth:100,
 				gap:4@0),
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							anOssiaParameter.value[0],
-							val.value,
-							anOssiaParameter.value[2],
-							anOssiaParameter.value[3]
-						]
-					)
-				},
 				gap:0@0),
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							anOssiaParameter.value[0],
-							anOssiaParameter.value[1],
-							val.value,
-							anOssiaParameter.value[3]
-						]
-					)
-				},
 				gap:0@0),
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				action:{ | val |
-
-					anOssiaParameter.value_(
-						[
-							anOssiaParameter.value[0],
-							anOssiaParameter.value[1],
-							anOssiaParameter.value[2],
-							val.value
-						]
-					)
-				},
 				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event) });
 		];
 
@@ -768,5 +736,53 @@ OSSIA_vec4f : OSSIA_FVector
 				}
 			}
 		);
+
+		// set GUI action and valued after min and max are set
+		{
+			anOssiaParameter.widgets[0].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						val.value,
+						anOssiaParameter.value[1],
+						anOssiaParameter.value[2],
+						anOssiaParameter.value[3]
+					]
+				)
+			}).value_(anOssiaParameter.value[0]);
+
+			anOssiaParameter.widgets[1].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						anOssiaParameter.value[0],
+						val.value,
+						anOssiaParameter.value[2],
+						anOssiaParameter.value[3]
+					]
+				)
+			}).value_(anOssiaParameter.value[1]);
+
+			anOssiaParameter.widgets[2].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						anOssiaParameter.value[0],
+						anOssiaParameter.value[1],
+						val.value,
+						anOssiaParameter.value[3]
+					]
+				)
+			}).value_(anOssiaParameter.value[2]);
+
+			anOssiaParameter.widgets[3].action_({ | val |
+				anOssiaParameter.value_(
+					[
+						anOssiaParameter.value[0],
+						anOssiaParameter.value[1],
+						anOssiaParameter.value[2],
+						val.value
+					]
+				)
+			}).value_(anOssiaParameter.value[3]);
+
+		}.defer;
 	}
 }
