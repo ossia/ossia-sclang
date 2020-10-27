@@ -177,12 +177,10 @@ OSSIA
 
 	*initClass
 	{
-		palette = QPalette.auto(Color.fromHexString("#1d1c1a"), Color.fromHexString("#222222"));
+		palette = QPalette.auto(Color.fromHexString("#222222"), Color.fromHexString("#1d1c1a"));
 
-		palette.setColor(Color.fromHexString("#222222"), 'window');
 		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
-		palette.setColor(Color.fromHexString("#222222"), 'button');
-		palette.setColor(Color.fromHexString("#f0f0f0"), 'buttonText');
+		palette.setColor(Color.fromHexString("#e0b01e"), 'buttonText'); // f0f0f0
 		palette.setColor(Color.fromHexString("#161514"), 'base');
 		palette.setColor(Color.fromHexString("#1e1d1c"), 'alternateBase');
 		palette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
@@ -304,8 +302,7 @@ OSSIA
 		).setColors(
 			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 			sliderBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
-			numNormalColor: anOssiaParameter.window.asView.palette.color('windowText', 'active'),
-			knobColor: anOssiaParameter.window.asView.palette.color('light', 'active')
+			numNormalColor: anOssiaParameter.window.asView.palette.color('windowText', 'active')
 		);
 
 		anOssiaParameter.widgets.sliderView.focusColor_(
@@ -324,7 +321,7 @@ OSSIA
 			{ anOssiaParameter.widgets.controlSpec.warp_(\db) };
 		};
 
-			// set GUI action and valued after min and max are set
+		// set GUI action and valued after min and max are set
 		{
 			anOssiaParameter.widgets.action_({ | val | anOssiaParameter.value_(val.value) });
 			anOssiaParameter.widgets.value_(anOssiaParameter.value);

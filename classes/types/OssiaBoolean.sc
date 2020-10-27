@@ -41,13 +41,13 @@
 			[
 				[
 					"false",
-					anOssiaParameter.window.view.palette.color('light', 'active'),
-					anOssiaParameter.window.view.palette.color('middark', 'active')
+					anOssiaParameter.window.asView.palette.color('light', 'active'),
+					anOssiaParameter.window.asView.palette.color('middark', 'active')
 					],
 				[
 					"true",
-					anOssiaParameter.window.view.palette.color('middark', 'active'),
-					anOssiaParameter.window.view.palette.color('light', 'active')
+					anOssiaParameter.window.asView.palette.color('middark', 'active'),
+					anOssiaParameter.window.asView.palette.color('light', 'active')
 				]
 			]
 		).action_({ | val | anOssiaParameter.value_(val.value) });

@@ -257,10 +257,7 @@ OSSIA_vec2f : OSSIA_FVector
 			anOssiaParameter.widgets[2].focusColor_(
 				anOssiaParameter.window.asView.palette.color('midlight', 'active'))
 			.background_(
-				anOssiaParameter.window.asView.palette.color('middark', 'active'))
-			.knobColor_(
-				anOssiaParameter.window.asView.palette.color('light', 'active')
-			);
+				anOssiaParameter.window.asView.palette.color('middark', 'active'));
 		} {
 			event = { | param |
 				{
@@ -280,8 +277,7 @@ OSSIA_vec2f : OSSIA_FVector
 			.setColors(
 				stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 				sliderColor:anOssiaParameter.window.asView.palette.color('middark', 'active'),
-				numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active'),
-				knobColor:anOssiaParameter.window.asView.palette.color('light', 'active')
+				numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active')
 			);
 
 			anOssiaParameter.widgets.rangeSlider.focusColor_(
@@ -478,8 +474,7 @@ OSSIA_vec3f : OSSIA_FVector
 							item.focusColor_(
 								OSSIA.palette.color('midlight', 'active'))
 							.background_(
-								OSSIA.palette.color('middark', 'active'))
-							.knobColor_(OSSIA.palette.color('light', 'active'));
+								OSSIA.palette.color('middark', 'active'));
 						}
 					);
 
@@ -532,7 +527,7 @@ OSSIA_vec3f : OSSIA_FVector
 
 								anOssiaParameter.value_(
 									[
-										specs[0].map(val.value),
+										specs[0].map(1 - val.value),
 										anOssiaParameter.value[1],
 										anOssiaParameter.value[2]
 									]
@@ -550,7 +545,7 @@ OSSIA_vec3f : OSSIA_FVector
 								anOssiaParameter.value_(
 									[
 										anOssiaParameter.value[0],
-										specs[1].map(val.value),
+										specs[1].map(1 - val.value),
 										anOssiaParameter.value[2]
 									]
 								)
@@ -568,7 +563,7 @@ OSSIA_vec3f : OSSIA_FVector
 									[
 										anOssiaParameter.value[0],
 										anOssiaParameter.value[1],
-										specs[2].map(val.value)
+										specs[2].map(1 - val.value)
 									]
 								)
 							}
@@ -593,9 +588,6 @@ OSSIA_vec3f : OSSIA_FVector
 							widgets[0].color[3]
 						]
 					);
-					widgets[1].knobColor_(OSSIA.palette.color('light', 'active'));
-					widgets[2].knobColor_(OSSIA.palette.color('light', 'active'));
-
 
 					anOssiaParameter.widgets = anOssiaParameter.widgets ++ widgets;
 
@@ -610,13 +602,13 @@ OSSIA_vec3f : OSSIA_FVector
 								param.widgets[2].value_(param.value[2]);
 							};
 
-							if (param.value != [specs[0].map(param.widgets[3].value),
-								specs[1].map(param.widgets[4].value),
-								specs[2].map(param.widgets[5].value)])
+							if (param.value != [specs[0].map(1 - param.widgets[3].value),
+								specs[1].map(1 - param.widgets[4].value),
+								specs[2].map(1 - param.widgets[5].value)])
 							{
-								param.widgets[3].value_(specs[0].unmap(param.value[0]));
-								param.widgets[4].value_(specs[1].unmap(param.value[1]));
-								param.widgets[5].value_(specs[2].unmap(param.value[2]));
+								param.widgets[3].value_(1 - specs[0].unmap(param.value[0]));
+								param.widgets[4].value_(1 - specs[1].unmap(param.value[1]));
+								param.widgets[5].value_(1 - specs[2].unmap(param.value[2]));
 							};
 						}.defer;
 					};
