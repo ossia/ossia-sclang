@@ -533,11 +533,10 @@ OSSIA_Parameter : OSSIA_Node
 			this.prCloseChildGui(childrenDepth);
 
 			widgets.do({ | item | item.remove });
-			widgets = nil;
 
 			if (window.asView.children == [])
 			{ window.close }
-		};
+		}
 	}
 }
 

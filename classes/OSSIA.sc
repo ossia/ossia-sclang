@@ -271,9 +271,10 @@ OSSIA
 			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
 			layout: 'vert',
 			gap: 2@0
-		).onClose_(
-			{ anOssiaParameter.removeDependant(event) }
-		).setColors(
+		).onClose_({
+			anOssiaParameter.removeDependant(event);
+			anOssiaParameter.widgets = nil;
+		}).setColors(
 			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 			menuStringColor: anOssiaParameter.window.asView.palette.color('light', 'active')
 		);
@@ -299,9 +300,10 @@ OSSIA
 			label: anOssiaParameter.name,
 			layout: 'line2',
 			gap: 2@0
-		).onClose_(
-			{ anOssiaParameter.removeDependant(event) }
-		).setColors(
+		).onClose_({
+			anOssiaParameter.removeDependant(event);
+			anOssiaParameter.widgets = nil;
+		}).setColors(
 			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 			sliderBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
 			numNormalColor: anOssiaParameter.window.asView.palette.color('windowText', 'active')
@@ -335,21 +337,24 @@ OSSIA
 
 		var event = { | param |
 			{
-				if (param.value != param.widgets[0].value)
-				{ param.widgets[0].value_(param.value) };
+				if (param.value != param.widgets[1].value)
+				{ param.widgets[1].value_(param.value) };
 			}.defer;
 		};
 
-		anOssiaParameter.widgets = [ Button(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
-		.onClose_({ anOssiaParameter.removeDependant(event); })
-		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active')),
-				StaticText(
+		anOssiaParameter.widgets = [ StaticText(
 			parent: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
 		.string_(anOssiaParameter.name)
-		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active')) ];
+		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active')),
+		Button(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
+		.onClose_({
+			anOssiaParameter.removeDependant(event);
+			anOssiaParameter.widgets = nil;
+		})
+		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active')) ];
 	}
 
 	*makeTxtGui
@@ -373,9 +378,10 @@ OSSIA
 			labelWidth: 100,
 			layout: 'vert',
 			gap: 2@0
-		).onClose_(
-			{ anOssiaParameter.removeDependant(event) }
-		).setColors(
+		).onClose_({
+			anOssiaParameter.removeDependant(event);
+			anOssiaParameter.widgets = nil;
+		}).setColors(
 			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 			textBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
 			textStringColor: anOssiaParameter.window.asView.palette.color('windowText', 'active'));

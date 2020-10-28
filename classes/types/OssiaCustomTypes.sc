@@ -252,7 +252,10 @@ OSSIA_vec2f : OSSIA_FVector
 						specs[1].map(val.y)
 					]
 				)
-			}).onClose_({ anOssiaParameter.removeDependant(event) });
+			}).onClose_({
+				anOssiaParameter.removeDependant(event);
+				anOssiaParameter.widgets = nil;
+			});
 
 			anOssiaParameter.widgets[2].focusColor_(
 				anOssiaParameter.window.asView.palette.color('midlight', 'active'))
@@ -273,8 +276,10 @@ OSSIA_vec2f : OSSIA_FVector
 				bounds: (width - 6)@40,
 				label: anOssiaParameter.name,
 				layout: 'line2',
-				gap:4@0).onClose_({ anOssiaParameter.removeDependant(event) })
-			.setColors(
+				gap:4@0).onClose_({
+				anOssiaParameter.removeDependant(event);
+				anOssiaParameter.widgets = nil;
+			}).setColors(
 				stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 				sliderColor:anOssiaParameter.window.asView.palette.color('middark', 'active'),
 				numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active')
@@ -357,7 +362,7 @@ OSSIA_vec3f : OSSIA_FVector
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event) });
+				gap:0@0);
 		];
 
 		anOssiaParameter.widgets[0].labelView.align_(\left);
@@ -631,6 +636,14 @@ OSSIA_vec3f : OSSIA_FVector
 		};
 
 		anOssiaParameter.addDependant(event);
+
+		// always add the onClose function to the last ellement
+		// reserving widgets = nil at the ed of the loop
+		anOssiaParameter.widgets[anOssiaParameter.widgets.size - 1]
+		.onClose_({
+			anOssiaParameter.removeDependant(event);
+			anOssiaParameter.widgets = nil;
+		})
 	}
 }
 
@@ -706,7 +719,10 @@ OSSIA_vec4f : OSSIA_FVector
 			EZNumber(
 				parent: anOssiaParameter.window,
 				bounds: 45@20,
-				gap:0@0).onClose_({ anOssiaParameter.removeDependant(event) });
+				gap:0@0).onClose_({
+				anOssiaParameter.removeDependant(event);
+				anOssiaParameter.widgets = nil;
+			});
 		];
 
 		anOssiaParameter.widgets[0].labelView.align_(\left);

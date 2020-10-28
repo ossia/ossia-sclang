@@ -37,7 +37,7 @@
 		OSSIA.makeButtonGui(anOssiaParameter);
 
 		// Boolean specific states, actions and initial value
-		anOssiaParameter.widgets[0].states_(
+		anOssiaParameter.widgets[1].states_(
 			[
 				[
 					"false",
@@ -52,6 +52,6 @@
 			]
 		).action_({ | val | anOssiaParameter.value_(val.value) });
 
-		{ anOssiaParameter.widgets[0].value_(anOssiaParameter.value); }.defer;
+		{ anOssiaParameter.widgets[1].value_(anOssiaParameter.value); }.defer;
 	}
 }

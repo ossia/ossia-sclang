@@ -34,7 +34,7 @@
 		OSSIA.makeButtonGui(anOssiaParameter);
 
 		// Impulse specific states and action
-		anOssiaParameter.widgets[0].states_([
+		anOssiaParameter.widgets[1].states_([
 			["Pulse"]
 		]).action_({ | val | anOssiaParameter.value_() });
 	}
