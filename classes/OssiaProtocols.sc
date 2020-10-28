@@ -217,6 +217,11 @@ OSSIA_OSCQSProtocol
 
 		dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
 
+/*		ws_server.numConnections.do({ | iter |
+
+			ws_server[iter].writeText("{\"COMMAND\":\"PATH_ADDED\",\"DATA\":\"" ++ anOssiaParameter.path ++"\"}";
+		});*/
+
 		if (anOssiaParameter.critical.not)
 		{
 			var path = anOssiaParameter.path;
@@ -237,6 +242,11 @@ OSSIA_OSCQSProtocol
 
 	freeParameter
 	{ | anOssiaNode |
+
+		ws_server.numConnections.do({ | iter |
+
+			ws_server[iter].writeText("{\"COMMAND\":\"PATH_REMOVED\",\"DATA\":\"" ++ anOssiaNode.path ++"\"}");
+		});
 
 		if (anOssiaNode.class == OSSIA_Parameter)
 		{
@@ -366,7 +376,8 @@ OSSIA_OSCQMProtocol
 
 		aDictionaryAray.do({ | aDictionary |
 
-			if (aDictionary["VALUE"].notNil) { dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); }; // only keep parameters
+			// only keep parameters
+			if (aDictionary["VALUE"].notNil) { dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); };
 			if (aDictionary["CONTENTS"].notNil) { this.setupIdentityDict(aDictionary["CONTENTS"]); };
 		});
 	}
