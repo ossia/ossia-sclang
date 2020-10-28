@@ -323,7 +323,7 @@ OSSIA_Parameter : OSSIA_Node
 		m_callback = {};
 	}
 
-	paramExplore { ^[this, children.collect(_.paramExplore)] }
+	prParamExplore { ^[this, children.collect(_.paramExplore)] }
 
 	free
 	{

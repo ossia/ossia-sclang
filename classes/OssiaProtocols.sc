@@ -254,12 +254,6 @@ OSSIA_OSCQSProtocol
 			{ OSCdef(anOssiaNode.path).free };
 		};
 	}
-
-	free
-	{
-		device.explore().flat.do(this.freeParameter(_));
-		^super.free;
-	}
 }
 
 	//-------------------------------------------//
