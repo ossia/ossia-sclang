@@ -41,7 +41,7 @@ OSSIA_OSCProtocol
 
 		var path = anOssiaParameter.path;
 
-		OSCFunc(
+		OSCdef(path,
 			{ | msg |
 				if (msg.size == 2)
 				{
@@ -59,7 +59,7 @@ OSSIA_OSCProtocol
 	freeParameter
 	{ | anOssiaParameter |
 
-		OSCdef(anOssiaParameter.path.asSymbol).free;
+		OSCdef(anOssiaParameter.path).free;
 	}
 
 	free
@@ -221,9 +221,8 @@ OSSIA_OSCQSProtocol
 		{
 			var path = anOssiaParameter.path;
 
-			OSCFunc(
+			OSCdef(path,
 				{ | msg |
-
 					if (msg.size == 2)
 					{
 						anOssiaParameter.valueQuiet(msg[1]);
@@ -231,7 +230,8 @@ OSSIA_OSCQSProtocol
 						msg.removeAt(0);
 						anOssiaParameter.valueQuiet(msg);
 					};
-				}, path, recvPort: osc_port);
+				},
+				path, recvPort: osc_port);
 		};
 	}
 
@@ -241,7 +241,7 @@ OSSIA_OSCQSProtocol
 		if (anOssiaNode.class == OSSIA_Parameter)
 		{
 			if (anOssiaNode.critical.not)
-			{ OSCdef(anOssiaNode.path.asSymbol).free };
+			{ OSCdef(anOssiaNode.path).free };
 		};
 	}
 

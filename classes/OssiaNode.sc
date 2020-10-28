@@ -49,6 +49,18 @@ OSSIA_Node : OSSIA_Base
 		this.prChildGui(childrenDepth);
 	}
 
+	closeGui
+	{ | childrenDepth = 1 |
+
+		if (window.notNil)
+		{
+			this.prCloseChildGui(childrenDepth);
+
+			if (window.asView.children == [])
+			{ window.close }
+		};
+	}
+
 	free
 	{
 		children.collect(_.free);
@@ -101,6 +113,17 @@ OSSIA_Node : OSSIA_Base
 		{
 			children.do({ | item |
 				item.gui(window, childrenDepth - 1);
+			});
+		};
+	}
+
+	prCloseChildGui
+	{ | childrenDepth |
+
+		if (childrenDepth > 0)
+		{
+			children.do({ | item |
+				item.closeGui(childrenDepth - 1);
 			});
 		};
 	}
@@ -488,29 +511,34 @@ OSSIA_Parameter : OSSIA_Node
 	gui
 	{ | parent_window, childrenDepth = 0 |
 
-		this.prWindowIfNeeded(parent_window);
+		if (widgets.isNil)
+		{
+			this.prWindowIfNeeded(parent_window);
 
-		type.ossiaWidget(this);
-		this.prChildGui(childrenDepth);
+			type.ossiaWidget(this);
+			this.prChildGui(childrenDepth);
 
-		if ((window.asView.decorator.used.height - window.bounds.height) != 2.0)
-		{ //resize to flow layout
-			window.bounds_(window.bounds.height_(window.asView.decorator.used.height + 2));
+			if ((window.asView.decorator.used.height - window.bounds.height) != 2.0)
+			{ //resize to flow layout
+				window.bounds_(window.bounds.height_(window.asView.decorator.used.height + 2));
+			};
 		};
 	}
 
-	// closeWigets {
-	//
-	// 	this.windowIfNeeded(parent_window);
-	//
-	// 	type.ossiaWidget(this);
-	// 	this.childGui(childrenDepth);
-	//
-	// 	if ((window.asView.decorator.used.height - window.bounds.height) != 2.0) { //resize to flow layout
-	// 		window.bounds_(window.bounds.height_(window.asView.decorator.used.height + 2.0));
-	// 	};
-	// }
+	closeGui
+	{ | childrenDepth = 0 |
 
+		if (widgets.notNil)
+		{
+			this.prCloseChildGui(childrenDepth);
+
+			widgets.do({ | item | item.remove });
+			widgets = nil;
+
+			if (window.asView.children == [])
+			{ window.close }
+		};
+	}
 }
 
 //-------------------------------------------//

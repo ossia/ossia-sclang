@@ -277,6 +277,8 @@ OSSIA
 			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
 			menuStringColor: anOssiaParameter.window.asView.palette.color('light', 'active')
 		);
+
+		event.value(anOssiaParameter); // initialise
 	}
 
 	*makeSliderGui
@@ -333,22 +335,21 @@ OSSIA
 
 		var event = { | param |
 			{
-				if (param.value != param.widgets.value)
-				{ param.widgets.value_(param.value) };
+				if (param.value != param.widgets[0].value)
+				{ param.widgets[0].value_(param.value) };
 			}.defer;
 		};
 
-		StaticText(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
-		.string_(anOssiaParameter.name)
-		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active'));
-
-		anOssiaParameter.widgets = Button(
+		anOssiaParameter.widgets = [ Button(
 			parent: anOssiaParameter.window,
 			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
 		.onClose_({ anOssiaParameter.removeDependant(event); })
-		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active'));
+		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active')),
+				StaticText(
+			parent: anOssiaParameter.window,
+			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
+		.string_(anOssiaParameter.name)
+		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active')) ];
 	}
 
 	*makeTxtGui
