@@ -246,7 +246,6 @@ OSSIA_Node : OSSIA_Base
 	// 	_OSSIA_PresetSave
 	// 	^this.primitiveFailed
 	// }
-
 }
 
 OSSIA_Parameter : OSSIA_Node
@@ -518,7 +517,7 @@ OSSIA_Parameter : OSSIA_Node
 			type.ossiaWidget(this);
 			this.prChildGui(childrenDepth);
 
-			this.prRsizeLayout();
+			this.resizeLayout(window);
 		};
 	}
 
@@ -532,20 +531,21 @@ OSSIA_Parameter : OSSIA_Node
 			this.prCloseChildGui(childrenDepth);
 
 			window.asView.decorator.reFlow(window.asView);
-			this.prRsizeLayout();
+			this.resizeLayout(window);
 
 			if (window.bounds.height <= 10)
 			{ window.close }
 		}
 	}
 
-	prRsizeLayout
-	{
-		var deco = window.asView.decorator;
+	resizeLayout
+	{ | aWindow |
 
-		if ((deco.used.height - window.bounds.height) != 2)
+		var deco = aWindow.asView.decorator;
+
+		if ((deco.used.height - aWindow.bounds.height) != 2)
 		{ //resize to flow layout
-			window.bounds_(window.bounds.height_(deco.used.height + 2));
+			aWindow.bounds_(aWindow.bounds.height_(deco.used.height + 2));
 		};
 	}
 }
