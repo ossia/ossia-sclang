@@ -182,7 +182,7 @@ OSSIA
 		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
 		palette.setColor(Color.fromHexString("#e0b01e"), 'buttonText'); // f0f0f0
 		palette.setColor(Color.fromHexString("#161514"), 'base');
-		palette.setColor(Color.fromHexString("#1e1d1c"), 'alternateBase');
+		palette.setColor(Color.fromHexString("#03C3DD"), 'alternateBase'); // blue interval "#1e1d1c"
 		palette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
 		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'toolTipText');
 		palette.setColor(Color.fromHexString("#9062400a"), 'highlight');
@@ -191,7 +191,7 @@ OSSIA
 		palette.setColor(Color.fromHexString("#e0b01e"), 'light'); // welow slider
 		palette.setColor(Color.fromHexString("#62400a"), 'midlight'); // brown contour
 		palette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
-		palette.setColor(Color.fromHexString("#a7dd0d"), 'baseText'); // green param
+		palette.setColor(Color.fromHexString("#94FF00"), 'baseText'); // green param "#a7dd0d"
 		palette.setColor(Color.fromHexString("#c58014"), 'brightText');
 	}
 
@@ -253,137 +253,149 @@ OSSIA
 	//-------------------------------------------//
 
 	*makeDropDownGui
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var event = { | param |
-			var i = param.domain.values.detectIndex({ | item | item == param.value });
+		var event, widget;
 
-			{ param.widgets.value_(i) }.defer;
-		};
-
-		anOssiaParameter.addDependant(event);
-
-		anOssiaParameter.widgets = EZPopUpMenu(
-			parentView: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
-			label: anOssiaParameter.name,
-			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
-			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
-			layout: 'vert',
-			gap: 2@0
-		).onClose_({
-			anOssiaParameter.removeDependant(event);
-			anOssiaParameter.widgets = nil;
-		}).setColors(
-			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
-			menuStringColor: anOssiaParameter.window.asView.palette.color('light', 'active')
-		);
-
-		event.value(anOssiaParameter); // initialise
-	}
-
-	*makeSliderGui
-	{ | anOssiaParameter |
-
-		var event = { | param |
+		event = { | param |
 			{
-				if (param.value != param.widgets.value)
-				{ param.widgets.value_(param.value) };
+				var i = param.domain.values.detectIndex({ | item | item == param.value });
+				widget.value_(i)
 			}.defer;
 		};
 
 		anOssiaParameter.addDependant(event);
 
-		anOssiaParameter.widgets = EZSlider(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
+		widget = EZPopUpMenu(
+			parentView: win,
+			bounds: (win.bounds.width - 6)@40,
 			label: anOssiaParameter.name,
-			layout: 'line2',
-			gap: 2@0
-		).onClose_({
-			anOssiaParameter.removeDependant(event);
-			anOssiaParameter.widgets = nil;
-		}).setColors(
-			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
-			sliderBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
-			numNormalColor: anOssiaParameter.window.asView.palette.color('windowText', 'active')
+			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
+			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
+			layout: 'vert',
+			gap: 2@0)
+		.onClose_({ anOssiaParameter.removeDependant(event);
+			anOssiaParameter.removeClosed();
+		})
+		.setColors(
+			stringColor: win.asView.palette.color('baseText', 'active'),
+			menuStringColor: win.asView.palette.color('light', 'active')
 		);
 
-		anOssiaParameter.widgets.sliderView.focusColor_(
-			anOssiaParameter.window.asView.palette.color('midlight', 'active');
+		event.value(anOssiaParameter); // initialise
+
+		^widget;
+	}
+
+	*makeSliderGui
+	{ | anOssiaParameter, win |
+
+		var event, widget;
+
+		event = { | param |
+			{
+				if (param.value != widget.value)
+				{ widget.value_(param.value) };
+			}.defer;
+		};
+
+		anOssiaParameter.addDependant(event);
+
+		widget = EZSlider(
+			parent: win,
+			bounds: (win.bounds.width - 6)@40,
+			label: anOssiaParameter.name,
+			layout: 'line2',
+			gap: 2@0)
+		.onClose_({ anOssiaParameter.removeDependant(event);
+			anOssiaParameter.removeClosed();
+		})
+		.setColors(
+			stringColor: win.asView.palette.color('baseText', 'active'),
+			sliderBackground: win.asView.palette.color('middark', 'active'),
+			numNormalColor: win.asView.palette.color('windowText', 'active')
+		);
+
+		widget.sliderView.focusColor_(
+			win.asView.palette.color('midlight', 'active');
 		);
 
 		if (anOssiaParameter.domain.min.notNil)
 		{
-			anOssiaParameter.widgets.controlSpec.minval_(anOssiaParameter.domain.min);
-			anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max);
+			widget.controlSpec.minval_(anOssiaParameter.domain.min);
+			widget.controlSpec.maxval_(anOssiaParameter.domain.max);
 		};
 
 		if (anOssiaParameter.unit.notNil)
 		{
 			if (anOssiaParameter.unit.string == "gain.decibel")
-			{ anOssiaParameter.widgets.controlSpec.warp_(\db) };
+			{ widget.controlSpec.warp_(\db) };
 		};
 
 		// set GUI action and valued after min and max are set
 		{
-			anOssiaParameter.widgets.action_({ | val | anOssiaParameter.value_(val.value) });
-			anOssiaParameter.widgets.value_(anOssiaParameter.value);
+			widget.action_({ | val | anOssiaParameter.value_(val.value) });
+			widget.value_(anOssiaParameter.value);
 		}.defer;
+
+		^widget;
 	}
 
 	*makeButtonGui
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var event = { | param |
-			{
-				if (param.value != param.widgets[1].value)
-				{ param.widgets[1].value_(param.value) };
-			}.defer;
-		};
+		var widget = [
+			StaticText(
+				parent: win,
+				bounds: (win.bounds.width - 6)@20)
+			.string_(anOssiaParameter.name)
+			.stringColor_(win.asView.palette.color('baseText', 'active')),
+			Button(
+				parent: win,
+				bounds: (win.bounds.width - 6)@20)
+			.focusColor_(win.asView.palette.color('midlight', 'active'))
+		];
 
-		anOssiaParameter.widgets = [ StaticText(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
-		.string_(anOssiaParameter.name)
-		.stringColor_(anOssiaParameter.window.asView.palette.color('baseText', 'active')),
-		Button(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@20)
-		.onClose_({
-			anOssiaParameter.removeDependant(event);
-			anOssiaParameter.widgets = nil;
-		})
-		.focusColor_(anOssiaParameter.window.asView.palette.color('midlight', 'active')) ];
+		^widget;
 	}
 
 	*makeTxtGui
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var event = { | param |
+		var widget, event;
+
+		event = { | param |
 			{
-				if (param.value != param.widgets.value)
-				{ param.widgets.value_(param.value) };
+				if (param.value != widget.value)
+				{ widget.value_(param.value) };
 			}.defer;
 		};
 
 		anOssiaParameter.addDependant(event);
 
-		anOssiaParameter.widgets = EZText(
-			parent: anOssiaParameter.window,
-			bounds: (anOssiaParameter.window.bounds.width - 6)@40,
+		widget = EZText(
+			parent: win,
+			bounds: (win.bounds.width - 6)@40,
 			label: anOssiaParameter.name,
 			action: { | val | anOssiaParameter.value_(val.value) },
 			initVal: anOssiaParameter.value,
 			labelWidth: 100,
 			layout: 'vert',
-			gap: 2@0
-		).onClose_({
-			anOssiaParameter.removeDependant(event);
-			anOssiaParameter.widgets = nil;
-		}).setColors(
-			stringColor: anOssiaParameter.window.asView.palette.color('baseText', 'active'),
-			textBackground: anOssiaParameter.window.asView.palette.color('middark', 'active'),
-			textStringColor: anOssiaParameter.window.asView.palette.color('windowText', 'active'));
+			gap: 2@0)
+		.onClose_({ anOssiaParameter.removeDependant(event);
+			anOssiaParameter.removeClosed();
+		})
+		.setColors(
+			stringColor: win.asView.palette.color('baseText', 'active'),
+			textBackground: win.asView.palette.color('middark', 'active'),
+			textStringColor: win.asView.palette.color('windowText', 'active'));
+
+		^widget;
 	}
+}
+
++ EZGui
+{
+	parent { ^view.parent.findWindow }
+	isClosed { ^view.isClosed }
 }

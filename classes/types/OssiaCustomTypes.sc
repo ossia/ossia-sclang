@@ -147,10 +147,10 @@ OSSIA_vec2f : OSSIA_FVector
 	*ossiaJson { ^"\"ff\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var isCartesian = false, event;
-		var width = anOssiaParameter.window.bounds.width;
+		var isCartesian = false, event, widget;
+		var width = win.bounds.width;
 
 		if (anOssiaParameter.unit.notNil)
 		{
@@ -163,43 +163,43 @@ OSSIA_vec2f : OSSIA_FVector
 
 			event = { | param |
 				{
-					if (param.value != [param.widgets[0].value,
-						param.widgets[1].value])
+					if (param.value != [widget[0].value,
+						widget[1].value])
 					{
-						param.widgets[0].value_(param.value[0]);
-						param.widgets[1].value_(param.value[1]);
+						widget[0].value_(param.value[0]);
+						widget[1].value_(param.value[1]);
 					};
 
-					if (param.value != [specs[0].map(param.widgets[2].x),
-						specs[1].map(param.widgets[2].y)])
+					if (param.value != [specs[0].map(widget[2].x),
+						specs[1].map(widget[2].y)])
 					{
-						param.widgets[2].x_(specs[0].unmap(param.value[0]));
-						param.widgets[2].y_(specs[1].unmap(param.value[1]));
+						widget[2].x_(specs[0].unmap(param.value[0]));
+						widget[2].y_(specs[1].unmap(param.value[1]));
 					};
 				}.defer;
 			};
 
-			anOssiaParameter.widgets = [
+			widget = [
 				EZNumber(
-					parent: anOssiaParameter.window,
+					parent: win,
 					bounds: (width - 57)@20,
 					numberWidth: 45,
 					label: anOssiaParameter.name,
 					gap: 4@0),
 				EZNumber(
-					parent: anOssiaParameter.window,
+					parent: win,
 					bounds: 45@20,
 					gap:0@0)
 			];
 
-			anOssiaParameter.widgets[0].labelView.align_(\left);
+			widget[0].labelView.align_(\left);
 
-			anOssiaParameter.widgets.do(
+			widget.do(
 				{ | item, i |
 
 					item.setColors(
-						stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
-						numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active')
+						stringColor: win.asView.palette.color('baseText', 'active'),
+						numNormalColor: win.asView.palette.color('windowText', 'active')
 					);
 
 					// set numberBoxes scroll step and colors
@@ -218,7 +218,7 @@ OSSIA_vec2f : OSSIA_FVector
 
 			// set GUI action and valued after min and max are set
 			{
-				anOssiaParameter.widgets[0].action_({ | val |
+				widget[0].action_({ | val |
 					anOssiaParameter.value_(
 						[
 							val.value,
@@ -227,7 +227,7 @@ OSSIA_vec2f : OSSIA_FVector
 					)
 				}).value_(anOssiaParameter.value[0]);
 
-				anOssiaParameter.widgets[1].action_({ | val |
+				widget[1].action_({ | val |
 					anOssiaParameter.value_(
 						[
 							anOssiaParameter.value[0],
@@ -238,9 +238,9 @@ OSSIA_vec2f : OSSIA_FVector
 
 			}.defer;
 
-			anOssiaParameter.widgets = anOssiaParameter.widgets ++
+			widget = widget ++
 			Slider2D(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: (width - 6)@(width - 6)
 			).x_(specs[0].unmap(anOssiaParameter.value[0])) // initial location of x
 			.y_(specs[1].unmap(anOssiaParameter.value[1])) // initial location of y
@@ -252,62 +252,65 @@ OSSIA_vec2f : OSSIA_FVector
 						specs[1].map(val.y)
 					]
 				)
-			}).onClose_({
-				anOssiaParameter.removeDependant(event);
-				anOssiaParameter.widgets = nil;
+			})
+			.onClose_({ anOssiaParameter.removeDependant(event);
+				widget[0].remove;
+				widget[1].remove;
+				anOssiaParameter.removeClosed();
 			});
 
-			anOssiaParameter.widgets[2].focusColor_(
-				anOssiaParameter.window.asView.palette.color('midlight', 'active'))
+			widget[2].focusColor_(
+				win.asView.palette.color('midlight', 'active'))
 			.background_(
-				anOssiaParameter.window.asView.palette.color('middark', 'active'));
+				win.asView.palette.color('middark', 'active'));
 		} {
 			event = { | param |
 				{
-					if (param.value != param.widgets.value)
-					{
-						param.widgets.value_(param.value);
-					};
+					if (param.value != widget.value)
+					{ widget.value_(param.value) };
 				}.defer;
 			};
 
-			anOssiaParameter.widgets = EZRanger(
-				parent: anOssiaParameter.window,
+			widget = EZRanger(
+				parent: win,
 				bounds: (width - 6)@40,
 				label: anOssiaParameter.name,
 				layout: 'line2',
-				gap:4@0).onClose_({
-				anOssiaParameter.removeDependant(event);
-				anOssiaParameter.widgets = nil;
-			}).setColors(
-				stringColor:anOssiaParameter.window.asView.palette.color('baseText', 'active'),
-				sliderColor:anOssiaParameter.window.asView.palette.color('middark', 'active'),
-				numNormalColor:anOssiaParameter.window.asView.palette.color('windowText', 'active')
+				gap:4@0)
+			.onClose_({ anOssiaParameter.removeDependant(event);
+				anOssiaParameter.removeClosed();
+			})
+			.setColors(
+				stringColor: win.asView.palette.color('baseText', 'active'),
+				sliderColor: win.asView.palette.color('middark', 'active'),
+				numNormalColor: win.asView.palette.color('windowText', 'active')
 			);
 
-			anOssiaParameter.widgets.rangeSlider.focusColor_(
-				anOssiaParameter.window.asView.palette.color('midlight', 'active'));
+			widget.rangeSlider.focusColor_(
+				win.asView.palette.color('midlight', 'active'));
 
-			anOssiaParameter.widgets.hiBox.maxDecimals_(3)
+			widget.hiBox.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
 
-			anOssiaParameter.widgets.loBox.maxDecimals_(3)
+			widget.loBox.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
 
 			if (anOssiaParameter.domain.min.notNil)
 			{
-				anOssiaParameter.widgets.controlSpec.minval_(anOssiaParameter.domain.min[0]);
-				anOssiaParameter.widgets.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
+				widget.controlSpec.minval_(anOssiaParameter.domain.min[0]);
+				widget.controlSpec.maxval_(anOssiaParameter.domain.max[1]);
 			};
 
 			// set GUI action & value after min and max are set
 			{
-				anOssiaParameter.widgets.action_({ | val | anOssiaParameter.value_(val.value) });
-				anOssiaParameter.widgets.value_(anOssiaParameter.value);
+				widget.action_({ | val | anOssiaParameter.value_(val.value) });
+				widget.value_(anOssiaParameter.value);
 			}.defer
 		};
 
 		anOssiaParameter.addDependant(event);
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }
 
@@ -343,35 +346,35 @@ OSSIA_vec3f : OSSIA_FVector
 	*ossiaJson { ^"\"fff\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var event, width = anOssiaParameter.window.bounds.width;
+		var widget, event, width = win.bounds.width;
 
-		anOssiaParameter.widgets = [
+		widget = [
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: (width - 106)@20,
 				numberWidth: 45,
 				label: anOssiaParameter.name,
 				labelWidth:100,
 				gap:4@0),
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: 45@20,
 				gap:0@0),
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: 45@20,
 				gap:0@0);
 		];
 
-		anOssiaParameter.widgets[0].labelView.align_(\left);
+		widget[0].labelView.align_(\left);
 
-		anOssiaParameter.widgets.do(
+		widget.do(
 			{ | item, i |
 
-				item.setColors(stringColor:OSSIA.palette.color('baseText', 'active'),
-					numNormalColor:OSSIA.palette.color('windowText', 'active'));
+				item.setColors(stringColor: win.asView.palette.color('baseText', 'active'),
+					numNormalColor: win.asView.palette.color('windowText', 'active'));
 
 				// set numberBoxes scroll step and colors
 				item.numberView.maxDecimals_(3)
@@ -387,7 +390,7 @@ OSSIA_vec3f : OSSIA_FVector
 
 		// set GUI action and valued after min and max are set
 		{
-			anOssiaParameter.widgets[0].action_({ | val |
+			widget[0].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						val.value,
@@ -397,7 +400,7 @@ OSSIA_vec3f : OSSIA_FVector
 				)
 			}).value_(anOssiaParameter.value[0]);
 
-			anOssiaParameter.widgets[1].action_({ | val |
+			widget[1].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						anOssiaParameter.value[0],
@@ -407,7 +410,7 @@ OSSIA_vec3f : OSSIA_FVector
 				)
 			}).value_(anOssiaParameter.value[1]);
 
-			anOssiaParameter.widgets[2].action_({ | val |
+			widget[2].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						anOssiaParameter.value[0],
@@ -438,7 +441,7 @@ OSSIA_vec3f : OSSIA_FVector
 
 					sliders = [
 						Slider2D(
-							parent: anOssiaParameter.window,
+							parent: win,
 							bounds: (width - 32)@(width - 32)
 						).x_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of x
 						.y_(specs[1].unmap(anOssiaParameter.value[1])) // initial value of y
@@ -455,7 +458,7 @@ OSSIA_vec3f : OSSIA_FVector
 							}
 						),
 						Slider(
-							parent: anOssiaParameter.window,
+							parent: win,
 							bounds: 20@(width - 32))
 						.orientation_(\vertical)
 						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of z
@@ -470,7 +473,13 @@ OSSIA_vec3f : OSSIA_FVector
 									]
 								)
 							}
-						)
+						).onClose_({ anOssiaParameter.removeDependant(event);
+							widget[0].remove;
+							widget[1].remove;
+							widget[2].remove;
+							widget[3].remove;
+							anOssiaParameter.removeClosed();
+						})
 					];
 
 					sliders.do(
@@ -483,33 +492,33 @@ OSSIA_vec3f : OSSIA_FVector
 						}
 					);
 
-					anOssiaParameter.widgets = anOssiaParameter.widgets ++ sliders;
+					widget = widget ++ sliders;
 
 					event = { | param |
 						{
-							if (param.value != [param.widgets[0].value,
-								param.widgets[1].value,
-								param.widgets[2].value])
+							if (param.value != [widget[0].value,
+								widget[1].value,
+								widget[2].value])
 							{
-								param.widgets[0].value_(param.value[0]);
-								param.widgets[1].value_(param.value[1]);
-								param.widgets[2].value_(param.value[2]);
+								widget[0].value_(param.value[0]);
+								widget[1].value_(param.value[1]);
+								widget[2].value_(param.value[2]);
 							};
 
-							if (param.value != [specs[0].map(param.widgets[3].x),
-								specs[1].map(param.widgets[3].y),
-								specs[2].map(param.widgets[4].value)])
+							if (param.value != [specs[0].map(widget[3].x),
+								specs[1].map(widget[3].y),
+								specs[2].map(widget[4].value)])
 							{
-								param.widgets[3].x_(specs[0].unmap(param.value[0]));
-								param.widgets[3].y_(specs[1].unmap(param.value[1]));
-								param.widgets[4].value_(specs[2].unmap(param.value[2]));
+								widget[3].x_(specs[0].unmap(param.value[0]));
+								widget[3].y_(specs[1].unmap(param.value[1]));
+								widget[4].value_(specs[2].unmap(param.value[2]));
 							};
 						}.defer;
 					};
 				},
 				"orientation.euler",
 				{
-					var specs = [ControlSpec(), ControlSpec(), ControlSpec()], widgets;
+					var specs = [ControlSpec(), ControlSpec(), ControlSpec()], controls;
 
 					if(anOssiaParameter.domain.min.notNil)
 					{
@@ -521,9 +530,9 @@ OSSIA_vec3f : OSSIA_FVector
 						);
 					};
 
-					widgets = [
+					controls = [
 						Knob(
-							parent: anOssiaParameter.window,
+							parent: win,
 							bounds: (width - 32)@(width - 32)
 						).value_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of roll
 						.centered_(true)
@@ -540,7 +549,7 @@ OSSIA_vec3f : OSSIA_FVector
 							}
 						),
 						Slider(
-							parent: anOssiaParameter.window,
+							parent: win,
 							bounds: 20@(width - 32))
 						.orientation_(\vertical)
 						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of pitch
@@ -557,7 +566,7 @@ OSSIA_vec3f : OSSIA_FVector
 							}
 						),
 						Slider(
-							parent: anOssiaParameter.window,
+							parent: win,
 							bounds: (width -6)@20)
 						.orientation_(\horizontal)
 						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of yaw
@@ -572,78 +581,84 @@ OSSIA_vec3f : OSSIA_FVector
 									]
 								)
 							}
-						)
+						).onClose_({ anOssiaParameter.removeDependant(event);
+							widget[0].remove;
+							widget[1].remove;
+							widget[2].remove;
+							widget[3].remove;
+							widget[4].remove;
+							anOssiaParameter.removeClosed();
+						})
 					];
 
-					widgets.do(
+					controls.do(
 						{ | item |
 
 							item.focusColor_(
-								OSSIA.palette.color('midlight', 'active'))
+								win.asView.palette.color('midlight', 'active'))
 							.background_(
-								OSSIA.palette.color('middark', 'active'));
+								win.asView.palette.color('middark', 'active'));
 						}
 					);
 
-					widgets[0].color_(
+					controls[0].color_(
 						[
-							widgets[0].color[0],
-							OSSIA.palette.color('light', 'active'),
-							widgets[0].color[2],
-							widgets[0].color[3]
+							controls[0].color[0],
+							win.asView.palette.color('light', 'active'),
+							controls[0].color[2],
+							controls[0].color[3]
 						]
 					);
 
-					anOssiaParameter.widgets = anOssiaParameter.widgets ++ widgets;
+					widget = widget ++ controls;
 
 					event = { | param |
 						{
-							if (param.value != [param.widgets[0].value,
-								param.widgets[1].value,
-								param.widgets[2].value])
+							if (param.value != [widget[0].value,
+								widget[1].value,
+								widget[2].value])
 							{
-								param.widgets[0].value_(param.value[0]);
-								param.widgets[1].value_(param.value[1]);
-								param.widgets[2].value_(param.value[2]);
+								widget[0].value_(param.value[0]);
+								widget[1].value_(param.value[1]);
+								widget[2].value_(param.value[2]);
 							};
 
-							if (param.value != [specs[0].map(1 - param.widgets[3].value),
-								specs[1].map(1 - param.widgets[4].value),
-								specs[2].map(1 - param.widgets[5].value)])
+							if (param.value != [specs[0].map(1 - widget[3].value),
+								specs[1].map(1 - widget[4].value),
+								specs[2].map(1 - widget[5].value)])
 							{
-								param.widgets[3].value_(1 - specs[0].unmap(param.value[0]));
-								param.widgets[4].value_(1 - specs[1].unmap(param.value[1]));
-								param.widgets[5].value_(1 - specs[2].unmap(param.value[2]));
+								widget[3].value_(1 - specs[0].unmap(param.value[0]));
+								widget[4].value_(1 - specs[1].unmap(param.value[1]));
+								widget[5].value_(1 - specs[2].unmap(param.value[2]));
 							};
 						}.defer;
-					};
-				},
-				{
-					event = { | param |
-						{
-							if (param.value != [param.widgets[0].value,
-								param.widgets[1].value,
-								param.widgets[2].value])
-							{
-								param.widgets[0].value_(param.value[0]);
-								param.widgets[1].value_(param.value[1]);
-								param.widgets[2].value_(param.value[2]);
-							}
-						}.defer;
-					};
+					}
 				}
-			);
+			)
+		} {
+			event = { | param |
+				{
+					if (param.value != [widget[0].value,
+						widget[1].value,
+						widget[2].value])
+					{
+						widget[0].value_(param.value[0]);
+						widget[1].value_(param.value[1]);
+						widget[2].value_(param.value[2]);
+					}
+				}.defer;
+			};
+
+			widget[2].onClose_({ anOssiaParameter.removeDependant(event);
+				widget[0].remove;
+				widget[1].remove;
+				anOssiaParameter.removeClosed();
+			})
 		};
 
 		anOssiaParameter.addDependant(event);
 
-		// always add the onClose function to the last ellement
-		// reserving widgets = nil at the ed of the loop
-		anOssiaParameter.widgets[anOssiaParameter.widgets.size - 1]
-		.onClose_({
-			anOssiaParameter.removeDependant(event);
-			anOssiaParameter.widgets = nil;
-		})
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }
 
@@ -681,57 +696,60 @@ OSSIA_vec4f : OSSIA_FVector
 	*ossiaJson { ^"\"ffff\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		var event, width = anOssiaParameter.window.bounds.width;
+		var event, width = win.bounds.width, widget;
 
 		event = { | param |
 			{
-				if (param.value != [param.widgets[0].value,
-					param.widgets[1].value,
-					param.widgets[2].value,
-					param.widgets[3].value])
+				if (param.value != [widget[0].value,
+					widget[1].value,
+					widget[2].value,
+					widget[3].value])
 				{
-					param.widgets[0].value_(param.value[0]);
-					param.widgets[1].value_(param.value[1]);
-					param.widgets[2].value_(param.value[2]);
-					param.widgets[3].value_(param.value[3]);
+					widget[0].value_(param.value[0]);
+					widget[1].value_(param.value[1]);
+					widget[2].value_(param.value[2]);
+					widget[3].value_(param.value[3]);
 				}
 			}.defer;
 		};
 
-		anOssiaParameter.widgets = [
+		widget = [
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: (width - 155)@20,
 				numberWidth: 45,
 				label: anOssiaParameter.name,
 				labelWidth:100,
 				gap:4@0),
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: 45@20,
 				gap:0@0),
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: 45@20,
 				gap:0@0),
 			EZNumber(
-				parent: anOssiaParameter.window,
+				parent: win,
 				bounds: 45@20,
-				gap:0@0).onClose_({
-				anOssiaParameter.removeDependant(event);
-				anOssiaParameter.widgets = nil;
-			});
+				gap:0@0)
+			.onClose_({ anOssiaParameter.removeDependant(event);
+				widget[0].remove;
+				widget[1].remove;
+				widget[2].remove;
+				anOssiaParameter.removeClosed();
+			})
 		];
 
-		anOssiaParameter.widgets[0].labelView.align_(\left);
+		widget.labelView.align_(\left);
 
-		anOssiaParameter.widgets.do(
+		widget.do(
 			{ | item, i |
 
-				item.setColors(stringColor:OSSIA.palette.color('baseText', 'active'),
-					numNormalColor:OSSIA.palette.color('windowText', 'active'));
+				item.setColors(stringColor: win.asView.palette.color('baseText', 'active'),
+					numNormalColor: win.asView.palette.color('windowText', 'active'));
 
 				// set numberBoxes scroll step and colors
 				item.numberView.maxDecimals_(3)
@@ -747,7 +765,7 @@ OSSIA_vec4f : OSSIA_FVector
 
 		// set GUI action and valued after min and max are set
 		{
-			anOssiaParameter.widgets[0].action_({ | val |
+			widget[0].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						val.value,
@@ -758,7 +776,7 @@ OSSIA_vec4f : OSSIA_FVector
 				)
 			}).value_(anOssiaParameter.value[0]);
 
-			anOssiaParameter.widgets[1].action_({ | val |
+			widget[1].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						anOssiaParameter.value[0],
@@ -769,7 +787,7 @@ OSSIA_vec4f : OSSIA_FVector
 				)
 			}).value_(anOssiaParameter.value[1]);
 
-			anOssiaParameter.widgets[2].action_({ | val |
+			widget[2].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						anOssiaParameter.value[0],
@@ -780,7 +798,7 @@ OSSIA_vec4f : OSSIA_FVector
 				)
 			}).value_(anOssiaParameter.value[2]);
 
-			anOssiaParameter.widgets[3].action_({ | val |
+			widget[3].action_({ | val |
 				anOssiaParameter.value_(
 					[
 						anOssiaParameter.value[0],
@@ -792,5 +810,7 @@ OSSIA_vec4f : OSSIA_FVector
 			}).value_(anOssiaParameter.value[3]);
 
 		}.defer;
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }

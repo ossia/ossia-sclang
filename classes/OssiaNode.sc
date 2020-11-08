@@ -16,7 +16,6 @@ OSSIA_Node : OSSIA_Base
 	var <device;
 	var <>description;
 	var m_ptr_data;
-	var <window;
 
 	parent { ^parent } // homogeneity with OSSIA_Device
 
@@ -45,20 +44,17 @@ OSSIA_Node : OSSIA_Base
 	gui
 	{ | parent_window, childrenDepth = 1 |
 
-		this.prWindowIfNeeded(parent_window);
-		this.prChildGui(childrenDepth);
+		var win = this.prWindowIfNeeded(parent_window);
+
+		this.prChildGui(childrenDepth, win);
+
+		^win;
 	}
 
 	closeGui
 	{ | childrenDepth = 1 |
 
-		if (window.notNil)
-		{
-			this.prCloseChildGui(childrenDepth);
-
-			if (window.bounds.height <= 10)
-			{ window.close }
-		};
+		this.prCloseChildGui(childrenDepth);
 	}
 
 	free
@@ -97,22 +93,23 @@ OSSIA_Node : OSSIA_Base
 
 		if (win.isNil)
 		{
-			window = Window(name).front; // resize later to the flow layout size
+			var window = Window(name).front; // resize later to the flow layout size
 			window.asView.palette_(OSSIA.palette);
 			window.asView.background_(OSSIA.palette.base);
 			window.addFlowLayout;
+			^window;
 		} {
-			window = win;
+			^win;
 		};
 	}
 
 	prChildGui
-	{ | childrenDepth |
+	{ | childrenDepth, win |
 
 		if (childrenDepth > 0)
 		{
 			children.do({ | item |
-				item.gui(window, childrenDepth - 1);
+				item.gui(win, childrenDepth - 1);
 			});
 		};
 	}
@@ -451,13 +448,7 @@ OSSIA_Parameter : OSSIA_Node
 
 	callback { ^m_callback }
 
-	callback_
-	{ | callback_function |
-
-		// if(m_callback.notNil()) { this.removeDependant(m_callback); };
-
-		m_callback = callback_function;
-	}
+	callback_{ | callback_function | m_callback = callback_function }
 
 	// interpreter callback from attached ossia lambda
 	pvOnCallback { m_callback.value(value) }
@@ -480,7 +471,7 @@ OSSIA_Parameter : OSSIA_Node
 
 		if(bind)
 		{
-			if(m_callback.notNil()) { this.removeDependant(m_callback); };
+			if(m_callback.notNil()) { this.removeDependant(m_callback) };
 
 			m_callback = { | v | OSSIA.server.sendMsg("/n_set", 0, this.sym, v) };
 		}
@@ -510,32 +501,47 @@ OSSIA_Parameter : OSSIA_Node
 	gui
 	{ | parent_window, childrenDepth = 0 |
 
-		if (widgets.isNil)
-		{
-			this.prWindowIfNeeded(parent_window);
+		var win = this.prWindowIfNeeded(parent_window);
 
-			type.ossiaWidget(this);
-			this.prChildGui(childrenDepth);
+		type.ossiaWidget(this, win);
+		this.prChildGui(childrenDepth, win);
 
-			this.resizeLayout(window);
-		};
+		this.resizeLayout(win);
+
+		^win;
+	}
+
+	removeClosed
+	{
+		var closed = [];
+
+		widgets.do({ | item, count |
+
+			if (item.isClosed) { closed = closed.add(count) };
+		});
+
+		closed.reverseDo({ | i | widgets.removeAt(i) });
 	}
 
 	closeGui
 	{ | childrenDepth = 0 |
 
-		if (widgets.notNil)
-		{
-			widgets.do({ | item | item.remove });
+		widgets.do({ | item |
 
-			this.prCloseChildGui(childrenDepth);
+			var win = item.parent;
 
-			window.asView.decorator.reFlow(window.asView);
-			this.resizeLayout(window);
+			item.remove;
 
-			if (window.bounds.height <= 10)
-			{ window.close }
-		}
+			win.postln;
+
+			win.asView.decorator.reFlow(win.asView);
+			this.resizeLayout(win);
+
+			if (win.view.children == [])
+			{ win.close }
+		});
+
+		this.prCloseChildGui(childrenDepth);
 	}
 
 	resizeLayout

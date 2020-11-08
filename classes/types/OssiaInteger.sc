@@ -59,15 +59,19 @@
 	*ossiaWidget
 	{ | anOssiaParameter |
 
+		var widget;
+
 		if (anOssiaParameter.domain.values == [])
 		{
-			OSSIA.makeSliderGui(anOssiaParameter);
+			widget = OSSIA.makeSliderGui(anOssiaParameter);
 
 			//integer specific decimals and steps
-			anOssiaParameter.widgets.numberView.maxDecimals_(0)
+			widget.numberView.maxDecimals_(0)
 			.step_(1).scroll_step_(1);
 		} {
-			OSSIA.makeDropDownGui(anOssiaParameter);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter);
 		};
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }

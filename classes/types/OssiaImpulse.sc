@@ -29,13 +29,19 @@
 	*ossiaJson { ^"\"I\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		OSSIA.makeButtonGui(anOssiaParameter);
+		var widget = OSSIA.makeButtonGui(anOssiaParameter, win);
 
 		// Impulse specific states and action
-		anOssiaParameter.widgets[1].states_([
+		widget[1].states_([
 			["Pulse"]
 		]).action_({ | val | anOssiaParameter.value_() });
+
+		widget[1].onClose_({ widget[0].remove;
+			anOssiaParameter.removeClosed();
+		});
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }

@@ -95,13 +95,17 @@
 	*ossiaJson { ^"\"l\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
+
+		var widget;
 
 		if (anOssiaParameter.domain.values == [])
 		{
-			OSSIA.makeTxtGui(anOssiaParameter);
+			widget = OSSIA.makeTxtGui(anOssiaParameter, win);
 		} {
-			OSSIA.makeDropDownGui(anOssiaParameter);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter, win);
 		};
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets.add(widget);
 	}
 }

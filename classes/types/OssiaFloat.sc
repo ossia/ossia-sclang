@@ -59,17 +59,21 @@
 	*ossiaJson { ^"\"f\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
+
+		var widget;
 
 		if (anOssiaParameter.domain.values == [])
 		{
-			OSSIA.makeSliderGui(anOssiaParameter);
+			widget = OSSIA.makeSliderGui(anOssiaParameter, win);
 
 			// float specific decimals and steps
-			anOssiaParameter.widgets.numberView.maxDecimals_(3)
+			widget.numberView.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
 		} {
-			OSSIA.makeDropDownGui(anOssiaParameter);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter, win);
 		};
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets.add(widget);
 	}
 }

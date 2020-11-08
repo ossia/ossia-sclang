@@ -32,26 +32,44 @@
 	*ossiaDefaultValue { ^false }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win |
 
-		OSSIA.makeButtonGui(anOssiaParameter);
+		var widget, event;
+
+		event = { | param |
+			{
+				if (param.value != widget[1].value)
+				{ widget[1].value_(param.value) };
+			}.defer;
+		};
+
+		anOssiaParameter.addDependant(event);
+
+		widget = OSSIA.makeButtonGui(anOssiaParameter, win);
 
 		// Boolean specific states, actions and initial value
-		anOssiaParameter.widgets[1].states_(
+		widget[1].states_(
 			[
 				[
 					"false",
-					anOssiaParameter.window.asView.palette.color('light', 'active'),
-					anOssiaParameter.window.asView.palette.color('middark', 'active')
+					win.asView.palette.color('light', 'active'),
+					win.asView.palette.color('middark', 'active')
 					],
 				[
 					"true",
-					anOssiaParameter.window.asView.palette.color('middark', 'active'),
-					anOssiaParameter.window.asView.palette.color('light', 'active')
+					win.asView.palette.color('middark', 'active'),
+					win.asView.palette.color('light', 'active')
 				]
 			]
 		).action_({ | val | anOssiaParameter.value_(val.value) });
 
-		{ anOssiaParameter.widgets[1].value_(anOssiaParameter.value); }.defer;
+		{ widget[1].value_(anOssiaParameter.value) }.defer;
+
+		widget[1].onClose_({ anOssiaParameter.removeDependant(event);
+			widget[0].remove;
+			anOssiaParameter.removeClosed();
+		});
+
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
 }
