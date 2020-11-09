@@ -314,6 +314,7 @@ OSSIA
 		if (layout == \minimal)
 		{
 			widget = NumberBox(win, 45@20)
+			.action_({ | num | anOssiaParameter.value_(num.value) })
 			.background_(win.asView.palette.color('base', 'active'))
 			.normalColor_(win.asView.palette.color('windowText', 'active'));
 
@@ -322,8 +323,6 @@ OSSIA
 				widget.clipLo_(anOssiaParameter.domain.min);
 				widget.clipHi_(anOssiaParameter.domain.max);
 			};
-
-			widget.action_({ | num | anOssiaParameter.value_(num.value) });
 
 			{ widget.value_(anOssiaParameter.value) }.defer;
 		} {
