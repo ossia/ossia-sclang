@@ -253,7 +253,7 @@ OSSIA
 	//-------------------------------------------//
 
 	*makeDropDownGui
-	{ | anOssiaParameter, win |
+	{ | anOssiaParameter, win, layout |
 
 		var event, widget;
 
@@ -266,29 +266,39 @@ OSSIA
 
 		anOssiaParameter.addDependant(event);
 
-		widget = EZPopUpMenu(
-			parentView: win,
-			bounds: (win.bounds.width - 6)@40,
-			label: anOssiaParameter.name,
-			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
-			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
-			layout: 'vert',
-			gap: 2@0)
-		.onClose_({ anOssiaParameter.removeDependant(event);
+		if (layout == \minimal)
+		{
+			widget = PopUpMenu(win, 100@20);
+
+			widget.items_(anOssiaParameter.domain.values.collect({ | item | item.asSymbol }));
+
+			widget.action_({ | obj | anOssiaParameter.value_(obj.item) });
+		} {
+			widget = EZPopUpMenu(
+				parentView: win,
+				bounds: (win.bounds.width - 6)@40,
+				label: anOssiaParameter.name,
+				items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
+				globalAction: { | obj | anOssiaParameter.value_(obj.item) },
+				layout: 'vert',
+				gap: 2@0)
+			.setColors(
+				stringColor: win.asView.palette.color('baseText', 'active'),
+				menuStringColor: win.asView.palette.color('light', 'active')
+			);
+		};
+
+		widget.onClose_({ anOssiaParameter.removeDependant(event);
 			anOssiaParameter.removeClosed();
-		})
-		.setColors(
-			stringColor: win.asView.palette.color('baseText', 'active'),
-			menuStringColor: win.asView.palette.color('light', 'active')
-		);
+		});
 
 		event.value(anOssiaParameter); // initialise
 
 		^widget;
 	}
 
-	*makeSliderGui
-	{ | anOssiaParameter, win |
+	*makeNumberGui
+	{ | anOssiaParameter, win, layout |
 
 		var event, widget;
 
@@ -301,42 +311,58 @@ OSSIA
 
 		anOssiaParameter.addDependant(event);
 
-		widget = EZSlider(
-			parent: win,
-			bounds: (win.bounds.width - 6)@40,
-			label: anOssiaParameter.name,
-			layout: 'line2',
-			gap: 2@0)
-		.onClose_({ anOssiaParameter.removeDependant(event);
-			anOssiaParameter.removeClosed();
-		})
-		.setColors(
-			stringColor: win.asView.palette.color('baseText', 'active'),
-			sliderBackground: win.asView.palette.color('middark', 'active'),
-			numNormalColor: win.asView.palette.color('windowText', 'active')
-		);
-
-		widget.sliderView.focusColor_(
-			win.asView.palette.color('midlight', 'active');
-		);
-
-		if (anOssiaParameter.domain.min.notNil)
+		if (layout == \minimal)
 		{
-			widget.controlSpec.minval_(anOssiaParameter.domain.min);
-			widget.controlSpec.maxval_(anOssiaParameter.domain.max);
-		};
+			widget = NumberBox(win, 45@20)
+			.background_(win.asView.palette.color('base', 'active'))
+			.normalColor_(win.asView.palette.color('windowText', 'active'));
 
-		if (anOssiaParameter.unit.notNil)
-		{
-			if (anOssiaParameter.unit.string == "gain.decibel")
-			{ widget.controlSpec.warp_(\db) };
+			if (anOssiaParameter.domain.min.notNil)
+			{
+				widget.clipLo_(anOssiaParameter.domain.min);
+				widget.clipHi_(anOssiaParameter.domain.max);
+			};
+
+			widget.action_({ | num | anOssiaParameter.value_(num.value) });
+
+			{ widget.value_(anOssiaParameter.value) }.defer;
+		} {
+			widget = EZSlider(
+				parent: win,
+				bounds: (win.bounds.width - 6)@40,
+				label: anOssiaParameter.name,
+				layout: 'line2',
+				gap: 2@0)
+			.setColors(
+				stringColor: win.asView.palette.color('baseText', 'active'),
+				sliderBackground: win.asView.palette.color('middark', 'active'),
+				numNormalColor: win.asView.palette.color('windowText', 'active')
+			);
+
+			widget.sliderView.focusColor_(
+				win.asView.palette.color('midlight', 'active');
+			);
+
+			if (anOssiaParameter.domain.min.notNil)
+			{
+				widget.controlSpec.minval_(anOssiaParameter.domain.min);
+				widget.controlSpec.maxval_(anOssiaParameter.domain.max);
+			};
+
+			if (anOssiaParameter.unit.notNil)
+			{
+				if (anOssiaParameter.unit.string == "gain.decibel")
+				{ widget.controlSpec.warp_(\db) };
+			};
 		};
 
 		// set GUI action and valued after min and max are set
-		{
-			widget.action_({ | val | anOssiaParameter.value_(val.value) });
-			widget.value_(anOssiaParameter.value);
-		}.defer;
+		widget.action_({ | val | anOssiaParameter.value_(val.value) });
+		{ widget.value_(anOssiaParameter.value) }.defer;
+
+		widget.onClose_({ anOssiaParameter.removeDependant(event);
+			anOssiaParameter.removeClosed();
+		});
 
 		^widget;
 	}
@@ -360,7 +386,7 @@ OSSIA
 	}
 
 	*makeTxtGui
-	{ | anOssiaParameter, win |
+	{ | anOssiaParameter, win, layout |
 
 		var widget, event;
 
@@ -373,22 +399,32 @@ OSSIA
 
 		anOssiaParameter.addDependant(event);
 
-		widget = EZText(
-			parent: win,
-			bounds: (win.bounds.width - 6)@40,
-			label: anOssiaParameter.name,
-			action: { | val | anOssiaParameter.value_(val.value) },
-			initVal: anOssiaParameter.value,
-			labelWidth: 100,
-			layout: 'vert',
-			gap: 2@0)
-		.onClose_({ anOssiaParameter.removeDependant(event);
+		if (layout == \minimal)
+		{
+			widget = TextField(win, 100@20);
+
+			widget.action_({ | field | anOssiaParameter.value_(field.value) });
+
+			{ widget.value_(anOssiaParameter.value) }.defer;
+		} {
+			widget = EZText(
+				parent: win,
+				bounds: (win.bounds.width - 6)@40,
+				label: anOssiaParameter.name,
+				action: { | val | anOssiaParameter.value_(val.value) },
+				initVal: anOssiaParameter.value,
+				labelWidth: 100,
+				layout: 'vert',
+				gap: 2@0)
+			.setColors(
+				stringColor: win.asView.palette.color('baseText', 'active'),
+				textBackground: win.asView.palette.color('middark', 'active'),
+				textStringColor: win.asView.palette.color('windowText', 'active'));
+		};
+
+		widget.onClose_({ anOssiaParameter.removeDependant(event);
 			anOssiaParameter.removeClosed();
-		})
-		.setColors(
-			stringColor: win.asView.palette.color('baseText', 'active'),
-			textBackground: win.asView.palette.color('middark', 'active'),
-			textStringColor: win.asView.palette.color('windowText', 'active'));
+		});
 
 		^widget;
 	}

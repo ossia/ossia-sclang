@@ -59,19 +59,28 @@
 	*ossiaJson { ^"\"f\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter, win |
+	{ | anOssiaParameter, win, layout |
 
 		var widget;
 
 		if (anOssiaParameter.domain.values == [])
 		{
-			widget = OSSIA.makeSliderGui(anOssiaParameter, win);
+			var numBox;
+
+			widget = OSSIA.makeNumberGui(anOssiaParameter, win, layout);
+
+			if (layout == \minimal)
+			{
+				numBox = widget;
+			} {
+				numBox = widget.numberView;
+			};
 
 			// float specific decimals and steps
-			widget.numberView.maxDecimals_(3)
+			numBox.maxDecimals_(3)
 			.step_(0.001).scroll_step_(0.001);
 		} {
-			widget = OSSIA.makeDropDownGui(anOssiaParameter, win);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter, win, layout);
 		};
 
 		anOssiaParameter.widgets = anOssiaParameter.widgets.add(widget);

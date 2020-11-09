@@ -42,11 +42,11 @@ OSSIA_Node : OSSIA_Base
 	}
 
 	gui
-	{ | parent_window, childrenDepth = 1 |
+	{ | parent_window, childrenDepth = 1, layout = \full |
 
 		var win = this.prWindowIfNeeded(parent_window);
 
-		this.prChildGui(childrenDepth, win);
+		this.prChildGui(childrenDepth, win, layout);
 
 		^win;
 	}
@@ -104,12 +104,12 @@ OSSIA_Node : OSSIA_Base
 	}
 
 	prChildGui
-	{ | childrenDepth, win |
+	{ | childrenDepth, win, layout |
 
 		if (childrenDepth > 0)
 		{
 			children.do({ | item |
-				item.gui(win, childrenDepth - 1);
+				item.gui(win, childrenDepth - 1, layout);
 			});
 		};
 	}
@@ -499,12 +499,14 @@ OSSIA_Parameter : OSSIA_Node
 	//-------------------------------------------//
 
 	gui
-	{ | parent_window, childrenDepth = 0 |
+	{ | parent_window, childrenDepth = 0, layout = \full |
 
 		var win = this.prWindowIfNeeded(parent_window);
 
-		type.ossiaWidget(this, win);
-		this.prChildGui(childrenDepth, win);
+		widgets = [];
+
+		type.ossiaWidget(this, win, layout);
+		this.prChildGui(childrenDepth, win, layout);
 
 		this.resizeLayout(win);
 

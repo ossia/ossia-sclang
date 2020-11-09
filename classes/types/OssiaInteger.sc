@@ -57,19 +57,28 @@
 	*ossiaDefaultValue { ^0 }
 
 	*ossiaWidget
-	{ | anOssiaParameter |
+	{ | anOssiaParameter, win, layout |
 
 		var widget;
 
 		if (anOssiaParameter.domain.values == [])
 		{
-			widget = OSSIA.makeSliderGui(anOssiaParameter);
+			var numBox;
 
-			//integer specific decimals and steps
-			widget.numberView.maxDecimals_(0)
+			widget = OSSIA.makeNumberGui(anOssiaParameter, win, layout);
+
+			if (layout == \minimal)
+			{
+				numBox = widget;
+			} {
+				numBox = widget.numberView;
+			};
+
+			// Integer specific decimals and steps
+			numBox.maxDecimals_(0)
 			.step_(1).scroll_step_(1);
 		} {
-			widget = OSSIA.makeDropDownGui(anOssiaParameter);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter, win, layout);
 		};
 
 		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;

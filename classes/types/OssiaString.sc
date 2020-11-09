@@ -41,15 +41,15 @@
 	*ossiaJson { ^"\"s\"" }
 
 	*ossiaWidget
-	{ | anOssiaParameter, win |
+	{ | anOssiaParameter, win, layout |
 
 		var widget;
 
 		if (anOssiaParameter.domain.values == [])
 		{
-			widget = OSSIA.makeTxtGui(anOssiaParameter, win);
+			widget = OSSIA.makeTxtGui(anOssiaParameter, win, layout);
 		} {
-			widget = OSSIA.makeDropDownGui(anOssiaParameter, win);
+			widget = OSSIA.makeDropDownGui(anOssiaParameter, win, layout);
 		};
 
 		anOssiaParameter.widgets = anOssiaParameter.widgets.add(widget);
