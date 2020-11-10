@@ -36,8 +36,6 @@
 
 		var widget, event;
 
-		anOssiaParameter.addDependant(event);
-
 		if (layout == \minimal)
 		{
 			event = { | param |
@@ -89,6 +87,8 @@
 				anOssiaParameter.removeClosed();
 			});
 		};
+
+		anOssiaParameter.addDependant(event);
 
 		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
 	}
