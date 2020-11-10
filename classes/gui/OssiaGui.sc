@@ -54,7 +54,7 @@
 			parentView: win,
 			bounds: bounds,
 			label: label,
-			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
+			items: anOssiaParameter.domain.values,
 			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
 			layout: 'vert',
 			gap: 2@0)

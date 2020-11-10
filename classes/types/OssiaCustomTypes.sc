@@ -111,6 +111,7 @@ OSSIA_FVector
 					))
 				};
 			},
+			'values',
 			{
 				^{ | value, domain |
 
@@ -120,7 +121,8 @@ OSSIA_FVector
 						}
 					);
 				};
-			}
+			},
+			{ ^Error("bounding mode not recognized").throw };
 		);
 	}
 }

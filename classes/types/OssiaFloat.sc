@@ -36,6 +36,7 @@
 			{ ^{ | value, domain | value.wrap(domain.min, domain.max).asFloat } },
 			'fold',
 			{ ^{ | value, domain | value.fold(domain.min, domain.max).asFloat } },
+			'values',
 			{
 				^{ | value, domain |
 
@@ -43,7 +44,8 @@
 						{ | item | item == value.asFloat };
 					);
 				};
-			};
+			},
+			{ ^Error("bounding mode not recognized").throw };
 		);
 	}
 

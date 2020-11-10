@@ -31,17 +31,19 @@
 			'low',
 			{ ^{ | value, domain | value.max(domain.min).asAscii } },
 			'high',
-			{ ^{ | value, domain | value.max(domain.min).asAscii } },
+			{ ^{ | value, domain | value.min(domain.max).asAscii } },
 			'wrap',
 			{ ^{ | value, domain, type | value.wrap(domain.min, domain.max).asAscii } },
 			'fold',
 			{ ^{ | value, domain, type | value.fold(domain.min, domain.max).asAscii } },
+			'values',
 			{
 				^{ | value, domain, type |
 
 					domain[2].detect({ | item | item == value.asAscii });
 				};
-			}
+			},
+			{ ^Error("bounding mode not recognized").throw };
 		);
 	}
 

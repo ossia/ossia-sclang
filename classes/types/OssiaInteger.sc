@@ -31,17 +31,19 @@
 			'low',
 			{ ^{ | value, domain | value.max(domain.min).asInteger } },
 			'high',
-			{ ^{ | value, domain | value.max(domain.min).asInteger } },
+			{ ^{ | value, domain | value.min(domain.max).asInteger } },
 			'wrap',
 			{ ^{ | value, domain | value.wrap(domain.min, domain.max).asInteger } },
 			'fold',
 			{ ^{ | value, domain | value.fold(domain.min, domain.max).asInteger } },
+			'values',
 			{
 				^{ | value, domain |
 
 					domain[2].detect({ | item | item == value.asInteger });
 				};
-			};
+			},
+			{ ^Error("bounding mode not recognized").throw };
 		);
 	}
 

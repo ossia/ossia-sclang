@@ -104,14 +104,16 @@
 		} {
 			widgets.do({ | item |
 
+				var parent = item.parent;
+
 				item.remove;
-				this.prCheckFlow(item.parent);
+
+				this.prCheckFlow(parent);
 			})
 		};
 
 		this.prCloseChildGui(childrenDepth, parent_window);
 	}
-
 
 	removeClosed
 	{

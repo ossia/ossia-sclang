@@ -77,6 +77,7 @@
 					).asArray;
 				};
 			},
+			'values',
 			{
 				^{ | value, domain |
 
@@ -84,7 +85,8 @@
 						{ | item | item == value.asArray }
 					);
 				};
-			}
+			},
+			{ ^Error("bounding mode not recognized").throw };
 		);
 	}
 
