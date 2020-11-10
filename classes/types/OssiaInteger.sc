@@ -55,32 +55,4 @@
 	*ossiaJson { ^"\"i\"" }
 
 	*ossiaDefaultValue { ^0 }
-
-	*ossiaWidget
-	{ | anOssiaParameter, win, layout |
-
-		var widget;
-
-		if (anOssiaParameter.domain.values == [])
-		{
-			var numBox;
-
-			widget = OSSIA.makeNumberGui(anOssiaParameter, win, layout);
-
-			if (layout == \minimal)
-			{
-				numBox = widget;
-			} {
-				numBox = widget.numberView;
-			};
-
-			// Integer specific decimals and steps
-			numBox.maxDecimals_(0)
-			.step_(1).scroll_step_(1);
-		} {
-			widget = OSSIA.makeDropDownGui(anOssiaParameter, win, layout);
-		};
-
-		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
-	}
 }

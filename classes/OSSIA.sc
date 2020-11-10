@@ -255,7 +255,7 @@ OSSIA
 	*makeDropDownGui
 	{ | anOssiaParameter, win, layout |
 
-		var event, widget;
+		var event, widget, bounds, label;
 
 		event = { | param |
 			{
@@ -268,25 +268,24 @@ OSSIA
 
 		if (layout == \minimal)
 		{
-			widget = PopUpMenu(win, 100@20);
-
-			widget.items_(anOssiaParameter.domain.values.collect({ | item | item.asSymbol }));
-
-			widget.action_({ | obj | anOssiaParameter.value_(obj.item) });
+			bounds = 100@20;
 		} {
-			widget = EZPopUpMenu(
-				parentView: win,
-				bounds: (win.bounds.width - 6)@40,
-				label: anOssiaParameter.name,
-				items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
-				globalAction: { | obj | anOssiaParameter.value_(obj.item) },
-				layout: 'vert',
-				gap: 2@0)
-			.setColors(
-				stringColor: win.asView.palette.color('baseText', 'active'),
-				menuStringColor: win.asView.palette.color('light', 'active')
-			);
+			bounds = (win.bounds.width - 6)@40;
+			label = anOssiaParameter.name;
 		};
+
+		widget = EZPopUpMenu(
+			parentView: win,
+			bounds: bounds,
+			label: label,
+			items: anOssiaParameter.domain.values.collect({ | item | item.asSymbol }),
+			globalAction: { | obj | anOssiaParameter.value_(obj.item) },
+			layout: 'vert',
+			gap: 2@0)
+		.setColors(
+			stringColor: win.asView.palette.color('baseText', 'active'),
+			menuStringColor: win.asView.palette.color('light', 'active')
+		);
 
 		widget.onClose_({ anOssiaParameter.removeDependant(event);
 			anOssiaParameter.removeClosed();
@@ -313,18 +312,12 @@ OSSIA
 
 		if (layout == \minimal)
 		{
-			widget = NumberBox(win, 45@20)
-			.action_({ | num | anOssiaParameter.value_(num.value) })
-			.background_(win.asView.palette.color('base', 'active'))
-			.normalColor_(win.asView.palette.color('windowText', 'active'));
-
-			if (anOssiaParameter.domain.min.notNil)
-			{
-				widget.clipLo_(anOssiaParameter.domain.min);
-				widget.clipHi_(anOssiaParameter.domain.max);
-			};
-
-			{ widget.value_(anOssiaParameter.value) }.defer;
+			widget = EZNumber(
+				parent: win,
+				bounds: 45@20)
+			.setColors(
+				numNormalColor: win.asView.palette.color('windowText', 'active')
+			);
 		} {
 			widget = EZSlider(
 				parent: win,
@@ -342,17 +335,17 @@ OSSIA
 				win.asView.palette.color('midlight', 'active');
 			);
 
-			if (anOssiaParameter.domain.min.notNil)
-			{
-				widget.controlSpec.minval_(anOssiaParameter.domain.min);
-				widget.controlSpec.maxval_(anOssiaParameter.domain.max);
-			};
-
 			if (anOssiaParameter.unit.notNil)
 			{
 				if (anOssiaParameter.unit.string == "gain.decibel")
 				{ widget.controlSpec.warp_(\db) };
 			};
+		};
+
+		if (anOssiaParameter.domain.min.notNil)
+		{
+			widget.controlSpec.minval_(anOssiaParameter.domain.min);
+			widget.controlSpec.maxval_(anOssiaParameter.domain.max);
 		};
 
 		// set GUI action and valued after min and max are set

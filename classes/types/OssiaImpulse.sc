@@ -27,35 +27,4 @@
 	*ossiaNaNFilter { | newVal, oldval | ^newVal }
 
 	*ossiaJson { ^"\"I\"" }
-
-	*ossiaWidget
-	{ | anOssiaParameter, win, layout |
-
-		var widget;
-
-		if (layout == \minimal)
-		{
-			widget = Button(win, 20@20)
-			.focusColor_(win.asView.palette.color('midlight', 'active'));
-
-			widget.action_({ | check | anOssiaParameter.value_(check.value) });
-
-			{ widget.value_(anOssiaParameter.value) }.defer;
-
-			widget.onClose_({ anOssiaParameter.removeClosed() });
-		} {
-			widget = OSSIA.makeButtonGui(anOssiaParameter, win);
-
-			// Impulse specific states and action
-			widget[1].states_([
-				["Pulse"]
-			]).action_({ | val | anOssiaParameter.value_() });
-
-			widget[1].onClose_({ widget[0].remove;
-				anOssiaParameter.removeClosed();
-			});
-		};
-
-		anOssiaParameter.widgets = anOssiaParameter.widgets ++ widget;
-	}
 }

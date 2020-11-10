@@ -41,22 +41,6 @@ OSSIA_Node : OSSIA_Base
 		children = [];
 	}
 
-	gui
-	{ | parent_window, childrenDepth = 1, layout = \full |
-
-		var win = this.prWindowIfNeeded(parent_window);
-
-		this.prChildGui(childrenDepth, win, layout);
-
-		^win;
-	}
-
-	closeGui
-	{ | childrenDepth = 1 |
-
-		this.prCloseChildGui(childrenDepth);
-	}
-
 	free
 	{
 		children.collect(_.free);
@@ -87,43 +71,6 @@ OSSIA_Node : OSSIA_Base
 	//-------------------------------------------//
 	//              PRIVATE METHODS              //
 	//-------------------------------------------//
-
-	prWindowIfNeeded
-	{ | win |
-
-		if (win.isNil)
-		{
-			var window = Window(name).front; // resize later to the flow layout size
-			window.asView.palette_(OSSIA.palette);
-			window.asView.background_(OSSIA.palette.base);
-			window.addFlowLayout;
-			^window;
-		} {
-			^win;
-		};
-	}
-
-	prChildGui
-	{ | childrenDepth, win, layout |
-
-		if (childrenDepth > 0)
-		{
-			children.do({ | item |
-				item.gui(win, childrenDepth - 1, layout);
-			});
-		};
-	}
-
-	prCloseChildGui
-	{ | childrenDepth |
-
-		if (childrenDepth > 0)
-		{
-			children.do({ | item |
-				item.closeGui(childrenDepth - 1);
-			});
-		};
-	}
 
 	prHandleParent
 	{ | pn |
@@ -319,7 +266,7 @@ OSSIA_Parameter : OSSIA_Node
 		m_callback = {};
 	}
 
-	prParamExplore { ^[this, children.collect(_.paramExplore)] }
+	prParamExplore { ^[this, children.collect(_.prParamExplore)] }
 
 	free
 	{
@@ -493,67 +440,6 @@ OSSIA_Parameter : OSSIA_Node
 	}
 
 	tr { ^this.sym.tr }
-
-	//-------------------------------------------//
-	//                    GUI                    //
-	//-------------------------------------------//
-
-	gui
-	{ | parent_window, childrenDepth = 0, layout = \full |
-
-		var win = this.prWindowIfNeeded(parent_window);
-
-		widgets = [];
-
-		type.ossiaWidget(this, win, layout);
-		this.prChildGui(childrenDepth, win, layout);
-
-		this.resizeLayout(win);
-
-		^win;
-	}
-
-	removeClosed
-	{
-		var closed = [];
-
-		widgets.do({ | item, count |
-
-			if (item.isClosed) { closed = closed.add(count) };
-		});
-
-		closed.reverseDo({ | i | widgets.removeAt(i) });
-	}
-
-	closeGui
-	{ | childrenDepth = 0 |
-
-		widgets.do({ | item |
-
-			var win = item.parent;
-
-			item.remove;
-
-			win.asView.decorator.reFlow(win.asView);
-			this.resizeLayout(win);
-
-			if (win.asView.children == [])
-			{ win.close }
-		});
-
-		this.prCloseChildGui(childrenDepth);
-	}
-
-	resizeLayout
-	{ | aWindow |
-
-		var deco = aWindow.asView.decorator;
-
-		if ((deco.used.height - aWindow.bounds.height) != 2)
-		{ //resize to flow layout
-			aWindow.bounds_(aWindow.bounds.height_(deco.used.height + 2));
-		};
-	}
 }
 
 //-------------------------------------------//
