@@ -431,6 +431,6 @@ OSSIA
 
 + EZGui
 {
-	parent { ^view.parent.findWindow }
+	parent { ^view.parent }
 	isClosed { ^view.isClosed }
 }

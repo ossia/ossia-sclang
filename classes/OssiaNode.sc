@@ -534,12 +534,10 @@ OSSIA_Parameter : OSSIA_Node
 
 			item.remove;
 
-			win.postln;
-
 			win.asView.decorator.reFlow(win.asView);
 			this.resizeLayout(win);
 
-			if (win.view.children == [])
+			if (win.asView.children == [])
 			{ win.close }
 		});
 
