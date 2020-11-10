@@ -128,7 +128,7 @@ OSSIA_Base // base classe for OSSIA_Device and OSSIA_Node
 
 			this.prCreateOrIncrement(previousNode, lasName);
 		} {
-			this.prCreateOrIncrement(curent_path, curent_path);
+			this.prCreateOrIncrement(this.parent, curent_path);
 		}
 	}
 
