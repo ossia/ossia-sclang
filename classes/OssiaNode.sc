@@ -39,11 +39,14 @@ OSSIA_Node : OSSIA_Base
 
 		parent.addChild(this);
 		children = [];
+
+		this.prInstantiateNode();
 	}
 
 	free
 	{
-		children.collect(_.free);
+		children.reverseDo(_.free);
+		this.prFreeNode();
 		parent.children.remove(this);
 		^super.free;
 	}
@@ -71,6 +74,10 @@ OSSIA_Node : OSSIA_Base
 	//-------------------------------------------//
 	//              PRIVATE METHODS              //
 	//-------------------------------------------//
+
+	prInstantiateNode { device.instantiateNode(path) }
+
+	prFreeNode { device.freeNode(path) }
 
 	prHandleParent
 	{ | pn |
@@ -266,13 +273,16 @@ OSSIA_Parameter : OSSIA_Node
 		m_callback = {};
 	}
 
+	// overide node
+	prInstantiateNode { }
+
+	prFreeNode { }
+
 	prParamExplore { ^[this, children.collect(_.prParamExplore)] }
 
 	free
 	{
-		children.collect(_.free);
 		device.freeParameter(this);
-		parent.children.remove(this);
 		^super.free;
 	}
 

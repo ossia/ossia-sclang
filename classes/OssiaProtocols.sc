@@ -36,6 +36,8 @@ OSSIA_OSCProtocol
 		anOssiaParameter.type.ossiaSendMsg(anOssiaParameter, netAddr);
 	}
 
+	instantiateNode { | anOssiaNode | }
+
 	instantiateParameter
 	{ | anOssiaParameter |
 
@@ -55,6 +57,8 @@ OSSIA_OSCProtocol
 
 		this.push(anOssiaParameter);
 	}
+
+	freeNode { | nodePath | }
 
 	freeParameter
 	{ | anOssiaParameter |
@@ -212,6 +216,15 @@ OSSIA_OSCQSProtocol
 		});
 	}
 
+	instantiateNode
+	{ | nodePath |
+
+		ws_server.numConnections.do({ | iter |
+
+			this.prAddPath(nodePath, iter);
+		});
+	}
+
 	instantiateParameter
 	{ | anOssiaParameter |
 
@@ -219,7 +232,7 @@ OSSIA_OSCQSProtocol
 
 		ws_server.numConnections.do({ | iter |
 
-			this.addPath(anOssiaParameter.path, iter);
+			this.prAddPath(anOssiaParameter.path, iter);
 			this.updateAtributes(anOssiaParameter, iter);
 		});
 
@@ -241,10 +254,24 @@ OSSIA_OSCQSProtocol
 		};
 	}
 
-	addPath
-	{ | path, index |
+	freeNode
+	{ | nodePath |
 
-		ws_server[index].writeText("{\"COMMAND\":\"PATH_ADDED\",\"DATA\":\"" ++ path ++"\"}");
+		ws_server.numConnections.do({ | iter |
+
+			this.prRemovePath(nodePath, iter);
+		});
+	}
+
+	freeParameter
+	{ | anOssiaParameter |
+
+		ws_server.numConnections.do({ | iter |
+
+			this.prRemovePath(anOssiaParameter.path, iter);
+		});
+
+		if (anOssiaParameter.critical.not) { OSCdef(anOssiaParameter.path).free }
 	}
 
 	updateAtributes
@@ -257,19 +284,16 @@ OSSIA_OSCQSProtocol
 		);
 	}
 
-	freeParameter
-	{ | anOssiaNode |
+	prAddPath
+	{ | path, index |
 
-		ws_server.numConnections.do({ | iter |
+		ws_server[index].writeText("{\"COMMAND\":\"PATH_ADDED\",\"DATA\":\"" ++ path ++"\"}");
+	}
 
-			ws_server[iter].writeText("{\"COMMAND\":\"PATH_REMOVED\",\"DATA\":\"" ++ anOssiaNode.path ++"\"}");
-		});
+	prRemovePath
+	{ | path, index |
 
-		if (anOssiaNode.class == OSSIA_Parameter)
-		{
-			if (anOssiaNode.critical.not)
-			{ OSCdef(anOssiaNode.path).free };
-		};
+		ws_server[index].writeText("{\"COMMAND\":\"PATH_REMOVED\",\"DATA\":\"" ++ path ++"\"}");
 	}
 }
 
@@ -393,6 +417,8 @@ OSSIA_OSCQMProtocol
 		});
 	}
 
+	instantiateNode { | anOssiaNode | }
+
 	instantiateParameter
 	{ | anOssiaParameter |
 
@@ -413,6 +439,8 @@ OSSIA_OSCQMProtocol
 			{ OSCdef(anOssiaNode.path.asSymbol).free };
 		};
 	}
+
+	freeNode { | nodePath | }
 
 	free
 	{

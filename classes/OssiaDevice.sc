@@ -55,10 +55,22 @@ OSSIA_Device : OSSIA_Base
 		});
 	}
 
+	instantiateNode
+	{ | nodePath |
+
+		if (protocol.notNil) { protocol.instantiateNode(nodePath) };
+	}
+
 	instantiateParameter
 	{ | anOssiaParameter |
 
 		if (protocol.notNil) { protocol.instantiateParameter(anOssiaParameter) };
+	}
+
+	freeNode
+	{ | nodePath |
+
+		if (protocol.notNil) { protocol.freeNode(nodePath) };
 	}
 
 	freeParameter
