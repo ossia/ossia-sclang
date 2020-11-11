@@ -89,7 +89,7 @@ OSSIA_OSCQSProtocol
 	*new
 	{ | name, osc_port, ws_port, device |
 
-		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor;
+		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor();
 	}
 
 	oscQuerryProtocolCtor
@@ -118,7 +118,7 @@ OSSIA_OSCQSProtocol
 		++",\"LISTEN\":true"
 		++",\"ECHO\":true"
 		++",\"PATH_CHANGED\":false"
-		++",\"PATH_RENAMED\":true"
+		++",\"PATH_RENAMED\":false"
 		++",\"PATH_ADDED\":true"
 		++",\"PATH_REMOVED\":true"
 		++"}"
@@ -217,10 +217,11 @@ OSSIA_OSCQSProtocol
 
 		dictionary.put(anOssiaParameter.path.asSymbol, anOssiaParameter);
 
-/*		ws_server.numConnections.do({ | iter |
+		ws_server.numConnections.do({ | iter |
 
-			ws_server[iter].writeText("{\"COMMAND\":\"PATH_ADDED\",\"DATA\":\"" ++ anOssiaParameter.path ++"\"}";
-		});*/
+			this.addPath(anOssiaParameter.path, iter);
+			this.updateAtributes(anOssiaParameter, iter);
+		});
 
 		if (anOssiaParameter.critical.not)
 		{
@@ -238,6 +239,22 @@ OSSIA_OSCQSProtocol
 				},
 				path, recvPort: osc_port);
 		};
+	}
+
+	addPath
+	{ | path, index |
+
+		ws_server[index].writeText("{\"COMMAND\":\"PATH_ADDED\",\"DATA\":\"" ++ path ++"\"}");
+	}
+
+	updateAtributes
+	{ | anOssiaParameter, index |
+
+		ws_server[index].writeText("{\"COMMAND\":\"ATTRIBUTES_CHANGED\",\"DATA\":{\"FULL_PATH\":\""
+			++ anOssiaParameter.path ++ "\""
+			++ anOssiaParameter.jsonParams()
+			++ "}}"
+		);
 	}
 
 	freeParameter

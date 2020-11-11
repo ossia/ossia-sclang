@@ -37,7 +37,7 @@
 
 		if (win.isNil)
 		{
-			var window = Window(name).front; // resize later to the flow layout size
+			var window = Window(name, scroll: true).front; // resize later to the flow layout size
 			window.asView.palette_(OSSIA.palette);
 			window.asView.background_(OSSIA.palette.base);
 			window.addFlowLayout;
