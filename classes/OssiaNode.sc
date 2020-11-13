@@ -43,6 +43,8 @@ OSSIA_Node : OSSIA_Base
 		this.prInstantiateNode();
 	}
 
+	instantiate { this.prInstantiateNode() }
+
 	free
 	{
 		children.reverseDo(_.free);
@@ -237,12 +239,7 @@ OSSIA_Parameter : OSSIA_Node
 
 		var dom_slot, df_val­­­­­­;
 
-		switch (tp,
-			Signal, { type = Impulse },
-			Symbol, { type = String },
-			List, { type = Array },
-			{ type = tp };
-		);
+		this.prHandleType(tp);
 
 		if (dm.isNil)
 		{
@@ -273,12 +270,7 @@ OSSIA_Parameter : OSSIA_Node
 		m_callback = {};
 	}
 
-	// overide node
-	prInstantiateNode { }
-
-	prFreeNode { }
-
-	prParamExplore { ^[this, children.collect(_.prParamExplore)] }
+	instantiate { device.instantiateParameter(this) }
 
 	free
 	{
@@ -327,6 +319,18 @@ OSSIA_Parameter : OSSIA_Node
 			};
 		};
 	}
+/*
+	type_
+	{ | newType |
+
+		var recall_mode = bounding_mode.md;
+
+		bounding_mode.free;
+		domain.free;
+
+		domain = OSSIA_domain(max, max, values, type);
+		bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
+	}*/
 
 	domain_
 	{ | min, max, values |
@@ -376,6 +380,27 @@ OSSIA_Parameter : OSSIA_Node
 		++",\"ACCESS\":\""++ access_mode ++"\""
 		++",\"CRITICAL\":"++ critical
 	}
+
+	//-------------------------------------------//
+	//              PRIVATE METHODS              //
+	//-------------------------------------------//
+
+	prHandleType
+	{ | newType |
+
+		switch (newType,
+			Signal, { type = Impulse },
+			Symbol, { type = String },
+			List, { type = Array },
+			{ type = newType };
+		);
+	}
+
+	prInstantiateNode { }
+
+	prFreeNode { }
+
+	prParamExplore { ^[this, children.collect(_.prParamExplore)] }
 
 	// priority {
 	// 	_OSSIA_ParameterGetPriority

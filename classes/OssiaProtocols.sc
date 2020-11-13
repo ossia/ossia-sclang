@@ -86,26 +86,14 @@ OSSIA_OSCQSProtocol
 	var <netAddr;
 	var ws_server;
 	var zeroconf_service;
-	var host_info;
 	var json_tree;
 	var <dictionary;
 
-	*new
-	{ | name, osc_port, ws_port, device |
+	classvar host_info;
 
-		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor();
-	}
-
-	oscQuerryProtocolCtor
+	*initClass
 	{
-		netAddr = [];
-		ws_server = WebSocketServer(ws_port).granularity_(25);
-		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
-		dictionary = IdentityDictionary.new;
-		host_info = "{"
-		++"\"NAME\":\""++ name ++"\""
-		++",\"OSC_PORT\":"++ osc_port ++""
-		++",\"OSC_TRANSPORT\":\"UDP\""
+		host_info = ",\"OSC_TRANSPORT\":\"UDP\""
 		++",\"EXTENSIONS\":"
 		++"{"
 		++"\"TYPE\":true"
@@ -127,6 +115,20 @@ OSSIA_OSCQSProtocol
 		++",\"PATH_REMOVED\":true"
 		++"}"
 		++"}";
+	}
+
+	*new
+	{ | name, osc_port, ws_port, device |
+
+		^this.newCopyArgs(name, osc_port, ws_port, device).oscQuerryProtocolCtor();
+	}
+
+	oscQuerryProtocolCtor
+	{
+		netAddr = [];
+		ws_server = WebSocketServer(ws_port).granularity_(25);
+		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
+		dictionary = IdentityDictionary.new;
 
 		ws_server.onNewConnection = { | con |
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
@@ -186,7 +188,7 @@ OSSIA_OSCQSProtocol
 			{
 				if (req.query == "HOST_INFO")
 				{
-					req.replyJson(host_info);
+					req.replyJson("{\"NAME\":\""++ name ++"\",\"OSC_PORT\":"++ osc_port ++ host_info);
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA.stringify(device.children) ++"}";
 					req.replyJson(json_tree);
@@ -198,7 +200,7 @@ OSSIA_OSCQSProtocol
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 
-		device.explore(parameters_only: true).flat.do(this.instantiateParameter(_));
+		device.explore().flat.do(_.instantiate());
 	}
 
 	push
@@ -308,7 +310,6 @@ OSSIA_OSCQMProtocol
 	var netAddr;
 	var ws_client;
 	var zeroconf_service;
-	var host_info;
 	var <dictionary;
 
 	*new
@@ -381,7 +382,7 @@ OSSIA_OSCQMProtocol
 			if (json["FULL_PATH"] == "/")
 			{
 				this.setupIdentityDict(json["CONTENTS"]);
-				device.explore(parameters_only: true).flat.do(this.instantiateParameter(_));
+				device.explore().flat.do(_.instantiate());
 			};
 
 			if (json["OSC_PORT"].notNil)
