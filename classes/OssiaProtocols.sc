@@ -192,6 +192,7 @@ OSSIA_OSCQSProtocol
 				} {
 					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA.stringify(device.children) ++"}";
 					req.replyJson(json_tree);
+					device.explore().flat.do(_.instantiate());
 				}
 			}
 		};
@@ -199,8 +200,6 @@ OSSIA_OSCQSProtocol
 		ws_server.onDisconnection = { | con |
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
-
-		device.explore().flat.do(_.instantiate());
 	}
 
 	push
