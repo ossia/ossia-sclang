@@ -69,7 +69,7 @@
 				.normalColor_(win.asView.palette.color('windowText', 'active'))
 				.onClose_({ anOssiaParameter.removeDependant(event);
 					widget[0].remove;
-					anOssiaParameter.removeClosed();
+					anOssiaParameter.removeClosed(win);
 				})
 			];
 
@@ -186,7 +186,7 @@
 				.onClose_({ anOssiaParameter.removeDependant(event);
 					widget[0].remove;
 					widget[1].remove;
-					anOssiaParameter.removeClosed();
+					anOssiaParameter.removeClosed(win);
 				});
 
 				widget[2].focusColor_(
@@ -208,7 +208,7 @@
 					layout: 'line2',
 					gap:4@0)
 				.onClose_({ anOssiaParameter.removeDependant(event);
-					anOssiaParameter.removeClosed();
+					anOssiaParameter.removeClosed(win);
 				})
 				.setColors(
 					stringColor: win.asView.palette.color('baseText', 'active'),
@@ -390,7 +390,7 @@
 							widget[1].remove;
 							widget[2].remove;
 							widget[3].remove;
-							anOssiaParameter.removeClosed();
+							anOssiaParameter.removeClosed(win);
 						})
 					];
 
@@ -499,7 +499,7 @@
 							widget[2].remove;
 							widget[3].remove;
 							widget[4].remove;
-							anOssiaParameter.removeClosed();
+							anOssiaParameter.removeClosed(win);
 						})
 					];
 
@@ -564,7 +564,7 @@
 			widget[2].onClose_({ anOssiaParameter.removeDependant(event);
 				widget[0].remove;
 				widget[1].remove;
-				anOssiaParameter.removeClosed();
+				anOssiaParameter.removeClosed(win);
 			})
 		};
 
@@ -632,7 +632,7 @@
 				widget[0].remove;
 				widget[1].remove;
 				widget[2].remove;
-				anOssiaParameter.removeClosed();
+				anOssiaParameter.removeClosed(win);
 			})
 		];
 

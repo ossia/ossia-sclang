@@ -64,7 +64,7 @@
 		);
 
 		widget.onClose_({ anOssiaParameter.removeDependant(event);
-			anOssiaParameter.removeClosed();
+			anOssiaParameter.removeClosed(win);
 		});
 
 		event.value(anOssiaParameter); // initialise
@@ -129,7 +129,7 @@
 		{ widget.value_(anOssiaParameter.value) }.defer;
 
 		widget.onClose_({ anOssiaParameter.removeDependant(event);
-			anOssiaParameter.removeClosed();
+			anOssiaParameter.removeClosed(win);
 		});
 
 		^widget;
@@ -190,7 +190,7 @@
 			textStringColor: win.asView.palette.color('windowText', 'active'));
 
 		widget.onClose_({ anOssiaParameter.removeDependant(event);
-			anOssiaParameter.removeClosed();
+			anOssiaParameter.removeClosed(win);
 		});
 
 		^widget;
@@ -250,7 +250,7 @@
 
 			{ widget.value_(anOssiaParameter.value) }.defer;
 
-			widget.onClose_({ anOssiaParameter.removeClosed() });
+			widget.onClose_({ anOssiaParameter.removeClosed(win) });
 		} {
 			widget = OSSIA.makeButtonGui(anOssiaParameter, win);
 
@@ -260,7 +260,7 @@
 			]).action_({ | val | anOssiaParameter.value_() });
 
 			widget[1].onClose_({ widget[0].remove;
-				anOssiaParameter.removeClosed();
+				anOssiaParameter.removeClosed(win);
 			});
 		};
 
@@ -291,7 +291,7 @@
 			{ widget.value_(anOssiaParameter.value) }.defer;
 
 			widget.onClose_({ anOssiaParameter.removeDependant(event);
-				anOssiaParameter.removeClosed();
+				anOssiaParameter.removeClosed(win);
 			});
 		} {
 			event = { | param |
@@ -323,7 +323,7 @@
 
 			widget[1].onClose_({ anOssiaParameter.removeDependant(event);
 				widget[0].remove;
-				anOssiaParameter.removeClosed();
+				anOssiaParameter.removeClosed(win);
 			});
 		};
 

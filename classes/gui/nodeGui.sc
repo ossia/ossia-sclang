@@ -40,7 +40,7 @@
 			var window = Window(name, scroll: true).front; // resize later to the flow layout size
 			window.asView.palette_(OSSIA.palette);
 			window.asView.background_(OSSIA.palette.base);
-			window.addFlowLayout;
+			window.addFlowLayout();
 			^window;
 		} {
 			^win;
@@ -99,16 +99,10 @@
 					if (item === widget) { item.remove }
 				})
 			});
-
-			this.prCheckFlow(parent_window);
 		} {
 			widgets.do({ | item |
 
-				var parent = item.parent;
-
 				item.remove;
-
-				this.prCheckFlow(parent);
 			})
 		};
 
@@ -116,7 +110,7 @@
 	}
 
 	removeClosed
-	{
+	{ | parent |
 		var closed = [];
 
 		widgets.do({ | item, count |
@@ -125,6 +119,22 @@
 		});
 
 		closed.reverseDo({ | i | widgets.removeAt(i) });
+
+		if (parent.isClosed.not)
+		{ this.prCheckFlow(parent) }
+	}
+
+	resizeLayout
+	{ | aWindow |
+
+		var margin, deco = aWindow.asView.decorator;
+
+		margin = deco.margin.y;
+
+		if ((deco.used.height - aWindow.bounds.height) != margin)
+		{ //resize to flow layout
+			aWindow.bounds_(aWindow.bounds.height_(deco.used.height + margin));
+		};
 	}
 
 	//-------------------------------------------//
@@ -139,16 +149,5 @@
 
 		if (parent.asView.children == [])
 		{ parent.close }
-	}
-
-	resizeLayout
-	{ | aWindow |
-
-		var deco = aWindow.asView.decorator;
-
-		if ((deco.used.height - aWindow.bounds.height) != 2)
-		{ //resize to flow layout
-			aWindow.bounds_(aWindow.bounds.height_(deco.used.height + 2));
-		};
 	}
 }
