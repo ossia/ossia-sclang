@@ -151,3 +151,11 @@
 		{ parent.close }
 	}
 }
+
+// Copied from https://github.com/supercollider-quarks/wslib to remove the dependance
++ FlowLayout {
+	reFlow { |parent|
+		this.reset;
+		parent.children.do({ |widget| this.place(widget); });
+	}
+}

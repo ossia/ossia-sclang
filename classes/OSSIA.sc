@@ -260,9 +260,3 @@ OSSIA
 		^widget;
 	}
 }
-
-+ EZGui
-{
-	parent { ^view.parent }
-	isClosed { ^view.isClosed }
-}

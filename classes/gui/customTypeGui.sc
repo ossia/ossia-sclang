@@ -242,7 +242,7 @@
 
 		anOssiaParameter.addDependant(event);
 
-		anOssiaParameter.widgets = anOssiaParameter.widgets ++ this.ez2View(widget);
+		anOssiaParameter.widgets = anOssiaParameter.widgets ++ this.ez2View([widget]);
 	}
 }
 

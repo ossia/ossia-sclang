@@ -1,11 +1,11 @@
 (
-	\name:    "OSSIA",
-	\summary: "minimal sclang port of libossia (https://github.com/OSSIA/libossia)",
-    	\author:  "mott@escuta.org",
-        \copyright: "Thibaud Keller 2019",	
+	\name: "OSSIA",
+	\summary: "partial sclang port of libossia (https://github.com/OSSIA/libossia)",
+    	\author:  "tibthejazzdude@gmail.com",
+        \copyright: "Thibaud Keller 2019",
     	\path:    "OSSIA",
     	\url:     "https://github.com/OSSIA/ossia-sclang",
     	\helpdoc: "HelpSource/Guides/OssiaReference.schelp",
-    	\version:	"0.1", // must be a float,
-	\dependencies:	[]
+    	\version: "0.1", // must be a float,
+	\dependencies: []
 )
