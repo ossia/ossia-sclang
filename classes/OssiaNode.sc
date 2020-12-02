@@ -264,10 +264,11 @@ OSSIA_Parameter : OSSIA_Node
 		critical = cl;
 		repetition_filter = rf;
 
-		value = df_val;
-		device.instantiateParameter(this);
-
 		m_callback = {};
+
+		value = bounding_mode.bound(type.ossiaNaNFilter(df_val, df_val));
+
+		device.instantiateParameter(this);
 	}
 
 	instantiate { device.instantiateParameter(this) }
@@ -275,6 +276,7 @@ OSSIA_Parameter : OSSIA_Node
 	free
 	{
 		device.freeParameter(this);
+		this.closeGui();
 		^super.free;
 	}
 

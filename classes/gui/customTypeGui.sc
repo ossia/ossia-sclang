@@ -446,7 +446,8 @@
 						Knob(
 							parent: win,
 							bounds: (width - 32)@(width - 32)
-						).value_(specs[0].unmap(anOssiaParameter.value[0])) // initial value of roll
+						).value_(1 - specs[0].unmap(anOssiaParameter.value[0]))
+						// initial value of roll
 						.centered_(true)
 						.action_(
 							{ | val |
@@ -464,7 +465,8 @@
 							parent: win,
 							bounds: 20@(width - 32))
 						.orientation_(\vertical)
-						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of pitch
+						.value_(1 - specs[1].unmap(anOssiaParameter.value[1]))
+						// initial value of pitch
 						.action_(
 							{ | val |
 
@@ -481,7 +483,8 @@
 							parent: win,
 							bounds: (width -6)@20)
 						.orientation_(\horizontal)
-						.value_(specs[2].unmap(anOssiaParameter.value[2])) // initial value of yaw
+						.value_(1 - specs[2].unmap(anOssiaParameter.value[2]))
+						// initial value of yaw
 						.action_(
 							{ | val |
 

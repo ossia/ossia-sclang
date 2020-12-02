@@ -88,6 +88,7 @@ OSSIA_OSCQSProtocol
 	var zeroconf_service;
 	var json_tree;
 	var <dictionary;
+	var clients;
 
 	classvar host_info;
 
@@ -129,9 +130,12 @@ OSSIA_OSCQSProtocol
 		ws_server = WebSocketServer(ws_port).granularity_(25);
 		zeroconf_service = ZeroconfService(name, "_oscjson._tcp", ws_port);
 		dictionary = IdentityDictionary.new;
+		clients = [];
 
 		ws_server.onNewConnection = { | con |
 			postln(format("[websocket-server] new connection from %:%", con.address, con.port));
+
+			clients = clients.add([con.address, con.port]);
 
 			con.onTextMessageReceived = { | msg |
 				var command = msg.parseYAML;
@@ -188,9 +192,12 @@ OSSIA_OSCQSProtocol
 			{
 				if (req.query == "HOST_INFO")
 				{
-					req.replyJson("{\"NAME\":\""++ name ++"\",\"OSC_PORT\":"++ osc_port ++ host_info);
+					req.replyJson("{\"NAME\":\""++ name ++"\",\"OSC_PORT\":"++
+						osc_port ++ host_info);
 				} {
-					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++ OSSIA.stringify(device.children) ++"}";
+					json_tree = "{\"FULL_PATH\":\"/\",\"CONTENTS\":"++
+					OSSIA.stringify(device.children) ++"}";
+
 					req.replyJson(json_tree);
 					device.explore().flat.do(_.instantiate());
 				}
@@ -198,6 +205,11 @@ OSSIA_OSCQSProtocol
 		};
 
 		ws_server.onDisconnection = { | con |
+
+			var i = clients.detectIndex({ | item | item == [con.address, con.port] });
+
+			netAddr.removeAt(i).free;
+
 			postln(format("[websocket-server] client %:% disconnected", con.address, con.port));
 		};
 	}
@@ -412,8 +424,11 @@ OSSIA_OSCQMProtocol
 		aDictionaryAray.do({ | aDictionary |
 
 			// only keep parameters
-			if (aDictionary["VALUE"].notNil) { dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); };
-			if (aDictionary["CONTENTS"].notNil) { this.setupIdentityDict(aDictionary["CONTENTS"]); };
+			if (aDictionary["VALUE"].notNil)
+			{ dictionary.put(aDictionary["FULL_PATH"].asSymbol, []); };
+
+			if (aDictionary["CONTENTS"].notNil)
+			{ this.setupIdentityDict(aDictionary["CONTENTS"]); };
 		});
 	}
 
