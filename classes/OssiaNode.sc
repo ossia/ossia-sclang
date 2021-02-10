@@ -321,6 +321,25 @@ OSSIA_Parameter : OSSIA_Node
 			};
 		};
 	}
+
+	set_
+	{ | v | // same as value_ without evaluting the callback
+
+		var handle_value = bounding_mode.bound(type.ossiaNaNFilter(v, value));
+
+		if (access_mode != 1)
+		{ // if differnet from get
+
+			if (repetition_filter.nand(handle_value == value))
+			{
+				value = handle_value;
+
+				this.changed();
+
+				if (listening) { device.updateParameter(this); };
+			};
+		};
+	}
 /*
 	type_
 	{ | newType |
