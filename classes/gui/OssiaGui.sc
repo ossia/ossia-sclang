@@ -8,24 +8,29 @@
 
 + OSSIA
 {
-	*initClass
+	*palette
 	{
-		palette = QPalette.auto(Color.fromHexString("#222222"), Color.fromHexString("#1d1c1a"));
+		if (palette.isNil)
+		{
+			palette = QPalette.auto(Color.fromHexString("#222222"), Color.fromHexString("#1d1c1a"));
 
-		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
-		palette.setColor(Color.fromHexString("#e0b01e"), 'buttonText'); // f0f0f0
-		palette.setColor(Color.fromHexString("#161514"), 'base');
-		palette.setColor(Color.fromHexString("#03C3DD"), 'alternateBase'); // blue interval "#1e1d1c"
-		palette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
-		palette.setColor(Color.fromHexString("#c0c0c0c0"), 'toolTipText');
-		palette.setColor(Color.fromHexString("#9062400a"), 'highlight');
-		palette.setColor(Color.fromHexString("#FDFDFD"), 'highlightText');
+			palette.setColor(Color.fromHexString("#c0c0c0c0"), 'windowText');
+			palette.setColor(Color.fromHexString("#e0b01e"), 'buttonText'); // f0f0f0
+			palette.setColor(Color.fromHexString("#161514"), 'base');
+			palette.setColor(Color.fromHexString("#03C3DD"), 'alternateBase'); // blue interval "#1e1d1c"
+			palette.setColor(Color.fromHexString("#161514"), 'toolTipBase');
+			palette.setColor(Color.fromHexString("#c0c0c0c0"), 'toolTipText');
+			palette.setColor(Color.fromHexString("#9062400a"), 'highlight');
+			palette.setColor(Color.fromHexString("#FDFDFD"), 'highlightText');
 
-		palette.setColor(Color.fromHexString("#e0b01e"), 'light'); // welow slider
-		palette.setColor(Color.fromHexString("#62400a"), 'midlight'); // brown contour
-		palette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
-		palette.setColor(Color.fromHexString("#94FF00"), 'baseText'); // green param "#a7dd0d"
-		palette.setColor(Color.fromHexString("#c58014"), 'brightText');
+			palette.setColor(Color.fromHexString("#e0b01e"), 'light'); // welow slider
+			palette.setColor(Color.fromHexString("#62400a"), 'midlight'); // brown contour
+			palette.setColor(Color.fromHexString("#363636"), 'middark'); // widget background
+			palette.setColor(Color.fromHexString("#94FF00"), 'baseText'); // green param "#a7dd0d"
+			palette.setColor(Color.fromHexString("#c58014"), 'brightText');
+		};
+
+		^palette;
 	}
 
 	*makeDropDownGui

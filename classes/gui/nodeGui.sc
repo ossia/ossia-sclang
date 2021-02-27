@@ -141,17 +141,6 @@
 	//              PRIVATE METHODS              //
 	//-------------------------------------------//
 
-	prParentGui
-	{ | widget |
-
-		if (widget.class.superclass == EZGui)
-		{
-			^widget.view.parent;
-		} {
-			^widget.parent;
-		}
-	}
-
 	prIsGuiClosed
 	{ | widget |
 
