@@ -115,7 +115,7 @@
 
 		widgets.do({ | item, count |
 
-			if (item.isClosed) { closed = closed.add(count) };
+			if (this.prIsGuiClosed(item)) { closed = closed.add(count) };
 		});
 
 		closed.reverseDo({ | i | widgets.removeAt(i) });
@@ -141,21 +141,43 @@
 	//              PRIVATE METHODS              //
 	//-------------------------------------------//
 
+	prParentGui
+	{ | widget |
+
+		if (widget.class.superclass == EZGui)
+		{
+			^widget.view.parent;
+		} {
+			^widget.parent;
+		}
+	}
+
+	prIsGuiClosed
+	{ | widget |
+
+		if (widget.class.superclass == EZGui)
+		{
+			^widget.view.isClosed;
+		} {
+			^widget.isClosed;
+		}
+	}
+
 	prCheckFlow
 	{ | parent |
 
-		parent.asView.decorator.reFlow(parent.asView);
+		this.prReFlow(parent.asView.decorator, parent.asView);
 		this.resizeLayout(parent);
 
 		if (parent.asView.children == [])
 		{ parent.close }
 	}
-}
 
-// Copied from https://github.com/supercollider-quarks/wslib to remove the dependance
-+ FlowLayout {
-	reFlow { |parent|
-		this.reset;
-		parent.children.do({ |widget| this.place(widget); });
+	// Copied from https://github.com/supercollider-quarks/wslib to remove the dependance
+	prReFlow
+	{ | aFlowLayout, parent |
+
+		aFlowLayout.reset;
+		parent.children.do({ |widget| aFlowLayout.place(widget); });
 	}
 }

@@ -213,12 +213,6 @@
 	}
 }
 
-+ EZGui
-{
-	parent { ^view.parent }
-	isClosed { ^view.isClosed }
-}
-
 + Array
 {
 	*ossiaWidget { | anOssiaParameter, win, layout | OSSIA.fieldOrMenu(anOssiaParameter, win, layout) }
