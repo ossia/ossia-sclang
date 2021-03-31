@@ -163,7 +163,8 @@ OSSIA_OSCQSProtocol
 				postln(format("[websocket-server] new osc message from: %:%", con.address, con.port));
 				postln(array);
 
-				dictionary.at(array[0].asSymbol).valueQuiet(array[1]);
+				// set value in a diferent thread
+				Routine( {dictionary.at(array[0].asSymbol).valueQuiet(array[1]) }).play;
 			};
 		};
 
@@ -373,8 +374,6 @@ OSSIA_OSCQMProtocol
 		};
 
 		ws_client.onOscMessageReceived = { | array |
-			//postln(format("[websocket-client] new osc message", array));
-
 			var address = array[0].asSymbol;
 
 			if (array.size == 2)

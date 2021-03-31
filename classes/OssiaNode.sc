@@ -340,18 +340,18 @@ OSSIA_Parameter : OSSIA_Node
 			};
 		};
 	}
-/*
-	type_
-	{ | newType |
 
-		var recall_mode = bounding_mode.md;
-
-		bounding_mode.free;
-		domain.free;
-
-		domain = OSSIA_domain(max, max, values, type);
-		bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
-	}*/
+	// type_
+	// { | newType |
+	//
+	// 	var recall_mode = bounding_mode.md;
+	//
+	// 	bounding_mode.free;
+	// 	domain.free;
+	//
+	// 	domain = OSSIA_domain(max, max, values, type);
+	// 	bounding_mode = OSSIA_bounding_mode(recall_mode, type, domain);
+	// }
 
 	domain_
 	{ | min, max, values |
